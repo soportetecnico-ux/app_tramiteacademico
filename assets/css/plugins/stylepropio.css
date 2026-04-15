@@ -1,0 +1,147 @@
+.custom-swal-width {
+  max-width: 360px !important;
+}
+
+.dropdown-item {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+}
+
+.pc-sidebar {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.navbar-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.navbar-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.pc-navbar {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.sidebar-support {
+  margin-top: auto;
+  padding: 12px;
+  border-top: 1px solid #ddd;
+  background: #fff;
+}
+
+
+
+#notificaciones-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+
+}
+
+#notificaciones-list .col {
+  flex: 1 1 100%;
+  max-width: 100%;
+}
+
+.icono-calendario {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  background-color: #0d4f9e;
+  color: white;
+  font-size: 16px;
+  margin-right: 10px;
+}
+
+/* Estilo para notificaciones leídas */
+.card.read {
+  background-color: #f0f0f0;
+  /* Fondo claro para las leídas */
+  opacity: 0.7;
+  /* Menos opacas */
+}
+
+/* Estilo para notificaciones no leídas */
+.card.unread {
+  background-color: #ffffff;
+  /* Fondo blanco para las no leídas */
+}
+
+/* Estilo para el ícono de marcar como leída (cuando la notificación está leída) */
+.mark-read i {
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.card.read .mark-read i {
+  color: #d1d1d1;
+  /* Color azul cuando la notificación está leída */
+}
+
+.card.unread .mark-read i {
+
+  color: #007bff;
+  /* Color negro cuando la notificación no está leída */
+}
+
+.mark-read {
+  cursor: pointer;
+  font-size: 15px;
+}
+
+a.read {
+  background-color: #f0f0f0;
+  /* Fondo claro para las leídas */
+  opacity: 0.7;
+  /* Menos opacas */
+}
+
+/* Estilo para notificaciones no leídas */
+a.unread {
+  background-color: #ffffff;
+  /* Fondo blanco para las no leídas */
+}
+
+/* Estilo para el ícono de marcar como leída (cuando la notificación está leída) */
+a.read .mark-read i {
+  color: #d1d1d1;
+  /* Color azul cuando la notificación está leída */
+}
+
+/* Estilo para el ícono de marcar como leída (cuando la notificación no está leída) */
+a.unread .mark-read i {
+
+  color: #007bff;
+  /* Color negro cuando la notificación no está leída */
+}
+
+/* 1. Forzamos que el label siempre esté en la posición "flotante" (arriba) */
+.form-floating>.form-control~label {
+  transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+  opacity: 0.65;
+}
+
+/* 2. Ajustamos el padding del input para que el texto no choque con el label de arriba */
+.form-floating>.form-control {
+  padding-top: 1.625rem;
+  padding-bottom: 0.625rem;
+}
+
+/* 3. Ahora sí, hacemos que el placeholder sea visible */
+.form-floating>.form-control::placeholder {
+  color: #6c757d !important;
+  opacity: 1 !important;
+}
