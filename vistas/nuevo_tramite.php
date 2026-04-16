@@ -109,17 +109,26 @@ include('head.php')
                             </div>
                         </div>
 
-                        <div id="detalle_tupa" style="display:none;" class="row g-2 mb-2">
-                            <div class="col-md-8">
-                                <div class="p-2 rounded text-white" style="background-color: #0a2152; font-size: 0.75rem;">
-                                    <i class="ti ti-list-check text-info"></i> <strong>REQUISITOS:</strong>
-                                    <div id="lbl_requisito" class="mt-1 opacity-75"></div>
+                        <div id="detalle_tupa" class="m-2" style="display:none;">
+                            <div class="row g-2">
+                                <div class="col-md-9">
+                                    <div class="p-3 border rounded shadow-sm h-100" style="background-color: #0a2152;">
+                                        <small class="text-uppercase fw-bold text-white d-block mb-2" style="font-size: 0.7rem;">
+                                            Requisitos del Trámite
+                                        </small>
+                                        <div id="lbl_requisito" class="text-white fw-medium" style="white-space: pre-wrap;font-size: 0.8rem;">
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="p-2 rounded text-center text-white" style="background-color: #0a2152;">
-                                    <small class="d-block text-info fw-bold">DERECHO DE PAGO</small>
-                                    <span id="lbl_monto" class="fs-6 fw-bold"></span>
+
+                                <div class="col-md-3">
+                                    <div class="p-3 border rounded shadow-sm h-100 d-flex flex-column justify-content-center" style="background-color: #0a2152;">
+                                        <small class="text-uppercase fw-bold text-white d-block mb-2" style="font-size: 0.7rem;">
+                                            Derecho de Pago
+                                        </small>
+                                        <div id="lbl_monto" class="text-white fw-medium" style="white-space: pre-wrap;font-size: 0.8rem;">
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
