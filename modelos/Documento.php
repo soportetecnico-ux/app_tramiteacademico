@@ -6,17 +6,19 @@ class Documento
 {
     public function __construct() {}
 
-    public function seleccionarTramite($id_car_sesion)
-    {
-        // Buscamos todos los trámites y tratamos de unirlos a la oficina
-        // que coincida con la carrera del alumno O con el código 0 (general)
-        $sql = "SELECT 
+public function seleccionarTramite($id_car_sesion)
+{
+    $sql = "SELECT 
                 t.id_tupa, 
                 t.denominacion, 
                 t.requisitos, 
                 t.monto,
                 o.cod_oficina,
-                o.nombre AS nombre_oficina
+                o.nombre AS nombre_oficina,
+                -- Traemos los nombres de anexos configurados
+                (SELECT GROUP_CONCAT(nombre_anexo SEPARATOR '|') 
+                 FROM tb_tupa_anexo_config 
+                 WHERE id_tupa = t.id_tupa AND estado = 1) as nombres_anexos
             FROM tb_tupa t
             LEFT JOIN tb_tupa_oficina v ON v.id_tupa = t.id_tupa 
                 AND (v.id_car = '$id_car_sesion' OR v.id_car = 0)
@@ -24,11 +26,9 @@ class Documento
             WHERE t.estado = 1
             GROUP BY t.id_tupa
             ORDER BY v.id_car DESC";
-        /* El ORDER BY v.id_car DESC asegura que si hay un id_car = 4 
-               y un id_car = 0, el GROUP BY mantenga el 4 (el más específico) */
 
-        return ejecutarConsulta($sql);
-    }
+    return ejecutarConsulta($sql);
+}
 
     /*     public function seleccionarTramite()
     {

@@ -12,29 +12,32 @@ $fech_crea = $Date->format("Y-m-d H:i:s");
 
 switch ($_GET["op"]) {
 
-    case 'seleccionarTramite':
-        if (!isset($_SESSION)) {
-            session_start();
-        }
-        $id_car = $_SESSION['id_car'];
+case 'seleccionarTramite':
+    if (!isset($_SESSION)) {
+        session_start();
+    }
+    $id_car = $_SESSION['id_car'];
 
-        $rspta = $documentos->seleccionarTramite($id_car);
-        echo '<option value="" disabled selected>Seleccione una opción</option>';
+    $rspta = $documentos->seleccionarTramite($id_car);
+    echo '<option value="" disabled selected>Seleccione una opción</option>';
 
-        while ($reg = $rspta->fetch_object()) {
-            // Si no encontró oficina ni específica ni general, ponemos un aviso
-            $oficina = !empty($reg->nombre_oficina) ? $reg->nombre_oficina : "OFICINA POR ASIGNAR";
-            $cod = !empty($reg->cod_oficina) ? $reg->cod_oficina : "";
+    while ($reg = $rspta->fetch_object()) {
+        $oficina = !empty($reg->nombre_oficina) ? $reg->nombre_oficina : "OFICINA POR ASIGNAR";
+        $cod = !empty($reg->cod_oficina) ? $reg->cod_oficina : "";
+        
+        // Si no hay anexos, enviamos cadena vacía
+        $anexos = !empty($reg->nombres_anexos) ? $reg->nombres_anexos : "";
 
-            echo '<option value="' . $reg->id_tupa . '" 
-                      data-requisito="' . $reg->requisitos . '" 
-                      data-monto="' . $reg->monto . '"
-                      data-oficina="' . $oficina . '"
-                      data-codoficina="' . $cod . '">'
-                . $reg->denominacion .
-                '</option>';
-        }
-        break;
+        echo '<option value="' . $reg->id_tupa . '" 
+                    data-requisito="' . $reg->requisitos . '" 
+                    data-monto="' . $reg->monto . '"
+                    data-oficina="' . $oficina . '"
+                    data-codoficina="' . $cod . '"
+                    data-anexos="' . $anexos . '">' // <-- NUEVO ATRIBUTO
+            . $reg->denominacion .
+            '</option>';
+    }
+    break;
 
     /*  case 'seleccionarTramite':
         $rspta = $documentos->seleccionarTramite();

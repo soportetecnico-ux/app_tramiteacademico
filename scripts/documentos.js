@@ -1,7 +1,7 @@
-$(document).ready(function () {
+let datosUsuarioGlobal = null;
 
+$(document).ready(function () {
     cargarDatosUsuario();
-    listarTramites();
 
 
     $.post("../controladores/documentos.php?op=seleccionarTramite", function (r) {
@@ -10,66 +10,148 @@ $(document).ready(function () {
 
     $("#id_tupa").on("change", function () {
         const opt = $(this).find('option:selected');
+        const nombreTramite = opt.text();
 
+        // 1. OBTENER DATOS DE LA OPCIÓN SELECCIONADA
         const requisito = opt.data('requisito');
         const monto = opt.data('monto');
         const oficina = opt.data('oficina');
         const codOficina = opt.data('codoficina');
+        const anexosRaw = opt.data('anexos'); // Trae los nombres unidos por "|"
 
+        // 2. REFERENCIA AL CONTENEDOR DE ANEXOS
+        const contenedorAnexos = document.getElementById('listaAnexos');
+
+        // Limpiamos la lista actual antes de generar la nueva
+        contenedorAnexos.innerHTML = "";
 
         if (requisito !== undefined) {
+            // --- LÓGICA DE DETALLES DEL TRÁMITE ---
             $("#lbl_requisito").text(requisito);
             $("#lbl_monto").text(monto);
-
-            // 2. Llenar el campo DEPENDENCIA automáticamente
-            // Aquí aparecerá la oficina de tu id_car, o la de id_car = 0
             $("#dependencia").val(oficina);
-
             $("#dependencia").attr("data-cod", codOficina);
-
             $("#detalle_tupa").fadeIn(300);
+
+            actualizarPlantillaFundamentacion(nombreTramite);
+
+            // --- LÓGICA DINÁMICA DE ANEXOS ---
+            if (anexosRaw && anexosRaw.trim() !== "") {
+                const lista = anexosRaw.split('|');
+
+                lista.forEach((nombre, index) => {
+                    const nuevaFila = document.createElement('div');
+                    nuevaFila.className = 'mb-2 archivo-item';
+
+                    // Generamos el HTML con el nombre específico del anexo
+                    nuevaFila.innerHTML = `
+                    <label class="mb-1 fw-bold text-uppercase" style="font-size: 0.7rem; color: #4e4e4e;">
+                        <i class="ti ti-file-check text-primary"></i> ${nombre}
+                    </label>
+                    <div class="input-group input-group-sm">
+                        <input type="file" class="form-control form-control-sm" 
+                               name="archivo_tupa[]" 
+                               id="anexo_${index}" 
+                               onchange="validarArchivo(this)">
+                        <button class="btn btn-outline-danger" type="button" onclick="this.parentElement.parentElement.remove()">
+                            <i class="ti ti-trash"></i>
+                        </button>
+                    </div>
+                `;
+                    contenedorAnexos.appendChild(nuevaFila);
+                });
+            } else {
+                // Si el trámite no tiene anexos configurados en la tabla
+                contenedorAnexos.innerHTML = `
+                <div class="alert alert-light border py-2 px-3 mb-0" style="font-size: 0.8rem;">
+                    <i class="ti ti-info-circle text-info"></i> Este trámite no requiere documentos adjuntos específicos.
+                </div>`;
+            }
+
         } else {
+            // --- SI NO HAY NADA SELECCIONADO ---
             $("#detalle_tupa").hide();
             $("#dependencia").val("");
             $("#lbl_requisito").text("");
             $("#lbl_monto").text("");
+            contenedorAnexos.innerHTML = ""; // Limpiar anexos
+
+            actualizarPlantillaFundamentacion("[SELECCIONE UN TRÁMITE]");
         }
     });
-
-    /*     $.post("../controladores/documentos.php?op=seleccionarTramite", function (r) {
-            $("#id_tupa").html(r);
-        });
-    
-        $("#id_tupa").on("change", function () {
-            const opt = $(this).find('option:selected');
-    
-            // Extraer datos de los atributos data-
-            const requisito = opt.data('requisito');
-            const monto = opt.data('monto');
-            const oficina = opt.data('oficina');
-            const codOficina = opt.data('codoficina');
-    
-            if (requisito !== undefined) {
-                // 1. Llenar los cuadros de información
-                $("#lbl_requisito").text(requisito);
-                $("#lbl_monto").text(monto);
-    
-                // 2. LLENAR EL CAMPO DEPENDENCIA AUTOMÁTICAMENTE
-                $("#dependencia").val(oficina);
-    
-                // Opcional: Si necesitas guardar el cod_oficina para el registro final, 
-                // puedes guardarlo en un input hidden o un atributo del propio input
-                $("#dependencia").attr("data-cod", codOficina);
-    
-                // 3. Mostrar el detalle con efecto
-                $("#detalle_tupa").fadeIn(300);
-            } else {
-                $("#detalle_tupa").hide();
-                $("#dependencia").val("");
-            }
-        }); */
-
 });
+
+function cargarDatosUsuario() {
+    $.ajax({
+        url: "../controladores/usuarios.php?op=obtenerDatosUsuario",
+        type: "GET",
+        dataType: "json",
+        success: function (response) {
+            if (response.status === "success") {
+
+                datosUsuarioGlobal = response.data;
+
+                const data = datosUsuarioGlobal;
+
+                $('#dni').val(data.dni_estu ?? '');
+                $('#nombres').val(`${data.nom_estu ?? ''}`);
+                $('#apepa').val(`${data.apepa_estu ?? ''}`);
+                $('#apema').val(`${data.apema_estu ?? ''}`);
+                $('#correo').val(data.email_estu ?? '');
+                $('#celular').val(data.celu_estu ?? '');
+                $('#direccion').val(data.domi_estu ?? '');
+                $('#departamento').val(data.depar ?? '');
+                $('#provincia').val(data.provi ?? '');
+                $('#distrito').val(data.dist ?? '');
+                $('#ubicacion').val(
+                    [data.dist, data.provi, data.depar]
+                        .filter(Boolean)
+                        .join(', ')
+                );
+                $('#nombres_completos').val(
+                    `${data.apepa_estu ?? ''} ${data.apema_estu ?? ''} ${data.nom_estu ?? ''}`.trim()
+                );
+
+                $('#nombreFirma').text(
+                    `${data.apepa_estu ?? ''} ${data.apema_estu ?? ''} ${data.nom_estu ?? ''}`.trim()
+                );
+                $('#dniFirma').text(data.dni_estu ?? '');
+
+                actualizarPlantillaFundamentacion("[SELECCIONE UN TRÁMITE]");
+            } else {
+                console.error("Error:", response.mensaje);
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error("AJAX Error:", status, error);
+        }
+    });
+}
+
+function actualizarPlantillaFundamentacion(nombreTramite) {
+    if (!datosUsuarioGlobal) return;
+
+    const data = datosUsuarioGlobal;
+
+    // Convertimos a Mayúsculas para resaltar, ya que textarea no soporta negritas HTML
+    const nombreCompleto = `${data.apepa_estu ?? ''} ${data.apema_estu ?? ''} ${data.nom_estu ?? ''}`.trim().toUpperCase();
+    const codigo = data.cod_estu ?? '-------';
+    const dni = data.dni_estu ?? '--------';
+
+    // Limpiamos y resaltamos el trámite
+    const tramiteLimpio = nombreTramite.replace(/^\d+\s*-\s*/, '').toUpperCase();
+
+    // La plantilla mantiene un formato limpio y profesional
+    const plantilla = `Yo, ${nombreCompleto}, identificado(a) con DNI N° ${dni} y código de estudiante N° ${codigo}, ante usted con el debido respeto me presento y expongo:
+
+Que, por convenir a mis intereses académicos, solicito se me otorgue el/la: ${tramiteLimpio}.
+
+Por lo expuesto, pido a usted acceder a mi solicitud por ser de justicia.
+
+Sin otro particular, me despido de usted expresándole las muestras de mi especial consideración y estima personal.`;
+
+    $('#txtFundamentacion').val(plantilla);
+}
 
 function listarTramites() {
     $('#tablaTramites').DataTable({
@@ -107,49 +189,6 @@ function listarTramites() {
         ],
         language: {
             url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json"
-        }
-    });
-}
-
-
-function cargarDatosUsuario() {
-    $.ajax({
-        url: "../controladores/usuarios.php?op=obtenerDatosUsuario",
-        type: "GET",
-        dataType: "json",
-        success: function (response) {
-
-            if (response.status === "success") {
-
-                const data = response.data;
-
-                $('#dni').val(data.dni_estu ?? '');
-                $('#nombres').val(
-                    `${data.nom_estu ?? ''}`
-                );
-                $('#apepa').val(
-                    `${data.apepa_estu ?? ''}`
-                );
-                $('#apema').val(
-                    `${data.apema_estu ?? ''}`
-                );
-                $('#correo').val(data.email_estu ?? '');
-                $('#celular').val(data.celu_estu ?? '');
-                $('#direccion').val(data.domi_estu ?? '');
-                $('#departamento').val(data.depar ?? '');
-                $('#provincia').val(data.provi ?? '');
-                $('#distrito').val(data.dist ?? '');
-                $('#nombreFirma').text(
-                    `${data.apepa_estu ?? ''} ${data.apema_estu ?? ''} ${data.nom_estu ?? ''}`.trim()
-                );
-                $('#dniFirma').text(data.dni_estu ?? '');
-
-            } else {
-                console.error("Error:", response.mensaje);
-            }
-        },
-        error: function (xhr, status, error) {
-            console.error("AJAX Error:", status, error);
         }
     });
 }
@@ -192,14 +231,12 @@ function validarArchivo(input) {
 }
 
 function generarFirmaDigital() {
-    // 1. Mostrar el contenedor
     const container = document.getElementById('previewFirmaContainer');
-    container.style.display = 'block';
+    if (container) container.style.display = 'flex';
 
-    // 2. Obtener fecha y hora actual
     const ahora = new Date();
 
-    // Formato de fecha para el sello: 16.04.2026 08:55:07
+    // 1. Formato Fecha Sello (Puntos como separador)
     const dia = String(ahora.getDate()).padStart(2, '0');
     const mes = String(ahora.getMonth() + 1).padStart(2, '0');
     const anio = ahora.getFullYear();
@@ -207,17 +244,20 @@ function generarFirmaDigital() {
     const min = String(ahora.getMinutes()).padStart(2, '0');
     const seg = String(ahora.getSeconds()).padStart(2, '0');
 
+    // Mantenemos el formato de tu imagen: 16.04.2026 08:55:07 -05:00
     const fechaFormateada = `${dia}.${mes}.${anio} ${hora}:${min}:${seg} -05:00`;
 
-    // 3. Insertar datos en el sello
-    document.getElementById('fechaFirma').innerText = fechaFormateada;
+    const elFechaFirma = document.getElementById('fechaFirma');
+    if (elFechaFirma) elFechaFirma.innerText = fechaFormateada;
 
-    // 4. Actualizar también la fecha del pie de página (San Vicente)
-    const opcionesFecha = { day: '2-digit', month: '2-digit', year: 'numeric' };
-    document.getElementById('fechaActualAutomatica').innerText = ahora.toLocaleDateString('es-PE', opcionesFecha);
+    // 2. Formato Pie de Página (SAN VICENTE, 16 DE ABRIL DE 2026)
+    const opcionesFecha = { day: 'numeric', month: 'long', year: 'numeric' };
+    let fechaLarga = ahora.toLocaleDateString('es-PE', opcionesFecha);
 
-    // Opcional: Feedback visual de que se firmó
-    console.log("Documento firmado digitalmente por el usuario.");
+    const elFechaAuto = document.getElementById('fechaActualAutomatica');
+    if (elFechaAuto) {
+        elFechaAuto.innerText = `SAN VICENTE, ${fechaLarga.toUpperCase()}`;
+    }
 }
 
 document.addEventListener("DOMContentLoaded", function () {
