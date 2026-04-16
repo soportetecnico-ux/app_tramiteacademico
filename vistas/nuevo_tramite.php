@@ -37,7 +37,7 @@ include('head.php')
         <div class="container my-4">
             <form id="formTramiteCompleto">
                 <div class="card mb-2 shadow-sm">
-                    <div class="card-header py-1 px-3 bg-light">
+                    <div class="card-header py-2 px-3 bg-light">
                         <h6 class="mb-0 fw-bold small text-uppercase" style="color: #0a3e9e;">I. SOLICITO: </h6>
                     </div>
                     <div class="card-body p-2">
@@ -75,7 +75,7 @@ include('head.php')
                 </div>
 
                 <div class="card mb-2 shadow-sm">
-                    <div class="card-header py-1 px-3 bg-light">
+                    <div class="card-header py-2 px-3 bg-light">
                         <h6 class="mb-0 fw-bold small text-uppercase" style="color: #0a3e9e;">II. DEPENDENCIA O AUTORIDAD A QUIEN SE DIRIGE LA SOLICITUD:</h6>
                     </div>
                     <div class="card-body p-2">
@@ -92,7 +92,7 @@ include('head.php')
                 </div>
 
                 <div class="card mb-2 shadow-sm">
-                    <div class="card-header py-1 px-3 bg-light">
+                    <div class="card-header py-2 px-3 bg-light">
                         <h6 class="mb-0 fw-bold small text-uppercase" style="color: #0a3e9e;">III. DERECHO DE TRÁMITE</h6>
                     </div>
                     <div class="card-body p-2">
@@ -114,7 +114,7 @@ include('head.php')
                 </div>
 
                 <div class="card mb-2 shadow-sm">
-                    <div class="card-header py-1 px-3 bg-light">
+                    <div class="card-header py-2 px-3 bg-light">
                         <h6 class="mb-0 fw-bold small text-uppercase" style="color: #0a3e9e;">IV. DATOS DEL SOLICITANTE</h6>
                     </div>
                     <div class="card-body p-2">
@@ -136,7 +136,7 @@ include('head.php')
                 </div>
 
                 <div class="card mb-2 shadow-sm">
-                    <div class="card-header py-1 px-3 bg-light">
+                    <div class="card-header py-2 px-3 bg-light">
                         <h6 class="mb-0 fw-bold small text-uppercase" style="color: #0a3e9e;">V. DIRECCIÓN</h6>
                     </div>
                     <div class="card-body p-2">
@@ -189,7 +189,7 @@ include('head.php')
                     </div>
                 </div>
                 <div class="card mb-2 shadow-sm">
-                    <div class="card-header py-1 px-3 bg-light">
+                    <div class="card-header py-2 px-3 bg-light">
                         <h6 class="mb-0 fw-bold small text-uppercase" style="color: #0a3e9e;">VI. FUNDAMENTACIÓN </h6>
                     </div>
                     <div class="card-body p-2">
@@ -197,7 +197,7 @@ include('head.php')
                     </div>
                 </div>
                 <div class="card shadow-sm">
-                    <div class="card-header py-1 px-3 bg-light d-flex justify-content-between align-items-center">
+                    <div class="card-header py-2 px-3 bg-light d-flex justify-content-between align-items-center">
                         <h6 class="mb-0 fw-bold small text-uppercase" style="color: #0a3e9e;">VII. ANEXOS <span class="text-muted fw-normal" style="font-size: 0.65rem;">(Máx. 10 archivos - 20MB c/u)</span></h6>
                         <button type="button" class="btn btn-outline-primary btn-sm py-0 px-1" onclick="agregarArchivo()" style="font-size: 0.8rem;">
                             <i class="ti ti-layout-grid-add"></i> Agregar
@@ -218,16 +218,26 @@ include('head.php')
                         <div class="card shadow-sm h-100">
                             <div class="card-header py-1 px-3 bg-light d-flex justify-content-between align-items-center">
                                 <h6 class="mb-0 fw-bold small text-uppercase" style="color: #0a3e9e;">Firma Digital</h6>
-                                <button type="button" class="btn btn-outline-primary btn-sm py-0 px-1" onclick="document.getElementById('inputFirma').click()" style="font-size: 0.75rem;">
-                                    <i class="bi bi-upload"></i> Subir JPG/PNG
+                                <button type="button" class="btn btn-primary btn-sm py-0 px-2" onclick="generarFirmaDigital()" style="font-size: 0.75rem;">
+                                    <i class="bi bi-pen-fill"></i> Firmar Documento
                                 </button>
                             </div>
                             <div class="card-body p-2 d-flex flex-column align-items-center justify-content-center" style="min-height: 100px;">
-                                <div id="previewFirmaContainer" class="mb-1" style="display: none;">
-                                    <img id="imgFirma" src="" alt="Firma" style="max-height: 60px; max-width: 150px; object-fit: contain;">
-                                </div>
 
-                                <input type="file" id="inputFirma" accept="image/png, image/jpeg" style="display: none;" onchange="visualizarFirma(this)">
+                                <div id="previewFirmaContainer" class="mb-1" style="display: none;">
+                                    <div style="display: flex; align-items: center; padding: 5px; background: #fff; width: fit-content; font-family: Arial, sans-serif; line-height: 1.1;">
+                                        <div style="padding-right: 1px;">
+                                            <img src="../assets/images/logo-tramite.png" alt="Escudo" style="height: 55px; width: auto;">
+                                        </div>
+
+                                        <div style="padding-left: 8px; text-align: left; font-size: 9px; color: #000;">
+                                            <div>Firmado digitalmente por <span id="nombreFirma" style="font-weight: bold;"></span></div>
+                                            <div style="font-weight: bold; font-size: 11px;"><span id="dniFirma" style="font-weight: bold;"></span></div>
+                                            <div>Motivo: Soy el autor del documento</div>
+                                            <div>Fecha: <span id="fechaFirma"></span></div>
+                                        </div>
+                                    </div>
+                                </div>
 
                                 <div class="border-top border-dark w-75 text-center pt-1">
                                     <p class="mb-0 fw-bold" style="font-size: 0.65rem;">FIRMA DEL USUARIO</p>
@@ -241,7 +251,7 @@ include('head.php')
 
                     <div class="col-md-6">
                         <div class="card shadow-sm h-100">
-                            <div class="card-header py-1 px-3 bg-light">
+                            <div class="card-header py-2 px-3 bg-light">
                                 <h6 class="mb-0 fw-bold small text-uppercase" style="color: #0a3e9e;">Observaciones <span class="fw-normal text-muted" style="font-size: 0.65rem;">(Opcional)</span></h6>
                             </div>
                             <div class="card-body p-1">
@@ -250,7 +260,7 @@ include('head.php')
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- ────── BOTONES PRINCIPALES ────── -->
                 <div class="d-flex justify-content-end mt-4 mb-3 gap-2">
                     <button type="button" class="btn btn-secondary" onclick="history.back()">

@@ -6,7 +6,31 @@ class Documento
 {
     public function __construct() {}
 
-    public function seleccionarTramite()
+    public function seleccionarTramite($id_car_sesion)
+    {
+        // Buscamos todos los trámites y tratamos de unirlos a la oficina
+        // que coincida con la carrera del alumno O con el código 0 (general)
+        $sql = "SELECT 
+                t.id_tupa, 
+                t.denominacion, 
+                t.requisitos, 
+                t.monto,
+                o.cod_oficina,
+                o.nombre AS nombre_oficina
+            FROM tb_tupa t
+            LEFT JOIN tb_tupa_oficina v ON v.id_tupa = t.id_tupa 
+                AND (v.id_car = '$id_car_sesion' OR v.id_car = 0)
+            LEFT JOIN oficina o ON v.cod_oficina = o.cod_oficina
+            WHERE t.estado = 1
+            GROUP BY t.id_tupa
+            ORDER BY v.id_car DESC";
+        /* El ORDER BY v.id_car DESC asegura que si hay un id_car = 4 
+               y un id_car = 0, el GROUP BY mantenga el 4 (el más específico) */
+
+        return ejecutarConsulta($sql);
+    }
+
+    /*     public function seleccionarTramite()
     {
         $sql = "SELECT 
                 t.id_tupa, 
@@ -21,7 +45,7 @@ class Documento
             WHERE v.estado = 1"; // Solo trámites con vinculación activa
 
         return ejecutarConsulta($sql);
-    }
+    } */
 
     public function registrarMPV($data)
     {

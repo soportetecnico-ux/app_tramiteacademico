@@ -3,6 +3,7 @@ $(document).ready(function () {
     cargarDatosUsuario();
     listarTramites();
 
+
     $.post("../controladores/documentos.php?op=seleccionarTramite", function (r) {
         $("#id_tupa").html(r);
     });
@@ -10,31 +11,63 @@ $(document).ready(function () {
     $("#id_tupa").on("change", function () {
         const opt = $(this).find('option:selected');
 
-        // Extraer datos de los atributos data-
         const requisito = opt.data('requisito');
         const monto = opt.data('monto');
         const oficina = opt.data('oficina');
         const codOficina = opt.data('codoficina');
 
+
         if (requisito !== undefined) {
-            // 1. Llenar los cuadros de información
             $("#lbl_requisito").text(requisito);
             $("#lbl_monto").text(monto);
 
-            // 2. LLENAR EL CAMPO DEPENDENCIA AUTOMÁTICAMENTE
+            // 2. Llenar el campo DEPENDENCIA automáticamente
+            // Aquí aparecerá la oficina de tu id_car, o la de id_car = 0
             $("#dependencia").val(oficina);
 
-            // Opcional: Si necesitas guardar el cod_oficina para el registro final, 
-            // puedes guardarlo en un input hidden o un atributo del propio input
             $("#dependencia").attr("data-cod", codOficina);
 
-            // 3. Mostrar el detalle con efecto
             $("#detalle_tupa").fadeIn(300);
         } else {
             $("#detalle_tupa").hide();
             $("#dependencia").val("");
+            $("#lbl_requisito").text("");
+            $("#lbl_monto").text("");
         }
     });
+
+    /*     $.post("../controladores/documentos.php?op=seleccionarTramite", function (r) {
+            $("#id_tupa").html(r);
+        });
+    
+        $("#id_tupa").on("change", function () {
+            const opt = $(this).find('option:selected');
+    
+            // Extraer datos de los atributos data-
+            const requisito = opt.data('requisito');
+            const monto = opt.data('monto');
+            const oficina = opt.data('oficina');
+            const codOficina = opt.data('codoficina');
+    
+            if (requisito !== undefined) {
+                // 1. Llenar los cuadros de información
+                $("#lbl_requisito").text(requisito);
+                $("#lbl_monto").text(monto);
+    
+                // 2. LLENAR EL CAMPO DEPENDENCIA AUTOMÁTICAMENTE
+                $("#dependencia").val(oficina);
+    
+                // Opcional: Si necesitas guardar el cod_oficina para el registro final, 
+                // puedes guardarlo en un input hidden o un atributo del propio input
+                $("#dependencia").attr("data-cod", codOficina);
+    
+                // 3. Mostrar el detalle con efecto
+                $("#detalle_tupa").fadeIn(300);
+            } else {
+                $("#detalle_tupa").hide();
+                $("#dependencia").val("");
+            }
+        }); */
 
 });
 
@@ -106,6 +139,10 @@ function cargarDatosUsuario() {
                 $('#departamento').val(data.depar ?? '');
                 $('#provincia').val(data.provi ?? '');
                 $('#distrito').val(data.dist ?? '');
+                $('#nombreFirma').text(
+                    `${data.apepa_estu ?? ''} ${data.apema_estu ?? ''} ${data.nom_estu ?? ''}`.trim()
+                );
+                $('#dniFirma').text(data.dni_estu ?? '');
 
             } else {
                 console.error("Error:", response.mensaje);
@@ -154,19 +191,33 @@ function validarArchivo(input) {
     }
 }
 
-function visualizarFirma(input) {
-    if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function (e) {
-            document.getElementById('imgFirma').src = e.target.result;
-            document.getElementById('previewFirmaContainer').style.display = 'block';
+function generarFirmaDigital() {
+    // 1. Mostrar el contenedor
+    const container = document.getElementById('previewFirmaContainer');
+    container.style.display = 'block';
 
-            // Si usas el formato oficial oculto, también copia la imagen allí
-            const outFirma = document.getElementById('out_img_firma');
-            if (outFirma) outFirma.src = e.target.result;
-        }
-        reader.readAsDataURL(input.files[0]);
-    }
+    // 2. Obtener fecha y hora actual
+    const ahora = new Date();
+
+    // Formato de fecha para el sello: 16.04.2026 08:55:07
+    const dia = String(ahora.getDate()).padStart(2, '0');
+    const mes = String(ahora.getMonth() + 1).padStart(2, '0');
+    const anio = ahora.getFullYear();
+    const hora = String(ahora.getHours()).padStart(2, '0');
+    const min = String(ahora.getMinutes()).padStart(2, '0');
+    const seg = String(ahora.getSeconds()).padStart(2, '0');
+
+    const fechaFormateada = `${dia}.${mes}.${anio} ${hora}:${min}:${seg} -05:00`;
+
+    // 3. Insertar datos en el sello
+    document.getElementById('fechaFirma').innerText = fechaFormateada;
+
+    // 4. Actualizar también la fecha del pie de página (San Vicente)
+    const opcionesFecha = { day: '2-digit', month: '2-digit', year: 'numeric' };
+    document.getElementById('fechaActualAutomatica').innerText = ahora.toLocaleDateString('es-PE', opcionesFecha);
+
+    // Opcional: Feedback visual de que se firmó
+    console.log("Documento firmado digitalmente por el usuario.");
 }
 
 document.addEventListener("DOMContentLoaded", function () {
