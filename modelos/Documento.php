@@ -6,19 +6,15 @@ class Documento
 {
     public function __construct() {}
 
-public function seleccionarTramite($id_car_sesion)
-{
-    $sql = "SELECT 
+    public function seleccionarTramite($id_car_sesion)
+    {
+        $sql = "SELECT 
                 t.id_tupa, 
                 t.denominacion, 
                 t.requisitos, 
                 t.monto,
                 o.cod_oficina,
-                o.nombre AS nombre_oficina,
-                -- Traemos los nombres de anexos configurados
-                (SELECT GROUP_CONCAT(nombre_anexo SEPARATOR '|') 
-                 FROM tb_tupa_anexo_config 
-                 WHERE id_tupa = t.id_tupa AND estado = 1) as nombres_anexos
+                o.nombre AS nombre_oficina
             FROM tb_tupa t
             LEFT JOIN tb_tupa_oficina v ON v.id_tupa = t.id_tupa 
                 AND (v.id_car = '$id_car_sesion' OR v.id_car = 0)
@@ -27,91 +23,92 @@ public function seleccionarTramite($id_car_sesion)
             GROUP BY t.id_tupa
             ORDER BY v.id_car DESC";
 
-    return ejecutarConsulta($sql);
-}
-
-    /*     public function seleccionarTramite()
-    {
-        $sql = "SELECT 
-                t.id_tupa, 
-                t.denominacion, 
-                t.requisitos, 
-                t.monto, 
-                o.cod_oficina, 
-                o.nombre 
-            FROM tb_tupa t
-            INNER JOIN tb_tupa_oficina v ON t.id_tupa = v.id_tupa
-            INNER JOIN oficina o ON v.cod_oficina = o.cod_oficina
-            WHERE v.estado = 1"; // Solo trámites con vinculación activa
-
         return ejecutarConsulta($sql);
-    } */
+    }
 
-    public function registrarMPV($data)
+    public function registrarDocumento($data)
     {
-        global $bd;
+        global $conexion;
+        if (!$conexion) return ['status' => 'error', 'mensaje' => 'No hay conexión.'];
 
-        $sql = "INSERT INTO mesa_de_partes 
-                (cod_remitente, email, celular, direccion, cod_tipo_documento, folio, numero, asunto, mensaje, nombre_archivo, fecha, estudiante, cod_web,id_usuario)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?,?)";
+        mysqli_begin_transaction($conexion);
 
-        $stmt = mysqli_prepare($bd, $sql);
-        if (!$stmt) {
-            return ['status' => 'error', 'mensaje' => 'Error en la consulta: ' . mysqli_error($bd)];
-        }
+        try {
+            // --- A. TABLA: documento --- (Tu código existente)
+            $sqlDoc = "INSERT INTO documento (asunto, mensaje, folio, fecha, fecha_emision, cod_tipo_documento, cod_oficina, cod_estado_documento, cod_estado_documento2, anexos, cod_usuario, cod_web, id_estu, id_tupa, comprobante, fecha_comprobante, observaciones, nombre_archivo) 
+                   VALUES (?, ?, 1, NOW(), CURDATE(), 6, 1, 3, 'Derivado', 1, 2, ?, ?, ?, ?, ?, ?, ?)";
 
-        mysqli_stmt_bind_param(
-            $stmt,
-            "sssssiisssssi",
-            $data['cod_remitente'],
-            $data['email'],
-            $data['celular'],
-            $data['direccion'],
-            $data['cod_tipo_documento'],
-            $data['folio'],
-            $data['numero'],
-            $data['asunto'],
-            $data['mensaje'],
-            $data['nombre_archivo'],
-            $data['estudiante'],
-            $data['cod_web'],
-            $data['id_usuario']
-        );
+            $stmtDoc = mysqli_prepare($conexion, $sqlDoc);
+            mysqli_stmt_bind_param(
+                $stmtDoc,
+                "sssiissss",
+                $data['denominacion'],
+                $data['fundamentacion'],
+                $data['cod_web'],
+                $data['id_estu'],
+                $data['id_tupa'],
+                $data['nro_comprobante'],
+                $data['fecha_comprobante'],
+                $data['observaciones'],
+                $data['nombre_archivo']
+            );
+            if (!mysqli_stmt_execute($stmtDoc)) throw new Exception("Error Documento: " . mysqli_stmt_error($stmtDoc));
 
-        $ok = mysqli_stmt_execute($stmt);
+            $cod_documento = mysqli_insert_id($conexion);
 
-        if ($ok) {
-            return [
-                'status' => 'success',
-                'mensaje' => 'Documento registrado correctamente',
-                'cod_web' => $data['cod_web']
-            ];
-        } else {
-            return ['status' => 'error', 'mensaje' => 'Error al registrar: ' . mysqli_stmt_error($stmt)];
+            // --- B. TABLA: historial_documento --- (Tu código existente)
+            $sqlHist = "INSERT INTO historial_documento (cod_historial_documento_origen, oficina_destino, fecha_emision, oficina_origen, cod_documento, cod_trabajador, estado, estado2, eliminado) 
+                    VALUES (0, ?, NOW(), 1, ?, 1, 1, 'Sin recibir', 0)";
+            $stmtHist = mysqli_prepare($conexion, $sqlHist);
+            mysqli_stmt_bind_param($stmtHist, "ii", $data['cod_oficina'], $cod_documento);
+            if (!mysqli_stmt_execute($stmtHist)) throw new Exception("Error Historial: " . mysqli_stmt_error($stmtHist));
+
+            // --- C. TABLA: tb_firma_fut --- (LO NUEVO)
+            $sqlFirma = "INSERT INTO tb_firma_fut (cod_web, id_estu, firmado_por, dni_firmante, motivo, fecha_sello) 
+                     VALUES (?, ?, ?, ?, 'Soy el autor del documento', ?)";
+
+            $stmtFirma = mysqli_prepare($conexion, $sqlFirma);
+            if (!$stmtFirma) throw new Exception("Error preparación Firma: " . mysqli_error($conexion));
+
+            mysqli_stmt_bind_param(
+                $stmtFirma,
+                "sisss",
+                $data['cod_web'],
+                $data['id_estu'],
+                $data['firmado_por'],
+                $data['dni_firmante'],
+                $data['fecha_sello']
+            );
+
+            if (!mysqli_stmt_execute($stmtFirma)) {
+                throw new Exception("Error al insertar Firma: " . mysqli_stmt_error($stmtFirma));
+            }
+
+            mysqli_commit($conexion);
+            return ['status' => 'success', 'mensaje' => 'Trámite y firma registrados.', 'cod_web' => $data['cod_web']];
+        } catch (Exception $e) {
+            mysqli_rollback($conexion);
+            return ['status' => 'error', 'mensaje' => $e->getMessage()];
         }
     }
 
-    public function listarMisTramites($id_usuario)
+    public function listarMisTramites($id_estu)
     {
-        global $bd;
+        global $conexion;
 
+        // 1. Limpiamos el SQL: agregamos DATE_FORMAT y corregimos el alias del ORDER BY
         $sql = "SELECT 
-                mp.fecha,
-                mp.cod_web,
-                mp.cod_tipo_documento,
-                tp.descripcion AS tipo_documento,
-                mp.folio,
-                mp.numero,
-                mp.asunto,
-                mp.nombre_archivo
-            FROM mesa_de_partes mp
-            INNER JOIN tipo_documento tp 
-                ON mp.cod_tipo_documento = tp.cod_tipo_documento
-            WHERE mp.id_usuario='$id_usuario' 
-            ORDER BY mp.fecha DESC;";
+                d.cod_web, 
+                d.fecha,
+                d.asunto, 
+                o.nombre AS nombre_oficina 
+            FROM documento AS d
+            INNER JOIN historial_documento AS hd ON d.cod_documento = hd.cod_documento
+            INNER JOIN oficina AS o ON o.cod_oficina = hd.oficina_destino
+            WHERE d.id_estu = '$id_estu'
+            ORDER BY d.fecha DESC";
 
-        $consulta = mysqli_query($bd, $sql);
-        if (!$consulta) return false;
-        return $consulta;
+        $consulta = mysqli_query($conexion, $sql);
+        return $consulta; // Si falla, devolverá false y el controlador lo manejará
     }
 }

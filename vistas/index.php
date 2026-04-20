@@ -20,112 +20,110 @@ include('head.php')
 </style>
 <!-- [ Main Content ] start -->
 <div class="pc-container">
-    <div class="pc-content"><!-- [ breadcrumb ] start -->
-        
+    <div class="pc-content">
 
-        <div class="row mt-0"><!-- [ sample-page ] start -->
-
-
-            <div class="row mt-0">
-                <div class="col-md-12">
-                    <div class="alert alert-secondary" role="alert" style="background-color:#edf2ff; border-color: #0e5fbb;">
-                        <strong style="color:#0e5fbb;">¡Bienvenido al Mesa de Partes Académico de la Universidad!</strong><br>
-                        Este sistema está diseñado para gestionar de manera eficiente los trámites académicos y garantizar un flujo organizado de solicitudes.
-                        Estamos comprometidos con la mejora continua y con ofrecerte una experiencia óptima. ¡Gracias por confiar en nuestra gestión administrativa!
-                    </div>
-                </div>
-                <!-- Card 1 -->
-
-            </div>
-            <div class="row row-cols-1 row-cols-md-2 row-cols-xl-5 g-4 mt-2">
-                <!-- Total Condiciones -->
-                <div class="col">
-                    <div class="card social-widget-card available-balance-card" style="background-color: #1b7bdc;">
-                        <div class="card-body d-flex justify-content-between align-items-center">
-                            <div>
-                                <h3 class="text-white m-0" id="TotalCondiciones"></h3>
-                                <span class="m-t-10 text-white">Condiciones</span>
+        <div class="row">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm mb-4"
+                    style="background: linear-gradient(to right, #ffffff, #edf2ff); border-radius: 15px; !important;">
+                    <div class="card-body p-3">
+                        <div class="d-flex align-items-center">
+                            <div class="d-flex align-items-center justify-content-center rounded-circle flex-shrink-0"
+                                style="width: 48px; height: 48px; background-color: rgba(14, 95, 187, 0.15); color: #0e5fbb;">
+                                <i class="ti ti-school fs-3"></i>
                             </div>
-                            <span class="pc-micon">
-                                <svg class="pc-icon" style="width: 24px; height: 24px;">
-                                    <use xlink:href="#custom-element-plus"></use>
-                                </svg>
-                            </span>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- Total Componentes -->
-                <div class="col">
-                    <div class="card social-widget-card available-balance-card" style="background-color: #1b7bdc;">
-                        <div class="card-body d-flex justify-content-between align-items-center">
-                            <div>
-                                <h3 class="text-white m-0" id="TotalComponentes"></h3>
-                                <span class="m-t-10 text-white">Componentes</span>
+                            <div class="flex-grow-1 ms-3">
+                                <h5 class="mb-1 fw-bold" style="color:#0a2152; letter-spacing: -0.3px;">¡Bienvenido al Mesa de Partes Académico!</h5>
+                                <p class="mb-0 text-muted small">Gestiona tus solicitudes de forma eficiente y realiza el seguimiento en tiempo real.</p>
                             </div>
-                            <span class="pc-micon">
-                                <svg class="pc-icon" style="width: 24px; height: 24px;">
-                                    <use xlink:href="#custom-element-plus"></use>
-                                </svg>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Total Indicadores -->
-                <div class="col">
-                    <div class="card social-widget-card available-balance-card" style="background-color: #1b7bdc;">
-                        <div class="card-body d-flex justify-content-between align-items-center">
-                            <div>
-                                <h3 class="text-white m-0" id="TotalIndicadores"></h3>
-                                <span class="m-t-10 text-white">Indicadores</span>
-                            </div>
-                            <span class="pc-micon">
-                                <svg class="pc-icon" style="width: 24px; height: 24px;">
-                                    <use xlink:href="#custom-element-plus"></use>
-                                </svg>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Total Medios -->
-                <div class="col">
-                    <div class="card social-widget-card available-balance-card" style="background-color: #1b7bdc;">
-                        <div class="card-body d-flex justify-content-between align-items-center">
-                            <div>
-                                <h3 class="text-white m-0" id="TotalMedios"></h3>
-                                <span class="m-t-10 text-white">Medios de Verificación</span>
-                            </div>
-                            <span class="pc-micon">
-                                <svg class="pc-icon" style="width: 24px; height: 24px;">
-                                    <use xlink:href="#custom-element-plus"></use>
-                                </svg>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Total Evidencias -->
-                <div class="col">
-                    <div class="card social-widget-card available-balance-card" style="background-color: #1b7bdc;">
-                        <div class="card-body d-flex justify-content-between align-items-center">
-                            <div>
-                                <h3 class="text-white m-0" id="TotalEvidencias"></h3>
-                                <span class="m-t-10 text-white">Evidencias</span>
-                            </div>
-                            <span class="pc-micon">
-                                <svg class="pc-icon" style="width: 24px; height: 24px;">
-                                    <use xlink:href="#custom-element-plus"></use>
-                                </svg>
-                            </span>
                         </div>
                     </div>
                 </div>
             </div>
-
         </div>
 
+        <div class="row g-3">
+            <div class="col-md-6 col-xl-3">
+                <div class="card border-0 shadow-sm" style="border-radius: 12px;">
+                    <div class="card-body p-3">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <h6 class="text-muted mb-1 small fw-bold" style="font-size: 10px; letter-spacing: 0.5px;">TOTAL TRÁMITES</h6>
+                                <h4 class="mb-0 fw-bold" id="TotalTramites">0</h4>
+                            </div>
+                            <div class="d-flex align-items-center justify-content-center rounded-circle"
+                                style="width: 42px; height: 42px; background-color: rgba(14, 95, 187, 0.15); color: #0e5fbb;">
+                                <i class="ti ti-folders fs-4"></i>
+                            </div>
+                        </div>
+                        <div class="progress mt-3" style="height: 4px; border-radius: 10px;">
+                            <div class="progress-bar bg-primary" style="width: 100%; border-radius: 10px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-xl-3">
+                <div class="card border-0 shadow-sm" style="border-radius: 12px;">
+                    <div class="card-body p-3">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <h6 class="text-muted mb-1 small fw-bold" style="font-size: 10px; letter-spacing: 0.5px;">PENDIENTES</h6>
+                                <h4 class="mb-0 fw-bold text-warning" id="TotalPendientes">0</h4>
+                            </div>
+                            <div class="d-flex align-items-center justify-content-center rounded-circle"
+                                style="width: 42px; height: 42px; background-color: rgba(255, 193, 7, 0.15); color: #ffc107;">
+                                <i class="ti ti-calendar-time fs-4"></i>
+                            </div>
+                        </div>
+                        <div class="progress mt-3" style="height: 4px; border-radius: 10px;">
+                            <div class="progress-bar bg-warning" style="width: 45%; border-radius: 10px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-xl-3">
+                <div class="card border-0 shadow-sm" style="border-radius: 12px;">
+                    <div class="card-body p-3">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <h6 class="text-muted mb-1 small fw-bold" style="font-size: 10px; letter-spacing: 0.5px;">OBSERVADOS</h6>
+                                <h4 class="mb-0 fw-bold text-danger" id="TotalObservados">0</h4>
+                            </div>
+                            <div class="d-flex align-items-center justify-content-center rounded-circle"
+                                style="width: 42px; height: 42px; background-color: rgba(220, 53, 69, 0.15); color: #dc3545;">
+                                <i class="ti ti-alert-circle fs-4"></i>
+                            </div>
+                        </div>
+                        <div class="progress mt-3" style="height: 4px; border-radius: 10px;">
+                            <div class="progress-bar bg-danger" style="width: 20%; border-radius: 10px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-xl-3">
+                <div class="card border-0 shadow-sm" style="border-radius: 12px;">
+                    <div class="card-body p-3">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <h6 class="text-muted mb-1 small fw-bold" style="font-size: 10px; letter-spacing: 0.5px;">FINALIZADOS</h6>
+                                <h4 class="mb-0 fw-bold text-success" id="TotalFinalizados">0</h4>
+                            </div>
+                            <div class="d-flex align-items-center justify-content-center rounded-circle"
+                                style="width: 42px; height: 42px; background-color: rgba(25, 135, 84, 0.15); color: #198754;">
+                                <i class="ti ti-circle-check fs-4"></i>
+                            </div>
+                        </div>
+                        <div class="progress mt-3" style="height: 4px; border-radius: 10px;">
+                            <div class="progress-bar bg-success" style="width: 80%; border-radius: 10px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 <!-- [ Main Content ] end -->
@@ -137,4 +135,3 @@ include('footer.php')
 
 
 <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
-

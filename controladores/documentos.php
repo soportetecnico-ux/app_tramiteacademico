@@ -12,127 +12,131 @@ $fech_crea = $Date->format("Y-m-d H:i:s");
 
 switch ($_GET["op"]) {
 
-case 'seleccionarTramite':
-    if (!isset($_SESSION)) {
-        session_start();
-    }
-    $id_car = $_SESSION['id_car'];
+    case 'seleccionarTramite':
+        if (!isset($_SESSION)) {
+            session_start();
+        }
+        $id_car = $_SESSION['id_car'];
 
-    $rspta = $documentos->seleccionarTramite($id_car);
-    echo '<option value="" disabled selected>Seleccione una opción</option>';
+        $rspta = $documentos->seleccionarTramite($id_car);
+        echo '<option value="" disabled selected>Seleccione un trámite</option>';
 
-    while ($reg = $rspta->fetch_object()) {
-        $oficina = !empty($reg->nombre_oficina) ? $reg->nombre_oficina : "OFICINA POR ASIGNAR";
-        $cod = !empty($reg->cod_oficina) ? $reg->cod_oficina : "";
-        
-        // Si no hay anexos, enviamos cadena vacía
-        $anexos = !empty($reg->nombres_anexos) ? $reg->nombres_anexos : "";
+        while ($reg = $rspta->fetch_object()) {
+            $oficina = !empty($reg->nombre_oficina) ? $reg->nombre_oficina : "OFICINA POR ASIGNAR";
+            $cod = !empty($reg->cod_oficina) ? $reg->cod_oficina : "";
 
-        echo '<option value="' . $reg->id_tupa . '" 
+            // Si no hay anexos, enviamos cadena vacía
+            $anexos = !empty($reg->nombres_anexos) ? $reg->nombres_anexos : "";
+
+            echo '<option value="' . $reg->id_tupa . '" 
                     data-requisito="' . $reg->requisitos . '" 
                     data-monto="' . $reg->monto . '"
                     data-oficina="' . $oficina . '"
                     data-codoficina="' . $cod . '"
                     data-anexos="' . $anexos . '">' // <-- NUEVO ATRIBUTO
-            . $reg->denominacion .
-            '</option>';
-    }
-    break;
-
-    /*  case 'seleccionarTramite':
-        $rspta = $documentos->seleccionarTramite();
-        echo '<option value="" disabled selected>Seleccione una opción</option>';
-
-        while ($reg = $rspta->fetch_object()) {
-            echo '<option value="' . $reg->id_tupa . '" 
-                      data-requisito="' . $reg->requisitos . '" 
-                      data-monto="' . $reg->monto . '"
-                      data-oficina="' . $reg->nombre . '"
-                      data-codoficina="' . $reg->cod_oficina . '">'
                 . $reg->denominacion .
                 '</option>';
         }
-        break; */
+        break;
 
-    case 'registrarMPV':
+    case 'registrarDocumento':
+
+        if (ob_get_contents()) ob_end_clean();
         header('Content-Type: application/json');
 
         try {
-            // Generar cod_web único
-            $cod_web = time() . rand(10, 99);
 
-            // Procesar archivo si existe
+            $cod_web = "TA-" . date("YmdHis");
+
             $nombreArchivo = "";
-            if (!empty($_FILES['archivo']['name'])) {
-                // Obtener extensión del archivo
-                $ext = pathinfo($_FILES['archivo']['name'], PATHINFO_EXTENSION);
-                // Generar nombre con fecha y hora + nombre original
-                $nombreArchivo = date("YmdHis") . "_" . basename($_FILES['archivo']['name']);
-                $destino = __DIR__ . "/../../views/archivos/" . $nombreArchivo;
+            if (isset($_FILES['archivo_tupa']) && !empty($_FILES['archivo_tupa']['name'][0])) {
 
-                if (!move_uploaded_file($_FILES['archivo']['tmp_name'], $destino)) {
-                    echo json_encode([
-                        'status' => 'error',
-                        'mensaje' => 'No se pudo guardar el archivo. Verifica permisos de la carpeta.'
-                    ]);
+                $fileTmpPath = $_FILES['archivo_tupa']['tmp_name'][0];
+                $originalName = $_FILES['archivo_tupa']['name'][0];
+                $ext = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
+
+
+                $nombre_raiz = pathinfo($originalName, PATHINFO_FILENAME);
+                $nombre_raiz = str_replace(' ', '_', $nombre_raiz); // Simula limpia_espacios
+                $nombre_raiz = preg_replace('/[^A-Za-z0-9\-]/', '', $nombre_raiz); // Quita caracteres raros
+                $nombre_raiz = substr($nombre_raiz, 0, 100); // Lo limitamos un poco más por seguridad
+
+                //Definir carpeta por año
+                $anioActual = date("Y");
+                $rutaBase = __DIR__ . "/../../views/archivos/" . $anioActual . "/";
+
+                //Crear la carpeta si no existe (permisos 0777)
+                if (!file_exists($rutaBase)) {
+                    mkdir($rutaBase, 0777, true);
+                }
+
+                // Formato: FECHA_HORA_NOMBRERAIZ.ext (Ej: 20260420120530_mi_documento.pdf)
+                $nombreArchivo = date("YmdHis") . "_" . $nombre_raiz . "." . $ext;
+
+                $destinoFull = $rutaBase . $nombreArchivo;
+
+                $extensionesPermitidas = ['pdf', 'rar', 'zip'];
+
+                if (!in_array($ext, $extensionesPermitidas)) {
+                    echo json_encode(['status' => 'error', 'mensaje' => 'Formato no permitido']);
+                    exit;
+                }
+
+                if (move_uploaded_file($fileTmpPath, $destinoFull)) {
+                    // IMPORTANTE: Guardamos en la BD "2026/nombre_archivo.pdf" para que luego sea fácil encontrarlo desde cualquier vista
+                    $nombreArchivoParaBD = $anioActual . "/" . $nombreArchivo;
+                } else {
+                    echo json_encode(['status' => 'error', 'mensaje' => 'Error al mover archivo']);
                     exit;
                 }
             }
 
-            // Armar array de datos
+
+            //Enviamos 'cod_oficina' que servirá para la oficina_destino en el historial
             $data = [
-                'cod_remitente'  => 0,
-                'email'          => $_POST['correo'] ?? '',
-                'celular'        => $_POST['celular'] ?? '',
-                'direccion'      => $_POST['direccion'] ?? '',
-                'cod_tipo_documento'  => $_POST['tipoDocumento'] ?? '',
-                'folio'          => $_POST['folio'] ?? 0,
-                'numero'         => $_POST['numeroDocumento'] ?? '',
-                'asunto'         => $_POST['asunto'] ?? '',
-                'mensaje'        => $_POST['mensaje'] ?? '',
-                'nombre_archivo' => $nombreArchivo,
-                'estudiante'     => $_POST['estudiante'] ?? '',
-                'cod_web'        => $cod_web,
-                'id_usuario'     => $_SESSION['id_usuario'] ?? '',
+                'denominacion'    => $_POST['denominacion'] ?? null,
+                'id_estu'         => $_POST['id_estu'] ?? null,
+                'id_tupa'         => $_POST['id_tupa'] ?? null,
+                'cod_oficina'     => $_POST['cod_oficina'] ?? '',
+                'fundamentacion'   => $_POST['fundamentacion'] ?? '', // Se guardará en el campo 'mensaje'
+                'nro_comprobante'   => $_POST['nro_comprobante'] ?? '',
+                'fecha_comprobante' => $_POST['fecha_comprobante' ?? ''],
+                'observaciones' => $_POST['observaciones' ?? ''],
+                'cod_web'         => $cod_web,
+                'nombre_archivo'  => $nombreArchivoParaBD,
+                'firmado_por'       => $_POST['firmado_por'] ?? '',
+                'dni_firmante'      => $_POST['dni_firmante'] ?? '',
+                'fecha_sello'       => $_POST['fecha_sello'] ?? ''
             ];
 
-            // Llamar al modelo
-            $rspta = $documentos->registrarMPV($data);
 
-            // Asegurarse de que siempre sea un JSON válido
-            if (!isset($rspta['status']) || !isset($rspta['mensaje'])) {
-                $rspta = [
-                    'status' => 'error',
-                    'mensaje' => 'Ocurrió un error inesperado al registrar el documento.'
-                ];
+            if (empty($data['id_tupa']) || empty($data['id_estu'])) {
+                echo json_encode(['status' => 'error', 'mensaje' => 'Faltan datos obligatorios (Tipo de trámite o ID Estudiante).']);
+                exit;
             }
 
+            $rspta = $documentos->registrarDocumento($data);
+
             echo json_encode($rspta);
-            exit;
         } catch (Exception $e) {
             echo json_encode([
                 'status' => 'error',
-                'mensaje' => 'Excepción: ' . $e->getMessage()
+                'mensaje' => 'Excepción en controlador: ' . $e->getMessage()
             ]);
-            exit;
         }
-
-    default:
-        echo json_encode([
-            'status' => 'error',
-            'mensaje' => 'Operación no válida'
-        ]);
         exit;
+        break;
 
     case 'listarMisTramites':
         header('Content-Type: application/json; charset=utf-8');
-        $id_usuario = $_SESSION['id_usuario'] ?? 0;
+        $id_estu = $_SESSION['id_estu'] ?? 0;
 
-        $data = $documentos->listarMisTramites($id_usuario);
+        $data = $documentos->listarMisTramites($id_estu);
 
         $tramites = array();
         if ($data) {
             while ($row = mysqli_fetch_assoc($data)) {
+                // Pasamos el row completo, que ya trae 'fecha_formateada' y 'nombre_oficina'
                 $tramites[] = $row;
             }
         }

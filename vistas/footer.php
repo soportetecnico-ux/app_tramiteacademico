@@ -2,12 +2,12 @@
     <div class="footer-wrapper container-fluid">
         <div class="row">
             <div class="col my-1">
-                <p class="m-0">© 2025 Universidad Nacional de Cañete. Todos los derechos reservados.</p>
+                <p class="m-0" style="font-size: 12px;">© 2025 Universidad Nacional de Cañete. Todos los derechos reservados.</p>
             </div>
 
             <div class="col-auto my-1">
                 <ul class="list-inline footer-link mb-0">
-                    <li class="list-inline-item">Plantilla diseñada por el equipo <a href="https://themeforest.net/user/phoenixcoded" target="_blank">Phoenixcoded</a></li>
+                    <li class="list-inline-item" style="font-size: 12px;">Plantilla:  <a href="https://themeforest.net/user/phoenixcoded" target="_blank">Phoenixcoded</a></li>
                 </ul>
             </div>
         </div>
@@ -37,7 +37,6 @@
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
 
 <!-- Otros plugins -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.11.0/dist/sweetalert2.all.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 
 <!-- Scripts del sistema -->
@@ -45,6 +44,8 @@
 <script src="../assets/js/fonts/custom-font.js"></script>
 <script src="../assets/js/script.js"></script>
 <script src="../assets/js/theme.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <!-- CKEditor 5 CDN -->
 <script src="https://cdn.ckeditor.com/ckeditor5/41.1.0/classic/ckeditor.js"></script>
 

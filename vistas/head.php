@@ -78,11 +78,6 @@
                         </div>
                         <div class="collapse pc-user-links" id="pc_sidebar_userlink">
                             <div class="pt-3">
-                                <a href="perfil.php" class="d-flex align-items-center">
-                                    <i class="ti ti-user"></i>
-                                    <span>Mi Perfil</span>
-                                    <!-- <span class="badge text-bg-warning ms-2">En Proceso</span> -->
-                                </a>
                                 <a href="../controladores/usuarios.php?op=salir">
                                     <i class="ti ti-power"></i>
                                     <span>Cerrar Sesion</span>
@@ -154,10 +149,6 @@
             </style>
 
             <div class="ms-auto d-flex align-items-center justify-content-between">
-                <span id="oficina-nombre" class="badge bg-light-primary mx-2" style="font-size: 12px;">
-                    Mesa de Partes
-                </span>
-
                 <ul class="list-unstyled">
 
                     <li class="dropdown pc-h-item header-user-profile">
@@ -172,9 +163,6 @@
                             <img src="../assets/images/user_logo.png" alt="user-image" class="user-avtar" />
                         </a>
                         <div class="dropdown-menu dropdown-user-profile dropdown-menu-end pc-h-dropdown">
-                            <div class="dropdown-header d-flex align-items-center justify-content-between">
-                                <h5 class="m-0">Mi Perfil</h5>
-                            </div>
                             <div class="dropdown-body">
                                 <div class="profile-notification-scroll position-relative" style="max-height: calc(100vh - 225px)">
                                     <div class="d-flex mb-1">
@@ -188,19 +176,6 @@
                                             <div id="id-usuario" data-usu-id="<?php echo $_SESSION['id_estu'] ?>" style="display: none;"></div>
                                         </div>
                                     </div>
-                                    <hr class="border-secondary border-opacity-50" />
-
-                                    <p class="text-span">Ajustes</p>
-                                    <a href="perfil.php" class="dropdown-item">
-                                        <span>
-                                            <i class="ti ti-user"></i>
-                                            <span>Mi Perfil</span>
-                                            <!-- <span class="badge text-bg-warning ms-2">En Proceso</span> -->
-                                        </span>
-                                    </a>
-
-                                    <hr class="border-secondary border-opacity-50" />
-
                                     <hr class="border-secondary border-opacity-50" />
                                     <div class="d-grid mb-3">
                                         <a class="btn btn-primary" href="../controladores/usuarios.php?op=salir">

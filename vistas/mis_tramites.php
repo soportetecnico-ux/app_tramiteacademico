@@ -21,25 +21,7 @@ include('head.php')
 <!-- [ Main Content ] start -->
 <div class="pc-container">
     <div class="pc-content"><!-- [ breadcrumb ] start -->
-        <div class="page-header">
-            <div class="page-block">
-                <div class="row align-items-center">
-                    <div class="col-md-12">
-                        <ul class="breadcrumb">
-                            <li class="breadcrumb-item">Bandeja de trámites</li>
-                            <li class="breadcrumb-item" aria-current="page">Mis trámites</li>
-                        </ul>
-                    </div>
-                    <div class="col-md-12">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div class="page-header-title">
-                                <h4 class="mb-0">Mis trámites</h4>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div><!-- [ breadcrumb ] end --><!-- [ Main Content ] start -->
+
 
 
         <div class="row justify-content-center mt-4">
@@ -53,18 +35,18 @@ include('head.php')
                         <div class="table-responsive">
                             <table class="table table-hover" id="tablaTramites">
                                 <thead>
-                                    <tr style="font-size: 11px;">
-                                        <th>#</th>
-                                        <th>FECHA</th>
-                                        <th>CODIGO WEB</th>
-                                        <th>DOCUMENTO</th>
+                                    <tr style="font-size: 11px; letter-spacing: 0.5px;">
+                                        <th class="text-center px-3" style="width: 50px;">#</th>
+                                        <th style="width: 150px;">FECHA EMISIÓN</th>
+                                        <th style="width: 140px;">CÓDIGO WEB</th>
                                         <th>ASUNTO</th>
-                                        <th>ESTADO</th>
+                                        <th>DEPENDENCIA DESTINO</th>
+                                        <th class="text-center" style="width: 120px;">ACCIONES</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    
-                                    
+
+
                                 </tbody>
                             </table>
                         </div>
