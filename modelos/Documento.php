@@ -34,16 +34,19 @@ class Documento
         mysqli_begin_transaction($conexion);
 
         try {
+
+            $nro_documento = $this->obtenerCorrelativo($data['id_estu']);
             // --- A. TABLA: documento --- (Tu código existente)
-            $sqlDoc = "INSERT INTO documento (asunto, mensaje, folio, fecha, fecha_emision, cod_tipo_documento, cod_oficina, cod_estado_documento, cod_estado_documento2, anexos, cod_usuario, cod_web, id_estu, id_tupa, celular_estu, comprobante, fecha_comprobante, observaciones, nombre_archivo,tipo_tramite) 
-                   VALUES (?, ?, 1, NOW(), CURDATE(), 6, 1, 3, 'Derivado', 1, 2, ?, ?, ?, ?, ?, ?, ?, ?, 'TA')";
+            $sqlDoc = "INSERT INTO documento (asunto, mensaje, folio, fecha, fecha_emision, numero, cod_tipo_documento, cod_oficina, cod_estado_documento, cod_estado_documento2, anexos, cod_usuario, cod_web, id_estu, id_tupa, celular_estu, comprobante, fecha_comprobante, observaciones, nombre_archivo,tipo_tramite) 
+                   VALUES (?, ?, 1, NOW(), CURDATE(), ?, 6, 1, 3, 'Derivado', 1, 2, ?, ?, ?, ?, ?, ?, ?, ?, 'TA')";
 
             $stmtDoc = mysqli_prepare($conexion, $sqlDoc);
             mysqli_stmt_bind_param(
                 $stmtDoc,
-                "sssiiissss",
+                "ssisiiissss",
                 $data['denominacion'],
                 $data['fundamentacion'],
+                $nro_documento,
                 $data['cod_web'],
                 $data['id_estu'],
                 $data['id_tupa'],
@@ -115,7 +118,7 @@ class Documento
         return $consulta; // Si falla, devolverá false y el controlador lo manejará
     }
 
-    public function mostrarSeguimiento($id_estu, $cod_web)
+    public function mostrarSeguimientoInicial($id_estu, $cod_web)
     {
         global $conexion;
 
@@ -146,7 +149,7 @@ class Documento
         return $consulta;
     }
 
-    public function mostrarSeguimientoInicial($id_estu, $cod_web)
+    /*public function mostrarSeguimientoInicial($id_estu, $cod_web)
     {
         global $conexion;
 
@@ -168,5 +171,24 @@ class Documento
 
         $consulta = mysqli_query($conexion, $sql);
         return $consulta;
+    }*/
+
+    public function obtenerCorrelativo($id_estu) {
+        global $conexion;
+        $eliminado=0;
+        // 1. Preparamos la sentencia
+        $sql = "SELECT COUNT(*) as total FROM documento WHERE id_estu = ? and eliminado = ?";
+        $stmt = mysqli_prepare($conexion, $sql);
+
+        // 2. Vinculamos el parámetro (la "i" significa que id_estu es un entero/integer)
+        mysqli_stmt_bind_param($stmt, "ii", $id_estu, $eliminado);
+ 
+        // 3. Ejecutamos y obtenemos el resultado
+        mysqli_stmt_execute($stmt);
+        $resultado = mysqli_stmt_get_result($stmt);
+        $fila = mysqli_fetch_assoc($resultado);
+
+        // 4. Retornamos el siguiente número
+        return $fila['total'] + 1;
     }
 }

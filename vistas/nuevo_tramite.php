@@ -138,10 +138,10 @@ include('head.php')
                                     <div class="row g-1">
 
                                         <div class="col-md-6">
-                                            <div class="form-floating"><input type="text" class="form-control" id="nroComprobante"><label class="fw-bold small text-primary">N° COMPROBANTE *</label></div>
+                                            <div class="form-floating"><input type="text" class="form-control" id="nroComprobante" minlength="6" maxlength="15" ><label class="fw-bold small text-primary">N° COMPROBANTE *</label></div>
                                         </div>
                                         <div class="col-md-6">
-                                            <div class="form-floating"><input type="date" class="form-control" id="fechaComprobante"><label class="fw-bold small text-primary">FECHA DE PAGO *</label></div>
+                                            <div class="form-floating"><input type="date" class="form-control" id="fechaComprobante" max="<?php echo date('Y-m-d'); ?>">><label class="fw-bold small text-primary">FECHA DE PAGO *</label></div>
                                         </div>
                                     </div>
                                 </div>
@@ -226,7 +226,7 @@ include('head.php')
                                             <h6 class="mb-0 fw-bold small">VI. OBSERVACIONES (OPCIONAL)</h6>
                                         </div>
                                         <div class="card-body p-1">
-                                            <textarea class="form-control form-control-sm" id="observaciones" rows="3" style="border:none; resize: none; min-height: 80px; font-size: 0.8rem;"></textarea>
+                                            <textarea class="form-control form-control-sm" maxlength="250" id="observaciones" rows="3" style="border:none; resize: none; min-height: 80px; font-size: 0.8rem;"></textarea>
                                         </div>
                                     </div>
                                 </div>
