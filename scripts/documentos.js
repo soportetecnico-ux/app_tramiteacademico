@@ -161,12 +161,27 @@ function confirmarEnvioDirecto() {
         Swal.fire({ title: "Campo requerido", text: "Ingrese el número de comprobante de pago.", icon: "warning", width: '380px' });
         return;
     }
+    // 2. Validar longitud
+    if (nroComprobante.length < 6 || nroComprobante.length > 15) {
+        Swal.fire({ title: "Voucher inválido", text: "El número debe tener entre 6 y 15 caracteres.", icon: "error", width: '380px' });
+        return;
+    }
+    // 3. Validar longitud de observación
+    if (observacion.length > 250) {
+        Swal.fire({ title: "Texto muy largo", text: "La observación no puede superar los 250 caracteres.", icon: "error", width: '380px' });
+        return;
+    }
 
     const fechaComprobante = $("#fechaComprobante").val();
     if (fechaComprobante === "") {
         Swal.fire({ title: "Campo requerido", text: "Seleccione la fecha en la que realizó el pago.", icon: "warning", width: '380px' });
         return;
     }
+    const hoy = new Date().toISOString().split('T')[0]; // Obtiene fecha actual YYYY-MM-DD
+    if (fechaComprobante > hoy) {
+    Swal.fire({ title: "Fecha inválida", text: "La fecha de pago no puede ser mayor a la fecha actual.", icon: "error", width: '380px' });
+    return;
+}
 
     // --- III. VALIDACIÓN DE FUNDAMENTACIÓN ---
     const fundamentacion = $("#txtFundamentacion").val().trim();
@@ -527,6 +542,8 @@ function tablaSeguimiento(codWeb) {
 }
 
 function generarVistaDetalle(data) {
+    console.log("DEPURACIÓN DE DATA:", data);
+
     const html = `
         <div class="mb-4">
             <h6 class="text-primary fw-bold mb-3" style="font-size: 13px; letter-spacing: 0.5px;">DATOS PRINCIPALES DEL TRÁMITE</h6>
@@ -542,7 +559,7 @@ function generarVistaDetalle(data) {
                 
                 <div class="col-md-6 border-bottom py-2 d-flex align-items-center">
                     <span class="fw-bold text-dark me-2" style="min-width: 140px; font-size: 13px;">Nro de documento:</span>
-                    <span class="text-muted" style="font-size: 13px;">${data.num_doc || '---'}</span>
+                    <span class="text-muted" style="font-size: 13px;">${ (data.num_doc || data.numero) ? String(data.num_doc || data.numero).padStart(3, '0') : '---' }</span>
                 </div>
                 <div class="col-md-6 border-bottom py-2 d-flex align-items-center ps-md-4">
                     <span class="fw-bold text-dark me-2" style="min-width: 100px; font-size: 13px;">Estado:</span>

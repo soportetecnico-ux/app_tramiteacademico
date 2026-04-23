@@ -1,4 +1,6 @@
-/vendor
-/vendor2
+vendor/
+vendor2/
 *.rar
-/google/config.php
+google/
+vistas/storage/
+vistas/includes/
