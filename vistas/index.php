@@ -17,6 +17,7 @@ include('head.php')
         z-index: 1051 !important;
         position: absolute;
     }
+
 </style>
 <!-- [ Main Content ] start -->
 <div class="pc-container">
@@ -35,7 +36,7 @@ include('head.php')
 
                             <div class="flex-grow-1 ms-3">
                                 <h5 class="mb-1 fw-bold" style="color:#0a2152; letter-spacing: -0.3px;">¡Bienvenido al Mesa de Partes Académico!</h5>
-                                <p class="mb-0 text-muted small">Gestiona tus solicitudes de forma eficiente y realiza el seguimiento en tiempo real.</p>
+                                <p class="mb-0 text-muted">Gestiona tus solicitudes de forma eficiente y realiza el seguimiento en tiempo real.</p>
                             </div>
                         </div>
                     </div>

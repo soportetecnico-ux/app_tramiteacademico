@@ -7,7 +7,8 @@ File: style.css
 =========================================================================
 =================================================================================== */
 body {
-  font-feature-settings: "salt";
+/*   font-feature-settings: "salt"; */
+  font-family: 'Poppins', sans-serif !important;
 }
 
 h1,

@@ -17,6 +17,12 @@ include('head.php')
         z-index: 1051 !important;
         position: absolute;
     }
+
+    thead th {
+        font-size: 12px !important;
+        text-transform: uppercase;
+        /* Para que se vea más profesional */
+    }
 </style>
 <!-- [ Main Content ] start -->
 <div class="pc-container">
@@ -24,7 +30,7 @@ include('head.php')
 
 
 
-        <div class="row justify-content-center mt-4">
+        <div class="row justify-content-center mt-2">
 
             <div class="col-md-12">
                 <div class="card">
@@ -35,12 +41,14 @@ include('head.php')
                         <div class="table-responsive">
                             <table class="table table-hover" id="tablaTramites">
                                 <thead>
-                                    <tr style="font-size: 11px; letter-spacing: 0.5px;">
+                                    <tr style="letter-spacing: 0.5px;">
                                         <th class="text-center px-3" style="width: 50px;">#</th>
                                         <th style="width: 150px;">FECHA EMISIÓN</th>
                                         <th style="width: 140px;">CÓDIGO WEB</th>
                                         <th>ASUNTO</th>
                                         <th>DEPENDENCIA DESTINO</th>
+                                        <th>ADJUNTO</th>
+                                        <th>ESTADO</th>
                                         <th class="text-center" style="width: 120px;">ACCIONES</th>
                                     </tr>
                                 </thead>

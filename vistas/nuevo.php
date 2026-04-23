@@ -17,7 +17,6 @@ include('head.php')
         z-index: 1051 !important;
         position: absolute;
     }
-    
 </style>
 <!-- [ Main Content ] start -->
 <div class="pc-container">
@@ -103,7 +102,7 @@ include('head.php')
                                     <div class="row g-2 mb-2">
                                         <div class="col-md-6">
                                             <label class="fw-bold small mb-1">SOLICITO:</label>
-                                            <select class="form-select form-select-sm" id="id_tupa"></select>
+                                            <select class="form-select form-select-sm fw-bold" id="id_tupa"></select>
                                         </div>
                                         <div class="col-md-6">
                                             <label class="fw-bold small mb-1">DIRIGIDO A:</label>
@@ -246,19 +245,10 @@ include('head.php')
 
     </div>
 </div>
-
 <!-- [ Main Content ] end -->
-
-<link rel="stylesheet" href="../assets/css/fut-style.css">
-
-<?php include('includes/fut_modal.php'); ?>
-
-<script src="../scripts/fut-pdf.js"></script>
-
 <?php
 include('footer.php')
 ?>
-
 <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
 
 <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
@@ -271,9 +261,7 @@ include('footer.php')
 <!-- DataTables JS -->
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+
 
 <script src="../scripts/documentos.js"></script>

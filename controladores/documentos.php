@@ -63,7 +63,7 @@ switch ($_GET["op"]) {
 
                 //Definir carpeta por año
                 $anioActual = date("Y");
-                $rutaBase = __DIR__ . "/../../views/archivos/" . $anioActual . "/";
+                $rutaBase = __DIR__ . "/../../views/archivos/academicos/" . $anioActual . "/";
 
                 //Crear la carpeta si no existe (permisos 0777)
                 if (!file_exists($rutaBase)) {
@@ -83,8 +83,9 @@ switch ($_GET["op"]) {
                 }
 
                 if (move_uploaded_file($fileTmpPath, $destinoFull)) {
-                    // IMPORTANTE: Guardamos en la BD "2026/nombre_archivo.pdf" para que luego sea fácil encontrarlo desde cualquier vista
-                    $nombreArchivoParaBD = $anioActual . "/" . $nombreArchivo;
+                    // IMPORTANTE: Guardamos en la BD "academicos/2026/nombre_archivo.pdf" para que luego sea fácil encontrarlo desde cualquier vista
+                    /* $nombreArchivoParaBD = $anioActual . "/" . $nombreArchivo; */
+                    $nombreArchivoParaBD = "academicos/" . $anioActual . "/" . $nombreArchivo;
                 } else {
                     echo json_encode(['status' => 'error', 'mensaje' => 'Error al mover archivo']);
                     exit;
@@ -97,6 +98,7 @@ switch ($_GET["op"]) {
                 'denominacion'    => $_POST['denominacion'] ?? null,
                 'id_estu'         => $_POST['id_estu'] ?? null,
                 'id_tupa'         => $_POST['id_tupa'] ?? null,
+                'celular'         => $_POST['celular'] ?? null,
                 'cod_oficina'     => $_POST['cod_oficina'] ?? '',
                 'fundamentacion'   => $_POST['fundamentacion'] ?? '', // Se guardará en el campo 'mensaje'
                 'nro_comprobante'   => $_POST['nro_comprobante'] ?? '',
@@ -137,6 +139,55 @@ switch ($_GET["op"]) {
         if ($data) {
             while ($row = mysqli_fetch_assoc($data)) {
                 // Pasamos el row completo, que ya trae 'fecha_formateada' y 'nombre_oficina'
+                $tramites[] = $row;
+            }
+        }
+
+        $results = array(
+            "sEcho" => 1,
+            "iTotalRecords" => count($tramites),
+            "iTotalDisplayRecords" => count($tramites),
+            "aaData" => $tramites
+        );
+
+        echo json_encode($results);
+        break;
+
+    case 'mostrarSeguimiento':
+        header('Content-Type: application/json; charset=utf-8');
+        $id_estu = $_SESSION['id_estu'] ?? 0;
+        $cod_web = isset($_GET['cod_web']) ? trim($_GET['cod_web']) : '';
+
+        $data = $documentos->mostrarSeguimiento($id_estu, $cod_web);
+
+        $tramites = array();
+        if ($data) {
+            while ($row = mysqli_fetch_assoc($data)) {
+                $tramites[] = $row;
+            }
+        }
+
+        $results = array(
+            "sEcho" => 1,
+            "iTotalRecords" => count($tramites),
+            "iTotalDisplayRecords" => count($tramites),
+            "aaData" => $tramites
+        );
+
+        echo json_encode($results);
+        break;
+
+
+    case 'mostrarSeguimientoInicial':
+        header('Content-Type: application/json; charset=utf-8');
+        $id_estu = $_SESSION['id_estu'] ?? 0;
+        $cod_web = isset($_GET['cod_web']) ? trim($_GET['cod_web']) : '';
+
+        $data = $documentos->mostrarSeguimientoInicial($id_estu, $cod_web);
+
+        $tramites = array();
+        if ($data) {
+            while ($row = mysqli_fetch_assoc($data)) {
                 $tramites[] = $row;
             }
         }
