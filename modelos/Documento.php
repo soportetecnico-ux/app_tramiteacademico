@@ -107,11 +107,11 @@ class Documento
                 d.asunto, 
                 o.nombre AS nombre_oficina,
                 d.nombre_archivo,
-                d.cod_estado_documento2 as estado
+                d.atendido as estado
             FROM documento AS d
             INNER JOIN historial_documento AS hd ON d.cod_documento = hd.cod_documento
             INNER JOIN oficina AS o ON o.cod_oficina = hd.oficina_destino
-            WHERE d.id_estu = '$id_estu'
+            WHERE d.id_estu = '$id_estu' AND hd.cod_historial_documento_origen=0
             ORDER BY d.fecha DESC";
 
         $consulta = mysqli_query($conexion, $sql);
@@ -127,7 +127,7 @@ class Documento
             d.asunto,
             d.fecha,
             o.nombre AS nombre_oficina,
-            d.cod_estado_documento2 AS estado
+            d.atendido AS estado
         FROM documento AS d
         INNER JOIN historial_documento AS hd 
             ON d.cod_documento = hd.cod_documento

@@ -444,14 +444,37 @@ function listarTramites() {
                 }
             },
             {
-
                 data: "estado",
                 className: "align-middle",
                 render: function (data) {
+
+                    let texto = '';
+                    let clase = '';
+
+                    switch (parseInt(data)) {
+                        case 0:
+                            texto = 'En Proceso';
+                            clase = 'text-bg-warning';
+                            break;
+                        case 1:
+                            texto = 'Finalizado';
+                            clase = 'text-bg-success';
+                            break;
+                        case 2:
+                            texto = 'Observado';
+                            clase = 'text-bg-danger';
+                            break;
+                        default:
+                            texto = 'SIN ESTADO';
+                            clase = 'text-bg-secondary';
+                    }
+
                     return `
-                        <div class="d-flex align-items-center">
-                            <span class="badge text-bg-success" style="font-size: 12px;">${data}</span>
-                        </div>`;
+            <div class="d-flex align-items-center">
+                <span class="badge ${clase}" style="font-size: 12px;">
+                    ${texto}
+                </span>
+            </div>`;
                 }
             },
             {
@@ -522,8 +545,27 @@ function tablaSeguimiento(codWeb) {
                 data: "estado",
                 className: "text-center",
                 render: function (data) {
-                    let bg = data === 'Derivado' ? 'bg-success' : 'bg-warning';
-                    return `<span class="badge ${bg} shadow-sm" style="font-size: 11px; padding: 5px 12px;">${data}</span>`;
+                    let texto = '';
+                    let clase = '';
+
+                    switch (parseInt(data)) {
+                        case 0:
+                            texto = 'En Proceso';
+                            clase = 'text-bg-warning';
+                            break;
+                        case 1:
+                            texto = 'Finalizado';
+                            clase = 'text-bg-success';
+                            break;
+                        case 2:
+                            texto = 'Observado';
+                            clase = 'text-bg-danger';
+                            break;
+                        default:
+                            texto = 'SIN ESTADO';
+                            clase = 'text-bg-secondary';
+                    }
+                    return `<span class="badge ${clase} shadow-sm" style="font-size: 12px; padding: 5px 12px;">${texto}</span>`;
                 }
             }
         ],
@@ -568,7 +610,7 @@ function obtenerDetalleCompleto(codWeb) {
     });
 }
 function generarVistaDetalle(dataArray) {
-    console.log("ENTRÓ A generarVistaDetalle", dataArray);
+
     if (!dataArray || dataArray.length === 0) {
         $('#contenedorDetallesTramite').html('<p class="text-muted">No hay información disponible.</p>');
         return;
@@ -576,7 +618,6 @@ function generarVistaDetalle(dataArray) {
 
     const safe = (val) => val ? val : '---';
 
-    // 🔹 Agrupar por expediente
     const grupos = {};
 
     dataArray.forEach(item => {
@@ -657,23 +698,23 @@ function generarVistaDetalle(dataArray) {
                     </td>
 
                     <td>
-                        <div class="fw-semibold">${safe(data.nombre_oficina_origen)}</div>
+                        <div class="text-muted">${safe(data.nombre_oficina_origen)}</div>
                     </td>
 
                     <td>
-                        <small class="text-muted">${safe(data.fecha)}</small>
+                        <div class="text-muted">${safe(data.fecha)}</div>
                     </td>
 
                     <td>
-                        <div class="fw-semibold">${safe(data.nombre_oficina)}</div>
+                        <div class="text-muted">${safe(data.nombre_oficina)}</div>
                     </td>
 
                     <td>
-                        <small class="text-muted">${safe(data.fecha_recepcion)}</small>
+                        <div class="text-muted">${safe(data.fecha_recepcion)}</div>
                     </td>
 
                     <td class="text-center">
-                        <span class="badge bg-success-subtle text-success px-3 py-2 rounded-pill">
+                        <span class="badge bg-success-subtle text-success rounded-pill" style="font-size:11px">
                             ${safe(data.estado2)}
                         </span>
                     </td>
