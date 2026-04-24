@@ -167,7 +167,7 @@ function confirmarEnvioDirecto() {
         return;
     }
     // 3. Validar longitud de observación
-    if (observacion.length > 250) {
+    if (observaciones.length > 250) {
         Swal.fire({ title: "Texto muy largo", text: "La observación no puede superar los 250 caracteres.", icon: "error", width: '380px' });
         return;
     }
@@ -398,6 +398,20 @@ function listarTramites() {
                 }
             },
             {
+                // Columna para Vista Previa del FUT
+                data: "cod_web", // Usamos cod_web como referencia
+                className: "text-center align-middle",
+                render: function (data) {
+                    return `
+                        <button onclick="generarFUT('${data}')" 
+                                class="btn btn-sm btn-light-primary border" 
+                                style="font-size: 11px; padding: 4px 8px; border-radius: 6px;"
+                                title="Ver Formulario FUT">
+                            <i class="fas fa-file-invoice me-1"></i> FUT
+                        </button>`;
+                }
+            },
+            {
                 data: "nombre_archivo",
                 className: "align-middle",
                 render: function (data) {
@@ -622,6 +636,19 @@ function generarVistaDetalle(data) {
     `;
     // Asegúrate de que este ID sea el que tienes en tu HTML para mostrar los detalles
     $('#contenedorDetallesTramite').html(html);
+}
+
+function generarFUT(cod_web) {
+    // Agregamos "includes/" a la ruta
+    const url = `includes/visor_fut.php?cod=${cod_web}`; 
+    
+    const width = 1000;
+    const height = 800;
+    const left = (screen.width - width) / 2;
+    const top = (screen.height - height) / 2;
+
+    window.open(url, 'Vista FUT', 
+        `width=${width},height=${height},top=${top},left=${left},scrollbars=yes`);
 }
 
 /* function irASeguimiento(codWeb) {
