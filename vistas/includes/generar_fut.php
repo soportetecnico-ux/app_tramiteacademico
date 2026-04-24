@@ -293,7 +293,9 @@ ob_start();
     
     <td style="width: 45%; padding: 8px;">
       <div class="font-bold mb-2">OBSERVACIONES:</div>
-      <div style="font-size: 9pt; white-space: pre-wrap;"><?= $observaciones ?: '&nbsp;' ?></div>
+        <div style="font-size: 9pt; width: 100%; display: block; word-wrap: break-word;">
+            <?= $observaciones ?: '&nbsp;' ?>
+        </div>
     </td>
   </tr>
 </table>

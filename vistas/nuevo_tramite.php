@@ -141,7 +141,7 @@ include('head.php')
                                             <div class="form-floating"><input type="text" class="form-control" id="nroComprobante" minlength="6" maxlength="15" ><label class="fw-bold small text-primary">N° COMPROBANTE *</label></div>
                                         </div>
                                         <div class="col-md-6">
-                                            <div class="form-floating"><input type="date" class="form-control" id="fechaComprobante" max="<?php echo date('Y-m-d'); ?>">><label class="fw-bold small text-primary">FECHA DE PAGO *</label></div>
+                                            <div class="form-floating"><input type="date" class="form-control" id="fechaComprobante" max="<?php echo date('Y-m-d'); ?>"><label class="fw-bold small text-primary">FECHA DE PAGO *</label></div>
                                         </div>
                                     </div>
                                 </div>
