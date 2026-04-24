@@ -118,37 +118,6 @@ class Documento
         return $consulta; // Si falla, devolverá false y el controlador lo manejará
     }
 
-    public function mostrarSeguimiento($id_estu, $cod_web)
-    {
-        global $conexion;
-
-        // Esta consulta trae los datos del documento y el detalle de cada movimiento en el historial
-        $sql = "SELECT 
-                d.cod_documento,
-                d.asunto,
-                d.numero as num_doc,
-                d.cod_estado_documento2 as estado,
-                hd.cod_historial_documento as n_proveido,
-                o_orig.nombre AS nombre_oficina_origen,
-                hd.fecha_emision as fecha, 
-                o_orig.celular AS celular_origen,
-                o_dest.nombre AS nombre_oficina,
-                hd.fecha_recepcion,
-                o_dest.celular AS celular_destino,
-                hd.estado2,
-                hd.proveido as comentario
-            FROM documento AS d
-            INNER JOIN historial_documento AS hd ON d.cod_documento = hd.cod_documento
-            LEFT JOIN oficina AS o_orig ON hd.oficina_origen = o_orig.cod_oficina
-            LEFT JOIN oficina AS o_dest ON hd.oficina_destino = o_dest.cod_oficina
-            WHERE d.cod_web = '$cod_web' 
-            AND hd.eliminado = '0'
-            ORDER BY hd.cod_historial_documento DESC";
-
-        $consulta = mysqli_query($conexion, $sql);
-        return $consulta;
-    }
-
     public function mostrarSeguimientoInicial($id_estu, $cod_web)
     {
         global $conexion;
@@ -172,29 +141,157 @@ class Documento
         return $consulta;
     }
 
-    /*public function mostrarSeguimientoInicial($id_estu, $cod_web)
+    public function obtenerCadenaPadres($conexion, $id_doc, &$visitados = [])
+    {
+        if (in_array($id_doc, $visitados)) {
+            return [];
+        }
+
+        $visitados[] = $id_doc;
+
+        $resultado = [$id_doc];
+
+        $sql = "SELECT cod_documento 
+                FROM referencia 
+                WHERE cod_documento_referido = '$id_doc'";
+
+        $query = mysqli_query($conexion, $sql);
+
+        while ($row = mysqli_fetch_assoc($query)) {
+            $padre = (int)$row['cod_documento'];
+
+            $resultado = array_merge(
+                $resultado,
+                $this->obtenerCadenaPadres($conexion, $padre, $visitados)
+            );
+        }
+
+        return array_unique($resultado);
+    }
+
+    public function mostrarSeguimiento($id_estu, $cod_web)
     {
         global $conexion;
 
-        // Esta consulta trae los datos del documento y el detalle de cada movimiento en el historial
+        $q = mysqli_query($conexion, "SELECT cod_documento 
+                                     FROM documento 
+                                     WHERE cod_web = '$cod_web' 
+                                     LIMIT 1");
+
+        if (!$row = mysqli_fetch_assoc($q)) {
+            return false;
+        }
+
+        $id_doc = (int)$row['cod_documento'];
+
+        $ids = $this->obtenerCadenaPadres($conexion, $id_doc);
+
+        if (empty($ids)) {
+            $ids = [$id_doc];
+        }
+
+        $ids_string = implode(',', $ids);
+
         $sql = "SELECT 
-            d.cod_web,
-            d.asunto,
-            d.fecha,
-            o.nombre AS nombre_oficina,
-            d.cod_estado_documento2 AS estado
-        FROM documento AS d
-        INNER JOIN historial_documento AS hd 
-            ON d.cod_documento = hd.cod_documento
-        INNER JOIN oficina AS o 
-            ON hd.oficina_destino = o.cod_oficina
-        WHERE d.cod_web = '$cod_web'
-        AND d.eliminado = '0'
-        AND hd.cod_historial_documento_origen = 0";
+                    d.cod_documento,
+                    d.asunto,
+                    d.numero as num_doc,
+                    d.cod_estado_documento2 as estado,
+                    hd.cod_historial_documento as n_proveido,
+                    o_orig.nombre AS nombre_oficina_origen,
+                    hd.fecha_emision as fecha, 
+                    o_dest.nombre AS nombre_oficina,
+                    hd.fecha_recepcion,
+                    hd.estado2 AS estado2,
+                    hd.proveido as comentario
+
+                FROM documento d
+                INNER JOIN historial_documento hd 
+                    ON d.cod_documento = hd.cod_documento
+                LEFT JOIN oficina o_orig 
+                    ON hd.oficina_origen = o_orig.cod_oficina
+                LEFT JOIN oficina o_dest 
+                    ON hd.oficina_destino = o_dest.cod_oficina
+
+                WHERE d.cod_documento IN ($ids_string)
+                AND hd.eliminado = '0'
+
+                ORDER BY d.cod_documento DESC, hd.cod_historial_documento DESC";
+
+        return mysqli_query($conexion, $sql);
+    }
+
+    public function mostrarSeguimientoold($id_estu, $cod_web)
+    {
+        global $conexion;
+
+        $sql = "SELECT 
+                -- DOCUMENTO
+                d.cod_documento,
+                d.asunto,
+                d.numero AS num_doc,
+                d.cod_estado_documento2 AS estado,
+                d.descripcion,
+                d.nombre_archivo,
+                d.anexos,
+
+                -- HISTORIAL
+                hd.cod_historial_documento AS n_proveido,
+                hd.fecha_emision AS fecha,
+                hd.fecha_recepcion,
+                hd.estado2,
+                hd.proveido AS comentario,
+                hd.proveido2,
+                hd.archivo_archivado,
+
+                -- OFICINA ORIGEN
+                o_orig.nombre AS nombre_oficina_origen,
+                o_orig.correo AS correo_origen,
+                o_orig.celular AS celular_origen,
+
+                --  OFICINA DESTINO
+                o_dest.nombre AS nombre_oficina,
+                o_dest.correo AS correo_destino,
+                o_dest.celular AS celular_destino,
+
+                --  RESPONSABLES
+                (SELECT u.nombre 
+                 FROM usuario u 
+                 WHERE u.rol = 1 AND u.cod_oficina = o_orig.cod_oficina 
+                 LIMIT 1) AS responsable_origen,
+
+                (SELECT u.nombre 
+                 FROM usuario u 
+                 WHERE u.rol = 1 AND u.cod_oficina = o_dest.cod_oficina 
+                 LIMIT 1) AS responsable_destino,
+
+                -- REFERENCIAS
+                r.cod_documento AS doc_referencia,
+                r.cod_documento_referido
+
+            FROM documento d
+
+            INNER JOIN historial_documento hd 
+                ON d.cod_documento = hd.cod_documento
+
+            LEFT JOIN oficina o_orig 
+                ON hd.oficina_origen = o_orig.cod_oficina
+
+            LEFT JOIN oficina o_dest 
+                ON hd.oficina_destino = o_dest.cod_oficina
+
+            LEFT JOIN referencia r 
+                ON r.cod_documento_referido = d.cod_documento
+
+            WHERE d.cod_web = '$cod_web'
+            AND hd.eliminado = '0'
+
+            ORDER BY hd.cod_historial_documento ASC";
 
         $consulta = mysqli_query($conexion, $sql);
+
         return $consulta;
-    }*/
+    }
 
     public function obtenerCorrelativo($id_estu)
     {
@@ -204,7 +301,7 @@ class Documento
         $sql = "SELECT COUNT(*) as total FROM documento WHERE id_estu = ? and eliminado = ?";
         $stmt = mysqli_prepare($conexion, $sql);
 
-        // 2. Vinculamos el parámetro (la "i" significa que id_estu es un entero/integer)
+     
         mysqli_stmt_bind_param($stmt, "ii", $id_estu, $eliminado);
 
         // 3. Ejecutamos y obtenemos el resultado

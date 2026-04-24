@@ -217,7 +217,7 @@ function confirmarEnvioDirecto() {
         return;
     }
 
-    
+
     // --- VI. PREPARACIÓN DE DATOS (BLINDAJE DE DISABLED) ---
     let formElement = document.getElementById("formTramiteCompleto");
     let formData = new FormData(formElement);
@@ -478,7 +478,7 @@ function listarTramites() {
     });
 }
 function irASeguimiento(codWeb) {
-   
+
     const form = document.createElement("form");
     form.method = "POST";
     form.action = "seguimiento.php";
@@ -490,7 +490,7 @@ function irASeguimiento(codWeb) {
 
     form.appendChild(input);
     document.body.appendChild(form);
-    form.submit(); 
+    form.submit();
 }
 
 function tablaSeguimiento(codWeb) {
@@ -539,6 +539,7 @@ function tablaSeguimiento(codWeb) {
     });
 }
 
+
 function obtenerDetalleCompleto(codWeb) {
     $.ajax({
         url: "../controladores/documentos.php?op=mostrarSeguimiento",
@@ -546,10 +547,19 @@ function obtenerDetalleCompleto(codWeb) {
         data: { cod_web: codWeb },
         dataType: "json",
         success: function (response) {
-            // Asumiendo que mostrarSeguimiento devuelve un objeto o un array con el detalle
-            const dataDetalle = Array.isArray(response.aaData) ? response.aaData[0] : response;
-            if (dataDetalle) {
-                generarVistaDetalle(dataDetalle);
+
+            console.log("RESPONSE:", response);
+
+            if (!response || !response.aaData) {
+                console.error("Respuesta inválida");
+                return;
+            }
+
+            if (response.aaData.length > 0) {
+                generarVistaDetalle(response.aaData);
+            } else {
+                $('#contenedorDetallesTramite')
+                    .html('<p class="text-danger">Sin datos del backend</p>');
             }
         },
         error: function () {
@@ -557,142 +567,136 @@ function obtenerDetalleCompleto(codWeb) {
         }
     });
 }
+function generarVistaDetalle(dataArray) {
+    console.log("ENTRÓ A generarVistaDetalle", dataArray);
+    if (!dataArray || dataArray.length === 0) {
+        $('#contenedorDetallesTramite').html('<p class="text-muted">No hay información disponible.</p>');
+        return;
+    }
 
-function generarVistaDetalle(data) {
-    console.log("DATOS CARGADOS DESDE MOSTRARSEGUIMIENTO:", data);
+    const safe = (val) => val ? val : '---';
 
-    const html = `
-        <div class="mb-4">
-            <h6 class="text-primary fw-bold mb-3" style="font-size: 13px; letter-spacing: 0.5px;">DATOS PRINCIPALES DEL TRÁMITE</h6>
-            <div class="row g-0">
-                <div class="col-md-6 border-bottom py-2 d-flex align-items-center">
-                    <span class="fw-bold text-dark me-2" style="min-width: 140px; font-size: 13px;">Expediente:</span>
-                    <span class="text-muted" style="font-size: 13px;">${data.cod_documento || '---'}</span>
-                </div>
-                <div class="col-md-6 border-bottom py-2 d-flex align-items-center ps-md-4">
-                    <span class="fw-bold text-dark me-2" style="min-width: 100px; font-size: 13px;">Asunto:</span>
-                    <span class="text-muted text-uppercase" style="font-size: 13px;">${data.asunto || '---'}</span>
-                </div>
-                <div class="col-md-6 border-bottom py-2 d-flex align-items-center">
-                    <span class="fw-bold text-dark me-2" style="min-width: 140px; font-size: 13px;">Nro de documento:</span>
-                    <span class="text-muted" style="font-size: 13px;">${(data.num_doc || data.numero) ? String(data.num_doc || data.numero).padStart(3, '0') : '---'}</span>
-                </div>
-                <div class="col-md-6 border-bottom py-2 d-flex align-items-center ps-md-4">
-                    <span class="fw-bold text-dark me-2" style="min-width: 100px; font-size: 13px;">Estado:</span>
-                    <span class="text-muted" style="font-size: 13px;">${data.estado || '---'}</span>
-                </div>
-            </div>
+    // 🔹 Agrupar por expediente
+    const grupos = {};
 
-            <div class="row g-2 align-items-stretch mt-4">
-                <div class="col-md-2">
-                    <div class="h-100 p-2 border-start border-primary border-4 bg-white shadow-sm rounded-end">
-                        <strong class="d-block text-primary fw-bold text-uppercase mb-1" style="font-size: 10px;">N° Proveído:</strong>
-                        <span class="fw-bold text-dark d-block small">${data.n_proveido || '---'}</span>
+    dataArray.forEach(item => {
+        let key = item.cod_documento || 'SIN_COD';
+
+        if (!grupos[key]) {
+            grupos[key] = [];
+        }
+        grupos[key].push(item);
+    });
+
+    let html = '';
+
+    //Recorrer cada expediente
+    Object.values(grupos).forEach((grupo) => {
+
+        const principal = grupo[0];
+
+        html += `
+        <div class="card mb-4 border-0 shadow-sm rounded-3">
+
+            <div class="card-body">
+
+                <h6 class="fw-semibold mb-3 text-primary" style="font-size: 14px;">
+                    DATOS PRINCIPALES DEL TRÁMITE
+                </h6>
+
+                <div class="row g-2 mb-4 small">
+                    <div class="col-md-6">
+                        <span class="text-muted">Expediente:</span><br>
+                        <strong>${safe(principal.cod_documento)}</strong>
+                    </div>
+
+                    <div class="col-md-6">
+                        <span class="text-muted">Asunto:</span><br>
+                        <strong class="text-uppercase">${safe(principal.asunto)}</strong>
+                    </div>
+
+                    <div class="col-md-6">
+                        <span class="text-muted">N° Documento:</span><br>
+                        <strong>${principal.num_doc ? String(principal.num_doc).padStart(3, '0') : '---'}</strong>
+                    </div>
+
+                    <div class="col-md-6">
+                        <span class="text-muted">Estado:</span><br>
+                        <strong>${safe(principal.estado)}</strong>
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <div class="h-100 p-2 border-start border-secondary border-4 bg-white shadow-sm rounded-end">
-                        <strong class="text-muted d-block fw-bold text-uppercase" style="font-size: 10px;">Origen:</strong>
-                        <span class="fw-bold text-dark d-block small text-truncate" title="${data.nombre_oficina_origen}">${data.nombre_oficina_origen || '---'}</span>
-                        <div class="mt-1 pt-1 border-top" style="font-size: 10px;">
-                            <span class="text-muted d-block"><i class="far fa-calendar-alt me-1"></i>Envío: ${data.fecha || '---'}</span>
-                            <span class="text-muted d-block"><i class="fas fa-mobile-alt me-1"></i>Cel: ${data.celular_origen || '---'}</span>
-                        </div>
-                    </div>
+
+                <div class="table-responsive">
+                    <table class="table align-middle" style="font-size: 13px; border-collapse: separate; border-spacing: 0 8px;">
+                        <thead>
+                            <tr class="text-muted small">
+                                <th>#</th>
+                                <th>N° Proveído</th>
+                                <th>Oficina Origen</th>
+                                <th>Fecha Envío</th>
+                                <th>Oficina Destino</th>
+                                <th>Fecha Recepción</th>
+                                <th>Estado</th>
+                                <th>Comentario</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+        `;
+
+        // 🔹 Invertir orden dentro del grupo
+        grupo = [...grupo].reverse();
+
+        grupo.forEach((data, index) => {
+
+            html += `
+                <tr class="bg-white shadow-sm">
+                    <td class="fw-semibold text-center">${index + 1}</td>
+
+                    <td class="text-center fw-semibold">
+                        ${safe(data.n_proveido)}
+                    </td>
+
+                    <td>
+                        <div class="fw-semibold">${safe(data.nombre_oficina_origen)}</div>
+                    </td>
+
+                    <td>
+                        <small class="text-muted">${safe(data.fecha)}</small>
+                    </td>
+
+                    <td>
+                        <div class="fw-semibold">${safe(data.nombre_oficina)}</div>
+                    </td>
+
+                    <td>
+                        <small class="text-muted">${safe(data.fecha_recepcion)}</small>
+                    </td>
+
+                    <td class="text-center">
+                        <span class="badge bg-success-subtle text-success px-3 py-2 rounded-pill">
+                            ${safe(data.estado2)}
+                        </span>
+                    </td>
+
+                    <td class="text-muted">
+                        ${safe(data.comentario)}
+                    </td>
+                </tr>
+            `;
+        });
+
+        html += `
+                        </tbody>
+                    </table>
                 </div>
-                <div class="col-md-3">
-                    <div class="h-100 p-2 border-start border-info border-4 bg-white shadow-sm rounded-end">
-                        <strong class="text-muted d-block fw-bold text-uppercase" style="font-size: 10px;">Destino:</strong>
-                        <span class="fw-bold text-dark d-block small text-truncate" title="${data.nombre_oficina}">${data.nombre_oficina || '---'}</span>
-                        <div class="mt-1 pt-1 border-top" style="font-size: 10px;">
-                            <span class="text-muted d-block"><i class="far fa-calendar-check me-1"></i>Recibo: ${data.fecha_recepcion || '---'}</span>
-                            <span class="text-muted d-block"><i class="fas fa-mobile-alt me-1"></i>Cel: ${data.celular_destino || '---'}</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-2">
-                    <div class="h-100 p-2 border-start border-success border-4 bg-white shadow-sm rounded-end">
-                        <strong class="d-block text-primary fw-bold text-uppercase mb-1" style="font-size: 10px;">Estado Act.:</strong>
-                        <div class="d-flex align-items-center h-50">
-                            <span class="badge bg-light-info text-info border border-info w-100" style="font-size: 10px;">
-                                ${data.estado2 || data.estado}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-2">
-                    <div class="h-100 p-2 border-start border-warning border-4 bg-white shadow-sm rounded-end">
-                        <strong class="d-block text-primary fw-bold text-uppercase mb-1" style="font-size: 10px;">Comentario:</strong>
-                        <div style="max-height: 45px; overflow-y: auto;">
-                            <span class="small text-muted lh-sm d-block" style="font-size: 10px;">
-                                ${data.comentario || 'Sin observaciones.'}
-                            </span>
-                        </div>
-                    </div>
-                </div>
+
             </div>
         </div>
-    `;
+        `;
+    });
+
     $('#contenedorDetallesTramite').html(html);
 }
 
-/* function irASeguimiento(codWeb) {
-    // Creamos un formulario dinámicamente
-    var form = document.createElement("form");
-    form.method = "POST";
-    form.action = "seguimiento.php";
 
-    // Creamos el input que contendrá el cod_web
-    var input = document.createElement("input");
-    input.type = "hidden";
-    input.name = "cod_web";
-    input.value = codWeb;
 
-    form.appendChild(input);
-    document.body.appendChild(form);
-
-    // Enviamos el formulario
-    form.submit();
-}
-
-// documentos.js
-
-function mostrarSeguimiento(codWeb) {
-    console.log("Iniciando seguimiento para:", codWeb); // Para que veas en consola que llegó
-    
-    $('#tablaSeguimiento').DataTable({
-        destroy: true,
-        responsive: true,
-        ajax: {
-            url: "../controladores/documentos.php?op=mostrarSeguimiento",
-            type: "GET",
-            data: { cod_web: codWeb }, 
-            dataSrc: "aaData"
-        },
-        columns: [
-            { data: null, render: (data, type, row, meta) => meta.row + 1 },
-            { data: "remitente" },
-            { data: "asunto", className: "small text-uppercase" },
-            { data: "enviado_por" },
-            { 
-                data: "fecha",
-                render: data => `<span class="text-secondary" style="font-size: 12px;">${data}</span>`
-            },
-            { data: "nombre_oficina" },
-            { 
-                data: "estado",
-                render: function (data) {
-                    const colores = {
-                        'Pendiente': 'bg-warning',
-                        'Derivado': 'bg-success',
-                        'Finalizado': 'bg-primary'
-                    };
-                    let badgeClass = colores[data] || 'bg-secondary';
-                    return `<span class="badge ${badgeClass}">${data}</span>`;
-                }
-            }
-        ],
-        language: { url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json" },
-        dom: 'rt'
-    });
-} */

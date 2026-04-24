@@ -154,27 +154,29 @@ switch ($_GET["op"]) {
         break;
 
     case 'mostrarSeguimiento':
+
         header('Content-Type: application/json; charset=utf-8');
+
         $id_estu = $_SESSION['id_estu'] ?? 0;
         $cod_web = isset($_GET['cod_web']) ? trim($_GET['cod_web']) : '';
 
         $data = $documentos->mostrarSeguimiento($id_estu, $cod_web);
 
-        $tramites = array();
+        $tramites = [];
+
         if ($data) {
             while ($row = mysqli_fetch_assoc($data)) {
                 $tramites[] = $row;
             }
         }
 
-        $results = array(
+        echo json_encode([
             "sEcho" => 1,
             "iTotalRecords" => count($tramites),
             "iTotalDisplayRecords" => count($tramites),
             "aaData" => $tramites
-        );
+        ]);
 
-        echo json_encode($results);
         break;
 
 
