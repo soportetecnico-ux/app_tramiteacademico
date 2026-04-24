@@ -161,25 +161,10 @@ function confirmarEnvioDirecto() {
         Swal.fire({ title: "Campo requerido", text: "Ingrese el número de comprobante de pago.", icon: "warning", width: '380px' });
         return;
     }
-    // 2. Validar longitud
-    if (nroComprobante.length < 6 || nroComprobante.length > 15) {
-        Swal.fire({ title: "Voucher inválido", text: "El número debe tener entre 6 y 15 caracteres.", icon: "error", width: '380px' });
-        return;
-    }
-    // 3. Validar longitud de observación
-    if (observaciones.length > 250) {
-        Swal.fire({ title: "Texto muy largo", text: "La observación no puede superar los 250 caracteres.", icon: "error", width: '380px' });
-        return;
-    }
 
     const fechaComprobante = $("#fechaComprobante").val();
     if (fechaComprobante === "") {
         Swal.fire({ title: "Campo requerido", text: "Seleccione la fecha en la que realizó el pago.", icon: "warning", width: '380px' });
-        return;
-    }
-    const hoy = new Date().toISOString().split('T')[0]; // Obtiene fecha actual YYYY-MM-DD
-    if (fechaComprobante > hoy) {
-        Swal.fire({ title: "Fecha inválida", text: "La fecha de pago no puede ser mayor a la fecha actual.", icon: "error", width: '380px' });
         return;
     }
 
@@ -217,7 +202,6 @@ function confirmarEnvioDirecto() {
         return;
     }
 
-    
     // --- VI. PREPARACIÓN DE DATOS (BLINDAJE DE DISABLED) ---
     let formElement = document.getElementById("formTramiteCompleto");
     let formData = new FormData(formElement);
@@ -328,10 +312,10 @@ function generarFirmaDigital() {
     Swal.fire({
         icon: 'success',
         title: 'Firma estampada correctamente',
-        width: '350px',
+        width: '350px', // Mantenemos el tamaño mediano que te gusta
         showConfirmButton: false,
         timer: 1500,
-        position: 'center',
+        position: 'center', // Centrado total
         customClass: {
             popup: 'rounded-4'
         }
@@ -350,7 +334,7 @@ function listarTramites() {
         },
         columns: [
             {
-
+                // Índice con estilo circular sutil
                 data: null,
                 className: "text-center align-middle",
                 render: function (data, type, row, meta) {
@@ -358,8 +342,8 @@ function listarTramites() {
                 }
             },
             {
-
-                data: "fecha",
+                // Fecha con icono y estilo muted
+                data: "fecha", // Asegúrate que el SQL devuelva este alias
                 className: "align-middle",
                 render: function (data) {
                     return `
@@ -369,6 +353,7 @@ function listarTramites() {
                 }
             },
             {
+                // Código Web estilo "Tag" elegante
                 data: "cod_web",
                 className: "align-middle",
                 render: function (data) {
@@ -376,6 +361,7 @@ function listarTramites() {
                 }
             },
             {
+                // Asunto con tipografía limpia y truncado inteligente
                 data: "asunto",
                 className: "align-middle",
                 render: function (data) {
@@ -386,6 +372,7 @@ function listarTramites() {
                 }
             },
             {
+                // Oficina destino con estilo institucional
                 data: "nombre_oficina",
                 className: "align-middle",
                 render: function (data) {
@@ -473,15 +460,15 @@ function listarTramites() {
                 previous: '<i class="ti ti-chevron-left"></i>'
             }
         },
-
+        // Personalización del DOM para que se vea limpio
         dom: '<"d-flex flex-wrap justify-content-between align-items-center mb-4"lf>rt<"d-flex flex-wrap justify-content-between align-items-center mt-4"ip>'
     });
 }
 function irASeguimiento(codWeb) {
-   
+    // Creamos un formulario virtual
     const form = document.createElement("form");
     form.method = "POST";
-    form.action = "seguimiento.php";
+    form.action = "seguimiento.php"; // Página de destino
 
     const input = document.createElement("input");
     input.type = "hidden";
@@ -490,7 +477,7 @@ function irASeguimiento(codWeb) {
 
     form.appendChild(input);
     document.body.appendChild(form);
-    form.submit(); 
+    form.submit(); // Saltamos a la siguiente página
 }
 
 function tablaSeguimiento(codWeb) {
@@ -539,6 +526,7 @@ function tablaSeguimiento(codWeb) {
     });
 }
 
+// Nueva función para obtener el detalle desde "mostrarSeguimiento"
 function obtenerDetalleCompleto(codWeb) {
     $.ajax({
         url: "../controladores/documentos.php?op=mostrarSeguimiento",

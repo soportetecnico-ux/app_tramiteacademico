@@ -8,7 +8,6 @@ if (!isset($_SESSION['id_estu'])) {
 ?>
 
 
-
 <?php
 include('head.php')
 ?>
