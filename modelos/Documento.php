@@ -203,7 +203,13 @@ class Documento
                     o_dest.nombre AS nombre_oficina,
                     hd.fecha_recepcion,
                     hd.estado2 AS estado2,
-                    hd.proveido as comentario
+                    hd.proveido as comentario,
+                  -- LÓGICA: ¿En qué otros expedientes se usó este como referencia?
+                (SELECT GROUP_CONCAT(CONCAT('EXPEDIENTE N° ', r.cod_documento, ' - ', o.nombre) SEPARATOR '|')
+                 FROM referencia r
+                 INNER JOIN documento d_hijo ON r.cod_documento = d_hijo.cod_documento
+                 INNER JOIN oficina o ON d_hijo.cod_oficina = o.cod_oficina
+                 WHERE r.cod_documento_referido = d.cod_documento) as usado_en_referencia
 
                 FROM documento d
                 INNER JOIN historial_documento hd 
@@ -301,7 +307,7 @@ class Documento
         $sql = "SELECT COUNT(*) as total FROM documento WHERE id_estu = ? and eliminado = ?";
         $stmt = mysqli_prepare($conexion, $sql);
 
-     
+
         mysqli_stmt_bind_param($stmt, "ii", $id_estu, $eliminado);
 
         // 3. Ejecutamos y obtenemos el resultado

@@ -70,7 +70,7 @@ include('head.php')
                     <div class="card-body p-3">
                         <div class="d-flex align-items-center justify-content-between">
                             <div>
-                                <h6 class="text-muted mb-1 small fw-bold" style="font-size: 10px; letter-spacing: 0.5px;">PENDIENTES</h6>
+                                <h6 class="text-muted mb-1 small fw-bold" style="font-size: 10px; letter-spacing: 0.5px;">EN PROCESO</h6>
                                 <h4 class="mb-0 fw-bold text-warning" id="TotalPendientes">0</h4>
                             </div>
                             <div class="d-flex align-items-center justify-content-center rounded-circle"

@@ -161,10 +161,25 @@ function confirmarEnvioDirecto() {
         Swal.fire({ title: "Campo requerido", text: "Ingrese el número de comprobante de pago.", icon: "warning", width: '380px' });
         return;
     }
+    // 2. Validar longitud
+    if (nroComprobante.length < 6 || nroComprobante.length > 15) {
+        Swal.fire({ title: "Voucher inválido", text: "El número debe tener entre 6 y 15 caracteres.", icon: "error", width: '380px' });
+        return;
+    }
+    // 3. Validar longitud de observación
+    if (observaciones.length > 250) {
+        Swal.fire({ title: "Texto muy largo", text: "La observación no puede superar los 250 caracteres.", icon: "error", width: '380px' });
+        return;
+    }
 
     const fechaComprobante = $("#fechaComprobante").val();
     if (fechaComprobante === "") {
         Swal.fire({ title: "Campo requerido", text: "Seleccione la fecha en la que realizó el pago.", icon: "warning", width: '380px' });
+        return;
+    }
+    const hoy = new Date().toISOString().split('T')[0]; // Obtiene fecha actual YYYY-MM-DD
+    if (fechaComprobante > hoy) {
+        Swal.fire({ title: "Fecha inválida", text: "La fecha de pago no puede ser mayor a la fecha actual.", icon: "error", width: '380px' });
         return;
     }
 
@@ -201,6 +216,7 @@ function confirmarEnvioDirecto() {
         });
         return;
     }
+
 
     // --- VI. PREPARACIÓN DE DATOS (BLINDAJE DE DISABLED) ---
     let formElement = document.getElementById("formTramiteCompleto");
@@ -312,10 +328,10 @@ function generarFirmaDigital() {
     Swal.fire({
         icon: 'success',
         title: 'Firma estampada correctamente',
-        width: '350px', // Mantenemos el tamaño mediano que te gusta
+        width: '350px',
         showConfirmButton: false,
         timer: 1500,
-        position: 'center', // Centrado total
+        position: 'center',
         customClass: {
             popup: 'rounded-4'
         }
@@ -334,7 +350,7 @@ function listarTramites() {
         },
         columns: [
             {
-                // Índice con estilo circular sutil
+
                 data: null,
                 className: "text-center align-middle",
                 render: function (data, type, row, meta) {
@@ -342,8 +358,8 @@ function listarTramites() {
                 }
             },
             {
-                // Fecha con icono y estilo muted
-                data: "fecha", // Asegúrate que el SQL devuelva este alias
+
+                data: "fecha",
                 className: "align-middle",
                 render: function (data) {
                     return `
@@ -353,7 +369,6 @@ function listarTramites() {
                 }
             },
             {
-                // Código Web estilo "Tag" elegante
                 data: "cod_web",
                 className: "align-middle",
                 render: function (data) {
@@ -361,7 +376,6 @@ function listarTramites() {
                 }
             },
             {
-                // Asunto con tipografía limpia y truncado inteligente
                 data: "asunto",
                 className: "align-middle",
                 render: function (data) {
@@ -372,7 +386,6 @@ function listarTramites() {
                 }
             },
             {
-                // Oficina destino con estilo institucional
                 data: "nombre_oficina",
                 className: "align-middle",
                 render: function (data) {
@@ -431,14 +444,37 @@ function listarTramites() {
                 }
             },
             {
-
                 data: "estado",
                 className: "align-middle",
                 render: function (data) {
+
+                    let texto = '';
+                    let clase = '';
+
+                    switch (parseInt(data)) {
+                        case 0:
+                            texto = 'En Proceso';
+                            clase = 'text-bg-warning';
+                            break;
+                        case 1:
+                            texto = 'Finalizado';
+                            clase = 'text-bg-success';
+                            break;
+                        case 2:
+                            texto = 'Observado';
+                            clase = 'text-bg-danger';
+                            break;
+                        default:
+                            texto = 'SIN ESTADO';
+                            clase = 'text-bg-secondary';
+                    }
+
                     return `
-                        <div class="d-flex align-items-center">
-                            <span class="badge text-bg-success" style="font-size: 12px;">${data}</span>
-                        </div>`;
+            <div class="d-flex align-items-center">
+                <span class="badge ${clase}" style="font-size: 12px;">
+                    ${texto}
+                </span>
+            </div>`;
                 }
             },
             {
@@ -460,15 +496,15 @@ function listarTramites() {
                 previous: '<i class="ti ti-chevron-left"></i>'
             }
         },
-        // Personalización del DOM para que se vea limpio
+
         dom: '<"d-flex flex-wrap justify-content-between align-items-center mb-4"lf>rt<"d-flex flex-wrap justify-content-between align-items-center mt-4"ip>'
     });
 }
 function irASeguimiento(codWeb) {
-    // Creamos un formulario virtual
+
     const form = document.createElement("form");
     form.method = "POST";
-    form.action = "seguimiento.php"; // Página de destino
+    form.action = "seguimiento.php";
 
     const input = document.createElement("input");
     input.type = "hidden";
@@ -477,7 +513,7 @@ function irASeguimiento(codWeb) {
 
     form.appendChild(input);
     document.body.appendChild(form);
-    form.submit(); // Saltamos a la siguiente página
+    form.submit();
 }
 
 function tablaSeguimiento(codWeb) {
@@ -508,15 +544,53 @@ function tablaSeguimiento(codWeb) {
             {
                 data: "estado",
                 className: "text-center",
-                render: function (data) {
-                    let bg = data === 'Derivado' ? 'bg-success' : 'bg-warning';
-                    return `<span class="badge ${bg} shadow-sm" style="font-size: 11px; padding: 5px 12px;">${data}</span>`;
+                render: function (data, type, row) {
+
+                    let texto = '';
+                    let clase = '';
+                    let boton = '';
+
+                    switch (parseInt(data)) {
+                        case 0:
+                            texto = 'En Proceso';
+                            clase = 'text-bg-warning';
+                            break;
+
+                        case 1:
+                            texto = 'Finalizado';
+                            clase = 'text-bg-success';
+                            break;
+
+                        case 2:
+                            texto = 'Observado';
+                            clase = 'text-bg-danger';
+
+                            boton = `
+                    <button class="btn btn-sm btn btn-outline-dark ms-2"
+                        onclick="subsanarDocumento('${row.cod_web}')">
+                        Subsanar
+                    </button>
+                `;
+                            break;
+
+                        default:
+                            texto = 'SIN ESTADO';
+                            clase = 'text-bg-secondary';
+                    }
+
+                    return `
+            <div class="d-flex justify-content-center align-items-center">
+                <span class="badge ${clase} shadow-sm" style="font-size: 12px; padding: 5px 12px;">
+                    ${texto}
+                </span>
+                ${boton}
+            </div>
+        `;
                 }
             }
         ],
         initComplete: function (settings, json) {
-            // En lugar de usar json.aaData[0] directamente, 
-            // consultamos la operación de detalle para obtener datos completos
+            
             if (codWeb) {
                 obtenerDetalleCompleto(codWeb);
             }
@@ -526,7 +600,7 @@ function tablaSeguimiento(codWeb) {
     });
 }
 
-// Nueva función para obtener el detalle desde "mostrarSeguimiento"
+
 function obtenerDetalleCompleto(codWeb) {
     $.ajax({
         url: "../controladores/documentos.php?op=mostrarSeguimiento",
@@ -534,10 +608,19 @@ function obtenerDetalleCompleto(codWeb) {
         data: { cod_web: codWeb },
         dataType: "json",
         success: function (response) {
-            // Asumiendo que mostrarSeguimiento devuelve un objeto o un array con el detalle
-            const dataDetalle = Array.isArray(response.aaData) ? response.aaData[0] : response;
-            if (dataDetalle) {
-                generarVistaDetalle(dataDetalle);
+
+            console.log("RESPONSE:", response);
+
+            if (!response || !response.aaData) {
+                console.error("Respuesta inválida");
+                return;
+            }
+
+            if (response.aaData.length > 0) {
+                generarVistaDetalle(response.aaData);
+            } else {
+                $('#contenedorDetallesTramite')
+                    .html('<p class="text-danger">Sin datos del backend</p>');
             }
         },
         error: function () {
@@ -546,141 +629,162 @@ function obtenerDetalleCompleto(codWeb) {
     });
 }
 
-function generarVistaDetalle(data) {
-    console.log("DATOS CARGADOS DESDE MOSTRARSEGUIMIENTO:", data);
+function generarVistaDetalle(dataArray) {
 
-    const html = `
-        <div class="mb-4">
-            <h6 class="text-primary fw-bold mb-3" style="font-size: 13px; letter-spacing: 0.5px;">DATOS PRINCIPALES DEL TRÁMITE</h6>
-            <div class="row g-0">
-                <div class="col-md-6 border-bottom py-2 d-flex align-items-center">
-                    <span class="fw-bold text-dark me-2" style="min-width: 140px; font-size: 13px;">Expediente:</span>
-                    <span class="text-muted" style="font-size: 13px;">${data.cod_documento || '---'}</span>
-                </div>
-                <div class="col-md-6 border-bottom py-2 d-flex align-items-center ps-md-4">
-                    <span class="fw-bold text-dark me-2" style="min-width: 100px; font-size: 13px;">Asunto:</span>
-                    <span class="text-muted text-uppercase" style="font-size: 13px;">${data.asunto || '---'}</span>
-                </div>
-                <div class="col-md-6 border-bottom py-2 d-flex align-items-center">
-                    <span class="fw-bold text-dark me-2" style="min-width: 140px; font-size: 13px;">Nro de documento:</span>
-                    <span class="text-muted" style="font-size: 13px;">${(data.num_doc || data.numero) ? String(data.num_doc || data.numero).padStart(3, '0') : '---'}</span>
-                </div>
-                <div class="col-md-6 border-bottom py-2 d-flex align-items-center ps-md-4">
-                    <span class="fw-bold text-dark me-2" style="min-width: 100px; font-size: 13px;">Estado:</span>
-                    <span class="text-muted" style="font-size: 13px;">${data.estado || '---'}</span>
-                </div>
-            </div>
+    if (!dataArray || dataArray.length === 0) {
+        $('#contenedorDetallesTramite').html('<p class="text-muted">No hay información disponible.</p>');
+        return;
+    }
 
-            <div class="row g-2 align-items-stretch mt-4">
-                <div class="col-md-2">
-                    <div class="h-100 p-2 border-start border-primary border-4 bg-white shadow-sm rounded-end">
-                        <strong class="d-block text-primary fw-bold text-uppercase mb-1" style="font-size: 10px;">N° Proveído:</strong>
-                        <span class="fw-bold text-dark d-block small">${data.n_proveido || '---'}</span>
+    const safe = (val) => val ? val : '---';
+
+    const grupos = {};
+
+    dataArray.forEach(item => {
+        let key = item.cod_documento || 'SIN_COD';
+
+        if (!grupos[key]) {
+            grupos[key] = [];
+        }
+        grupos[key].push(item);
+    });
+
+    let html = '';
+
+    //Recorrer cada expediente
+    Object.values(grupos).forEach((grupo) => {
+
+        const principal = grupo[0];
+
+       // Procesar donde se usó como referencia
+        let htmlReferencias = '';
+        if (principal.usado_en_referencia) {
+            const lista = principal.usado_en_referencia.split('|');
+            htmlReferencias = `
+                <div class="mt-3" style='font-size:13px;'>
+                    <p class="mb-1 fw-bold text-dark">Usado como referencia en:</p>
+                    <ul class="list-unstyled mb-0 ms-3">
+                        ${lista.map(ref => `<li class="text-muted">• ${ref}</li>`).join('')}
+                    </ul>
+                </div>`;
+        }
+
+
+        html += `
+        <div class="card mb-4 border-0 shadow-sm rounded-3">
+
+            <div class="card-body">
+
+                <h6 class="fw-semibold mb-3 text-primary" style="font-size: 14px;">
+                    DATOS PRINCIPALES DEL TRÁMITE
+                </h6>
+
+                <div class="row g-2 mb-4" style='font-size:13px;'>
+                    <div class="col-md-6">
+                        <span class="text-muted">Expediente:</span><br>
+                        <strong>${safe(principal.cod_documento)}</strong>
+                    </div>
+
+                    <div class="col-md-6">
+                        <span class="text-muted">Asunto:</span><br>
+                        <strong class="text-uppercase">${safe(principal.asunto)}</strong>
+                    </div>
+
+                    <div class="col-md-6">
+                        <span class="text-muted">N° Documento:</span><br>
+                        <strong>${principal.num_doc ? String(principal.num_doc).padStart(3, '0') : '---'}</strong>
+                    </div>
+
+                    <div class="col-md-6">
+                        <span class="text-muted">Estado:</span><br>
+                        <strong>${safe(principal.estado)}</strong>
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <div class="h-100 p-2 border-start border-secondary border-4 bg-white shadow-sm rounded-end">
-                        <strong class="text-muted d-block fw-bold text-uppercase" style="font-size: 10px;">Origen:</strong>
-                        <span class="fw-bold text-dark d-block small text-truncate" title="${data.nombre_oficina_origen}">${data.nombre_oficina_origen || '---'}</span>
-                        <div class="mt-1 pt-1 border-top" style="font-size: 10px;">
-                            <span class="text-muted d-block"><i class="far fa-calendar-alt me-1"></i>Envío: ${data.fecha || '---'}</span>
-                            <span class="text-muted d-block"><i class="fas fa-mobile-alt me-1"></i>Cel: ${data.celular_origen || '---'}</span>
-                        </div>
-                    </div>
+
+                ${htmlReferencias}
+
+                <div class="table-responsive">
+                    <table class="table align-middle" style="font-size: 13px; border-collapse: separate; border-spacing: 0 8px;">
+                        <thead>
+                            <tr class="text-muted small">
+                                <th>#</th>
+                                <th>N° Proveído</th>
+                                <th>Oficina Origen</th>
+                                <th>Fecha Envío</th>
+                                <th>Oficina Destino</th>
+                                <th>Fecha Recepción</th>
+                                <th>Estado</th>
+                                <th>Comentario</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+        `;
+
+        // 🔹 Invertir orden dentro del grupo
+        grupo = [...grupo].reverse();
+
+        grupo.forEach((data, index) => {
+
+            html += `
+                <tr class="bg-white shadow-sm">
+                    <td class="fw-semibold text-center">${index + 1}</td>
+
+                    <td class="text-center fw-semibold">
+                        ${safe(data.n_proveido)}
+                    </td>
+
+                    <td>
+                        <div class="text-muted">${safe(data.nombre_oficina_origen)}</div>
+                    </td>
+
+                    <td>
+                        <div class="text-muted">${safe(data.fecha)}</div>
+                    </td>
+
+                    <td>
+                        <div class="text-muted">${safe(data.nombre_oficina)}</div>
+                    </td>
+
+                    <td>
+                        <div class="text-muted">${safe(data.fecha_recepcion)}</div>
+                    </td>
+
+                    <td class="text-center">
+                        <span class="badge bg-success-subtle text-success rounded-pill" style="font-size:11px">
+                            ${safe(data.estado2)}
+                        </span>
+                    </td>
+
+                    <td class="text-muted">
+                        ${safe(data.comentario)}
+                    </td>
+                </tr>
+            `;
+        });
+
+        html += `
+                        </tbody>
+                    </table>
                 </div>
-                <div class="col-md-3">
-                    <div class="h-100 p-2 border-start border-info border-4 bg-white shadow-sm rounded-end">
-                        <strong class="text-muted d-block fw-bold text-uppercase" style="font-size: 10px;">Destino:</strong>
-                        <span class="fw-bold text-dark d-block small text-truncate" title="${data.nombre_oficina}">${data.nombre_oficina || '---'}</span>
-                        <div class="mt-1 pt-1 border-top" style="font-size: 10px;">
-                            <span class="text-muted d-block"><i class="far fa-calendar-check me-1"></i>Recibo: ${data.fecha_recepcion || '---'}</span>
-                            <span class="text-muted d-block"><i class="fas fa-mobile-alt me-1"></i>Cel: ${data.celular_destino || '---'}</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-2">
-                    <div class="h-100 p-2 border-start border-success border-4 bg-white shadow-sm rounded-end">
-                        <strong class="d-block text-primary fw-bold text-uppercase mb-1" style="font-size: 10px;">Estado Act.:</strong>
-                        <div class="d-flex align-items-center h-50">
-                            <span class="badge bg-light-info text-info border border-info w-100" style="font-size: 10px;">
-                                ${data.estado2 || data.estado}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-2">
-                    <div class="h-100 p-2 border-start border-warning border-4 bg-white shadow-sm rounded-end">
-                        <strong class="d-block text-primary fw-bold text-uppercase mb-1" style="font-size: 10px;">Comentario:</strong>
-                        <div style="max-height: 45px; overflow-y: auto;">
-                            <span class="small text-muted lh-sm d-block" style="font-size: 10px;">
-                                ${data.comentario || 'Sin observaciones.'}
-                            </span>
-                        </div>
-                    </div>
-                </div>
+
             </div>
         </div>
-    `;
+        `;
+    });
+
     $('#contenedorDetallesTramite').html(html);
 }
 
-/* function irASeguimiento(codWeb) {
-    // Creamos un formulario dinámicamente
-    var form = document.createElement("form");
-    form.method = "POST";
-    form.action = "seguimiento.php";
+function subsanarDocumento(cod_web) {
 
-    // Creamos el input que contendrá el cod_web
-    var input = document.createElement("input");
-    input.type = "hidden";
-    input.name = "cod_web";
-    input.value = codWeb;
+    $('#cod_web_subsanar').val(cod_web);
 
-    form.appendChild(input);
-    document.body.appendChild(form);
+    $('#archivoSubsanar').val('');
+    $('#comentarioSubsanar').val('');
 
-    // Enviamos el formulario
-    form.submit();
+    const modal = new bootstrap.Modal(document.getElementById('modalSubsanar'));
+    modal.show();
 }
 
-// documentos.js
 
-function mostrarSeguimiento(codWeb) {
-    console.log("Iniciando seguimiento para:", codWeb); // Para que veas en consola que llegó
-    
-    $('#tablaSeguimiento').DataTable({
-        destroy: true,
-        responsive: true,
-        ajax: {
-            url: "../controladores/documentos.php?op=mostrarSeguimiento",
-            type: "GET",
-            data: { cod_web: codWeb }, 
-            dataSrc: "aaData"
-        },
-        columns: [
-            { data: null, render: (data, type, row, meta) => meta.row + 1 },
-            { data: "remitente" },
-            { data: "asunto", className: "small text-uppercase" },
-            { data: "enviado_por" },
-            { 
-                data: "fecha",
-                render: data => `<span class="text-secondary" style="font-size: 12px;">${data}</span>`
-            },
-            { data: "nombre_oficina" },
-            { 
-                data: "estado",
-                render: function (data) {
-                    const colores = {
-                        'Pendiente': 'bg-warning',
-                        'Derivado': 'bg-success',
-                        'Finalizado': 'bg-primary'
-                    };
-                    let badgeClass = colores[data] || 'bg-secondary';
-                    return `<span class="badge ${badgeClass}">${data}</span>`;
-                }
-            }
-        ],
-        language: { url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json" },
-        dom: 'rt'
-    });
-} */
+

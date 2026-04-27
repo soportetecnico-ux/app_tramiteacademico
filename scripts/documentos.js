@@ -558,34 +558,53 @@ function tablaSeguimiento(codWeb) {
             {
                 data: "estado",
                 className: "text-center",
-                render: function (data) {
+                render: function (data, type, row) {
+
                     let texto = '';
                     let clase = '';
+                    let boton = '';
 
                     switch (parseInt(data)) {
                         case 0:
                             texto = 'En Proceso';
                             clase = 'text-bg-warning';
                             break;
+
                         case 1:
                             texto = 'Finalizado';
                             clase = 'text-bg-success';
                             break;
+
                         case 2:
                             texto = 'Observado';
                             clase = 'text-bg-danger';
+
+                            boton = `
+                    <button class="btn btn-sm btn btn-outline-dark ms-2"
+                        onclick="subsanarDocumento('${row.cod_web}')">
+                        Subsanar
+                    </button>
+                `;
                             break;
+
                         default:
                             texto = 'SIN ESTADO';
                             clase = 'text-bg-secondary';
                     }
-                    return `<span class="badge ${clase} shadow-sm" style="font-size: 12px; padding: 5px 12px;">${texto}</span>`;
+
+                    return `
+            <div class="d-flex justify-content-center align-items-center">
+                <span class="badge ${clase} shadow-sm" style="font-size: 12px; padding: 5px 12px;">
+                    ${texto}
+                </span>
+                ${boton}
+            </div>
+        `;
                 }
             }
         ],
         initComplete: function (settings, json) {
-            // En lugar de usar json.aaData[0] directamente, 
-            // consultamos la operación de detalle para obtener datos completos
+            
             if (codWeb) {
                 obtenerDetalleCompleto(codWeb);
             }
@@ -623,6 +642,7 @@ function obtenerDetalleCompleto(codWeb) {
         }
     });
 }
+
 function generarVistaDetalle(dataArray) {
 
     if (!dataArray || dataArray.length === 0) {
@@ -650,6 +670,20 @@ function generarVistaDetalle(dataArray) {
 
         const principal = grupo[0];
 
+       // Procesar donde se usó como referencia
+        let htmlReferencias = '';
+        if (principal.usado_en_referencia) {
+            const lista = principal.usado_en_referencia.split('|');
+            htmlReferencias = `
+                <div class="mt-3" style='font-size:13px;'>
+                    <p class="mb-1 text-dark" style='font-size:13px;'>Usado como referencia en:</p>
+                    <ul class="list-unstyled mb-0 ms-3">
+                        ${lista.map(ref => `<li class="text-muted">• ${ref}</li>`).join('')}
+                    </ul>
+                </div>`;
+        }
+
+
         html += `
         <div class="card mb-4 border-0 shadow-sm rounded-3">
 
@@ -659,15 +693,10 @@ function generarVistaDetalle(dataArray) {
                     DATOS PRINCIPALES DEL TRÁMITE
                 </h6>
 
-                <div class="row g-2 mb-4 small">
+                <div class="row g-2 mb-4" style='font-size:13px;'>
                     <div class="col-md-6">
                         <span class="text-muted">Expediente:</span><br>
                         <strong>${safe(principal.cod_documento)}</strong>
-                    </div>
-
-                    <div class="col-md-6">
-                        <span class="text-muted">Asunto:</span><br>
-                        <strong class="text-uppercase">${safe(principal.asunto)}</strong>
                     </div>
 
                     <div class="col-md-6">
@@ -676,12 +705,20 @@ function generarVistaDetalle(dataArray) {
                     </div>
 
                     <div class="col-md-6">
+                        <span class="text-muted">Asunto:</span><br>
+                        <strong class="text-uppercase">${safe(principal.asunto)}</strong>
+                    </div>
+
+
+                    <div class="col-md-6">
                         <span class="text-muted">Estado:</span><br>
                         <strong>${safe(principal.estado)}</strong>
                     </div>
                 </div>
 
-                <div class="table-responsive">
+                ${htmlReferencias}
+
+                <div class="table-responsive mt-2">
                     <table class="table align-middle" style="font-size: 13px; border-collapse: separate; border-spacing: 0 8px;">
                         <thead>
                             <tr class="text-muted small">
@@ -704,7 +741,7 @@ function generarVistaDetalle(dataArray) {
         grupo.forEach((data, index) => {
 
             html += `
-                <tr class="bg-white shadow-sm">
+                <tr class="bg-white">
                     <td class="fw-semibold text-center">${index + 1}</td>
 
                     <td class="text-center fw-semibold">
@@ -753,7 +790,7 @@ function generarVistaDetalle(dataArray) {
     $('#contenedorDetallesTramite').html(html);
 }
 
- 
+
 function generarFUT(cod_web) {
     // Agregamos "includes/" a la ruta
     const url = `includes/visor_fut.php?cod=${cod_web}`; 
@@ -767,10 +804,18 @@ function generarFUT(cod_web) {
         `width=${width},height=${height},top=${top},left=${left},scrollbars=yes`);
 }
 
-/* function irASeguimiento(codWeb) {
-    // Creamos un formulario dinámicamente
-    var form = document.createElement("form");
-    form.method = "POST";
-    form.action = "seguimiento.php";*/
+
+
+function subsanarDocumento(cod_web) {
+
+    $('#cod_web_subsanar').val(cod_web);
+
+    $('#archivoSubsanar').val('');
+    $('#comentarioSubsanar').val('');
+
+    const modal = new bootstrap.Modal(document.getElementById('modalSubsanar'));
+    modal.show();
+}
+
 
 
