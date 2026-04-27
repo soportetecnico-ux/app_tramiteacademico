@@ -249,11 +249,7 @@ include('head.php')
 
 <!-- [ Main Content ] end -->
 
-<link rel="stylesheet" href="../assets/css/fut-style.css">
-
-<?php include('includes/fut_modal.php'); ?>
-
-<script src="../scripts/fut-pdf.js"></script>
+ 
 
 <?php
 include('footer.php')

@@ -47,6 +47,7 @@ include('head.php')
                                         <th style="width: 140px;">CÓDIGO WEB</th>
                                         <th>ASUNTO</th>
                                         <th>DEPENDENCIA DESTINO</th>
+                                        <th>FUT</th>
                                         <th>ADJUNTO</th>
                                         <th>ESTADO</th>
                                         <th class="text-center" style="width: 120px;">ACCIONES</th>

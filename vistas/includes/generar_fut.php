@@ -1,71 +1,54 @@
 <?php
-/**
- * generar_fut.php
- * Genera el FUT en PDF usando Dompdf y lo guarda en el servidor.
- *
- * GET ?accion=preview    → devuelve PDF inline (para iframe de vista previa)
- * GET ?accion=descargar  → descarga el PDF
- * (sin accion)           → guarda el PDF y retorna JSON
- *
- * Requiere Dompdf: composer require dompdf/dompdf
- */
-
-if (strlen(session_id()) < 1) session_start();
-if (!isset($_SESSION['id_estu'])) {
-    http_response_code(401);
-    echo json_encode(['ok' => false, 'msg' => 'No autenticado']);
-    exit();
+// Validamos que el controlador haya pasado los datos
+if (!isset($reg_doc) || !isset($reg_usuario)) {
+    exit("Acceso denegado: Datos insuficientes.");
 }
 
-require_once __DIR__ . '/../../vendor2/autoload.php';
+require_once __DIR__ . '/../../vendor/autoload.php';
 use Dompdf\Dompdf;
 use Dompdf\Options;
-
-/* ─────────────────────────────────────────────────────────────────
-   1. RECIBIR Y SANITIZAR DATOS
-──────────────────────────────────────────────────────────────── */
-$raw  = file_get_contents('php://input');
-$data = json_decode($raw, true);
-if (!$data) $data = $_POST;
-
-function s(string $key, array $data): string {
-    return htmlspecialchars(trim($data[$key] ?? ''), ENT_QUOTES, 'UTF-8');
-}
-
-$id_tupa       = s('id_tupa',       $data);
-$dependencia    = s('dependencia',    $data);
-$nroComprobante = s('nroComprobante', $data);
-$fechaPago      = s('fechaPago',      $data);   // YYYY-MM-DD
-$apepa          = s('apepa',          $data);
-$apema          = s('apema',          $data);
-$nombres        = s('nombres',        $data);
-$dni            = s('dni',            $data);
-$direccion      = s('direccion',      $data);
-$distrito       = s('distrito',       $data);
-$provincia      = s('provincia',      $data);
-$departamento   = s('departamento',   $data);
-$correo         = s('correo',         $data);
-$telefono       = s('telefono',       $data);
-$celular        = s('celular',        $data);
-$fundamentacion = s('fundamentacion', $data);
-$anexos         = s('anexos',         $data);
-$observaciones  = s('observaciones',  $data);
-$firmaBase64    = $data['firma'] ?? '';         // data:image/... base64
-
+ 
+//Datos del Modelo Documento
+$id_tupa         = $reg_doc->id_tupa; 
+$asunto          = $reg_doc->asunto;
+$dependencia    = $reg_doc->oficina;
+$nroComprobante = $reg_doc->comprobante;  
+$fechaPago      = $reg_doc->fecha_comprobante;  
+$fundamentacion = $reg_doc->mensaje;  
+// Extraemos la ruta que viene de la BD
+$rutaArchivo = $reg_doc->nombre_archivo;
+// 1. Quitamos la carpeta 
+$soloNombre = basename($rutaArchivo); 
+// 2. Cortamos en el primer guion bajo  
+$partes = explode('_', $soloNombre, 2); 
+// 3. Asignamos el nombre limpio  
+$anexos = isset($partes[1]) ? $partes[1] : $soloNombre;
+$observaciones  = $reg_doc->observaciones;  
+//Datos del Modelo Usuario
+$apepa          = $reg_usuario['apepa_estu'];
+$apema          = $reg_usuario['apema_estu'];
+$nombres        = $reg_usuario['nom_estu'];
+$dni            = $reg_usuario['dni_estu'];
+$direccion      = $reg_usuario['domi_estu'];
+$distrito       = $reg_usuario['dist'];
+$provincia      = $reg_usuario['provi'];
+$departamento   = $reg_usuario['depar'];
+$correo         = $reg_usuario['email_estu'];
+$tipo_doc       = $reg_usuario['tipo_docu'];
+$telefono       = '';
+$celular        = $reg_usuario['celu_estu'];
+$fechaPagoFmt = ($fechaPago) ? date("d/m/Y", strtotime($fechaPago)) : '';
 // Formatear fecha de pago  YYYY-MM-DD → DD/MM/YYYY
 $fechaPagoFmt = '';
 if ($fechaPago) {
     [$y, $m, $d] = explode('-', $fechaPago);
     $fechaPagoFmt = "$d/$m/$y";
 }
-
-// Fecha actual en español
-$meses = ['','ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO',
-          'JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
+// Fecha actual
+$meses = ['','ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
 $hoy   = new DateTime('now', new DateTimeZone('America/Lima'));
 $fechaFirma = 'SAN VICENTE, ' . $hoy->format('j') . ' DE '
             . $meses[(int)$hoy->format('n')] . ' DE ' . $hoy->format('Y');
-
 // Logo como base64 (Dompdf no accede a rutas del sistema de archivos por defecto)
 $logoPath = __DIR__ . '/../../assets/images/logo-tramite.png';
 $logoB64  = '';
@@ -73,9 +56,19 @@ if (file_exists($logoPath)) {
     $logoB64 = 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath));
 }
 
-// Validar firma base64
-$firmaImg = (str_starts_with($firmaBase64, 'data:image')) ? $firmaBase64 : '';
-
+// Lógica para la firma
+if (isset($reg_firma) && $reg_firma) {
+    // Si hay firma en BD, extraemos de "24.04.2026 16:54..."
+    $dia = substr($reg_firma->fecha_sello, 0, 2);
+    $mes_num = (int)substr($reg_firma->fecha_sello, 3, 2);
+    $anio = substr($reg_firma->fecha_sello, 6, 4);
+    $fechaFirmaTexto = 'SAN VICENTE, ' . $dia . ' DE ' . $meses[$mes_num] . ' DE ' . $anio;
+} else {
+    // Fallback: Si no hay firma, usa la fecha actual
+    $hoy = new DateTime('now', new DateTimeZone('America/Lima'));
+    $fechaFirmaTexto = 'SAN VICENTE, ' . $hoy->format('j') . ' DE ' . $meses[(int)$hoy->format('n')] . ' DE ' . $hoy->format('Y');
+}
+ 
 /* ─────────────────────────────────────────────────────────────────
    2. HTML DEL FUT  (Dompdf usa un subconjunto de CSS 2.1)
 ──────────────────────────────────────────────────────────────── */
@@ -85,6 +78,7 @@ ob_start();
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<title>FUT_<?= $reg_doc->cod_web ?>.pdf</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
@@ -94,7 +88,6 @@ ob_start();
     background: #fff;
     padding: 15px; /* Margen interno para emular los bordes de la página */
   }
-
   /* ── Encabezado ── */
   .header-table { width: 100%; border: none; margin-bottom: 20px; }
   .header-table td { border: none; vertical-align: middle; }
@@ -103,7 +96,6 @@ ob_start();
   .title-cell { text-align: center; }
   .uni-title { font-size: 14pt; font-weight: bold; margin-bottom: 5px; }
   .doc-title { font-size: 12pt; }
-
   /* ── Estructura Principal de Tablas ── */
   table {
     width: 100%;
@@ -119,16 +111,13 @@ ob_start();
   th {
     text-align: left;
    }
-
   /* ── Utilidades Tipográficas ── */
   .font-bold { font-weight: bold; }
   .text-center { text-align: center; }
-  
   /* ── Alturas fijas para áreas de escritura ── */
   .h-30 { height: 30px; }
   .h-60 { height: 60px; }
   .h-100 { height: 100px; }
-
   /* ── Checkbox simulado ── */
   .chk {
     display: inline-block;
@@ -168,7 +157,7 @@ ob_start();
 
 <table>
   <tr><th class="font-bold sl" colspan="2">I. SOLICITO:</th></tr>
-  <tr><td class="border-top-0 h-20" style="padding-left: 25px;" colspan="2"><?= $id_tupa ?></td></tr>
+  <tr><td class="border-top-0 h-20" style="padding-left: 25px;" colspan="2"><?= $asunto ?></td></tr>
   
   <tr><th class="font-bold sl" colspan="2">II. DEPENDENCIA O AUTORIDAD A QUIEN SE DIRIGE LA SOLICITUD:</th></tr>
   <tr><td class="border-top-0 h-20" style="padding-left: 25px;" colspan="2"><?= $dependencia ?></td></tr>
@@ -196,11 +185,14 @@ ob_start();
     <th width="20%" class="sl">Apellido Materno</th>
     <th width="20%" class="sl">Nombres</th>
     <th width="40%" class="sl text-center" style="white-space: nowrap;">
-      <span class="chk">X</span> DNI &nbsp;&nbsp;
+      <span class="chk"><?= ($tipo_doc == 1) ? 'X' : '' ?></span> DNI &nbsp;&nbsp;
+      
       <span class="chk"></span> L.E. &nbsp;&nbsp;
-      <span class="chk"></span> C.E. &nbsp;&nbsp;
-      <span class="chk"></span> OTRO
-    </th>
+      
+      <span class="chk"><?= ($tipo_doc == 3) ? 'X' : '' ?></span> C.E. &nbsp;&nbsp;
+      
+      <span class="chk"><?= (in_array($tipo_doc, [2, 4, 5, 6])) ? 'X' : '' ?></span> OTRO
+  </th>
   </tr>
   <tr class="text-center h-30" style="vertical-align: middle;">
     <td><?= $apepa ?></td>
@@ -264,15 +256,35 @@ ob_start();
 <table class="border-0" style="margin-top: 10px;">
   <tr>
     <td class="text-center" style="width: 50%; vertical-align: bottom; padding-bottom: 0;">
-      <div style="height: 80px; text-align: center; margin-bottom: 5px;">
-        <?php if ($firmaImg): ?>
-          <img src="<?= $firmaImg ?>" alt="Firma" style="max-height: 75px; max-width: 250px;">
-        <?php endif; ?>
-      </div>
-      <div style="width: 80%; margin: 0 auto; border-top: 1px solid #000; padding-top: 5px;">
-        <span class="font-bold">FIRMA DEL USUARIO</span><br>
-        <span style="font-size: 8pt;"><?= $fechaFirma ?></span><br>
-        <span style="font-size: 8pt;">(LUGAR Y FECHA)</span>
+      <?php if (isset($reg_firma) && $reg_firma): ?>
+          <table style="width: 260px; margin: 0 auto 5px auto; border: none; border-collapse: collapse;">
+              <tr>
+                  <td style="width: 65px; border: none; vertical-align: middle; text-align: center; padding-right: 5px;">
+                      <?php if ($logoB64): ?>
+                          <img src="<?= $logoB64 ?>" style="width: 50px; height: auto;" alt="Escudo">
+                      <?php endif; ?>
+                  </td>
+                  <td style="width: 195px; border: none; border-left: 1px solid #a0a0a0; text-align: left; padding-left: 8px; font-size: 7.5pt; line-height: 1.1;">
+                      <span style="color: #444;">Firmado digitalmente por:</span>
+                      
+                      <div style="width: 140px; text-align: justify; padding-top: 1px; padding-bottom: 1px;">
+                          <?= htmlspecialchars($reg_firma->firmado_por) ?>
+                      </div>
+                      
+                      <strong><?= htmlspecialchars($reg_firma->dni_firmante) ?></strong><br>
+                      Motivo: <?= htmlspecialchars($reg_firma->motivo) ?><br>
+                      Fecha: <?= htmlspecialchars($reg_firma->fecha_sello) ?>
+                  </td>
+              </tr>
+          </table>
+      <?php else: ?>
+          <div style="height: 60px;"></div>
+      <?php endif; ?>
+
+      <div style="width: 90%; margin: 0 auto; border-top: 1px solid #000; padding-top: 3px;">
+          <span class="font-bold" style="font-size: 8pt;">FIRMA DEL USUARIO</span><br>
+          <span style="font-size: 7.5pt;"><?= $fechaFirmaTexto ?></span><br>
+          <span style="font-size: 7.5pt;">(LUGAR Y FECHA)</span>
       </div>
     </td>
     <td class="border-0" idth: 45%;>
@@ -281,7 +293,9 @@ ob_start();
     
     <td style="width: 45%; padding: 8px;">
       <div class="font-bold mb-2">OBSERVACIONES:</div>
-      <div style="font-size: 9pt; white-space: pre-wrap;"><?= $observaciones ?: '&nbsp;' ?></div>
+        <div style="font-size: 9pt; width: 100%; display: block; word-wrap: break-word;">
+            <?= $observaciones ?: '&nbsp;' ?>
+        </div>
     </td>
   </tr>
 </table>
@@ -290,64 +304,16 @@ ob_start();
 </html>
 <?php
 $htmlFut = ob_get_clean();
-
-/* ─────────────────────────────────────────────────────────────────
-   3. GENERAR PDF CON DOMPDF
-──────────────────────────────────────────────────────────────── */
 $options = new Options();
 $options->set('isHtml5ParserEnabled', true);
-$options->set('isRemoteEnabled', false);   // imágenes embebidas como base64
-$options->set('defaultFont', 'Arial');
-
+$options->set('isRemoteEnabled', true);
 $dompdf = new Dompdf($options);
-$dompdf->loadHtml($htmlFut, 'UTF-8');
+$dompdf->loadHtml($htmlFut);
 $dompdf->setPaper('A4', 'portrait');
 $dompdf->render();
 
-/* ─────────────────────────────────────────────────────────────────
-    4. RESPUESTA SEGÚN ACCIÓN (Control de flujo)
-──────────────────────────────────────────────────────────────── */
-$accion = $_GET['accion'] ?? 'guardar';
-
-// Si es Vista Previa o Descarga, enviamos el PDF y detenemos el script (EXIT)
-if ($accion === 'preview' || $accion === 'descargar') {
-    header('Content-Type: application/pdf');
-    
-    if ($accion === 'preview') {
-        header('Content-Disposition: inline; filename="PREVIEW_FUT.pdf"');
-    } else {
-        header('Content-Disposition: attachment; filename="FUT_' . ($dni ?: 'DOCUMENTO') . '.pdf"');
-    }
-    
-    echo $dompdf->output();
-    exit(); // IMPORTANTE: Aquí se detiene, evitando que se guarde en el servidor
-}
-
-/* ─────────────────────────────────────────────────────────────────
-    5. GUARDAR EN SERVIDOR (Solo ocurre si la acción es 'guardar')
-──────────────────────────────────────────────────────────────── */
-$idEstu   = $_SESSION['id_estu'];
-$fechaDir = $hoy->format('Y/m');
-$dirBase  = __DIR__ . "/../storage/tramites/{$idEstu}/{$fechaDir}";
-
-// Crear carpeta si no existe
-if (!is_dir($dirBase)) {
-    mkdir($dirBase, 0755, true);
-}
-
-// Nombre único para el archivo final
-$nombreArchivo = 'FUT_' . $idEstu . '_' . $hoy->format('Ymd_His') . '.pdf';
-$rutaCompleta  = $dirBase . '/' . $nombreArchivo;
-$rutaRelativa  = "storage/tramites/{$idEstu}/{$fechaDir}/{$nombreArchivo}";
-
-// Guardar el PDF físicamente en el servidor
-file_put_contents($rutaCompleta, $dompdf->output());
-
-// Responder al JS con JSON para que continúe con el registro en BD
-echo json_encode([
-    'ok'     => true,
-    'ruta'   => $rutaRelativa,
-    'nombre' => $nombreArchivo,
-    'msg'    => 'FUT generado y guardado correctamente.',
-]);
+header('Content-Type: application/pdf');
+header('Content-Disposition: inline; filename="FUT_'.$reg_doc->cod_web.'.pdf"');
+echo $dompdf->output();
+exit();
 ?>
