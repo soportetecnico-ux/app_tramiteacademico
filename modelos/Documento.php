@@ -196,6 +196,8 @@ class Documento
                     d.cod_documento,
                     d.asunto,
                     d.numero as num_doc,
+                    d.atendido as observado,
+                    d.obs_atendido as comentario_observacion,
                     d.cod_estado_documento2 as estado,
                     hd.cod_historial_documento as n_proveido,
                     o_orig.nombre AS nombre_oficina_origen,
@@ -300,27 +302,37 @@ class Documento
         // 1. Preparamos la sentencia
         $sql = "SELECT COUNT(*) as total FROM documento WHERE id_estu = ? and eliminado = ?";
         $stmt = mysqli_prepare($conexion, $sql);
-
      
         mysqli_stmt_bind_param($stmt, "ii", $id_estu, $eliminado);
 
-        // 3. Ejecutamos y obtenemos el resultado
         mysqli_stmt_execute($stmt);
         $resultado = mysqli_stmt_get_result($stmt);
         $fila = mysqli_fetch_assoc($resultado);
 
-        // 4. Retornamos el siguiente número
         return $fila['total'] + 1;
     }
 
     public function obtenerDatosFUT($cod_web) {
-        $sql = "SELECT d.*, o.nombre AS oficina FROM documento d INNER JOIN historial_documento hd ON hd.cod_documento = d.cod_documento INNER JOIN oficina o ON o.cod_oficina = hd.oficina_destino  
-        INNER JOIN tb_tupa t ON t.id_tupa = d.id_tupa INNER JOIN tb_tupa_oficina v ON v.id_tupa = t.id_tupa AND v.cod_oficina = o.cod_oficina 
-         WHERE d.cod_web = '$cod_web' and d.eliminado = 0";
+        $sql = "SELECT d.*, o.nombre AS oficina FROM documento d 
+        INNER JOIN historial_documento hd ON hd.cod_documento = d.cod_documento 
+        INNER JOIN oficina o ON o.cod_oficina = hd.oficina_destino  
+        INNER JOIN tb_tupa t ON t.id_tupa = d.id_tupa 
+        INNER JOIN tb_tupa_oficina v ON v.id_tupa = t.id_tupa AND v.cod_oficina = o.cod_oficina 
+        WHERE d.cod_web = '$cod_web' and d.eliminado = 0";
         return ejecutarConsulta($sql);
     }
     public function obtenerFirmaFUT($cod_web) {
         $sql = "SELECT * FROM tb_firma_fut WHERE cod_web = '$cod_web'";
+        return ejecutarConsulta($sql);
+    }
+
+    public function subsanar($cod_documento, $nombre_archivo) {
+        $sql = "UPDATE documento SET 
+                    atendido = 0, 
+                    obs_atendido = NULL, 
+                    nombre_archivo = '$nombre_archivo' 
+                WHERE cod_documento = '$cod_documento'";
+        
         return ejecutarConsulta($sql);
     }
 }

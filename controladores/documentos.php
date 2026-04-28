@@ -205,32 +205,83 @@ switch ($_GET["op"]) {
         break;
 
     case 'generarFUT':
-    $cod_web = $_GET["cod_web"];
-    
-    require_once "../modelos/Documento.php";
-    $doc = new Documento();
-    $rspta_doc = $doc->obtenerDatosFUT($cod_web);
-    $reg_doc = $rspta_doc->fetch_object();
-
-    if ($reg_doc) {
-        $id_estu = $reg_doc->id_estu;
-
-        require_once "../modelos/Usuario.php";
-        $usuario = new Usuario();
-        $reg_usuario = $usuario->obtenerDatosUsuario($id_estu);
-
-        $rspta_firma = $doc->obtenerFirmaFUT($cod_web);
-        $reg_firma = $rspta_firma->fetch_object();
-
-        // Forzamos la acción de preview para que el PDF se muestre en pantalla
-        $_GET['accion'] = 'preview'; 
-
-        // Cargamos la vista (ahora usará $reg_doc y $reg_usuario)
-        require_once "../vistas/includes/generar_fut.php";
-    } else {
-        echo "Error: No se encontró el trámite.";
-    }
-    break;
-
+        $cod_web = $_GET["cod_web"];
         
+        require_once "../modelos/Documento.php";
+        $doc = new Documento();
+        $rspta_doc = $doc->obtenerDatosFUT($cod_web);
+        $reg_doc = $rspta_doc->fetch_object();
+
+        if ($reg_doc) {
+            $id_estu = $reg_doc->id_estu;
+
+            require_once "../modelos/Usuario.php";
+            $usuario = new Usuario();
+            $reg_usuario = $usuario->obtenerDatosUsuario($id_estu);
+
+            $rspta_firma = $doc->obtenerFirmaFUT($cod_web);
+            $reg_firma = $rspta_firma->fetch_object();
+
+            // Forzamos la acción de preview para que el PDF se muestre en pantalla
+            $_GET['accion'] = 'preview'; 
+
+            // Cargamos la vista (ahora usará $reg_doc y $reg_usuario)
+            require_once "../vistas/includes/generar_fut.php";
+        } else {
+            echo "Error: No se encontró el trámite.";
+        }
+        break;
+    
+     case 'subsanarDocumento':
+        
+        // 1. Validación de datos
+        $cod_documento = isset($_POST["cod_documento"]) ? $_POST["cod_documento"] : "";
+        $archivo_file = isset($_FILES["archivo"]) ? $_FILES["archivo"] : null;
+
+        if (empty($cod_documento) || !$archivo_file || $archivo_file['error'] !== UPLOAD_ERR_OK) {
+             echo json_encode(["status" => "error", "message" => "Faltan datos obligatorios o error en carga."]);
+            exit;
+        }
+
+        // 2. Configuración y Sanitización
+        $originalName = $archivo_file['name'];
+        $ext = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
+        $permitidos = ['pdf', 'zip', 'rar'];
+
+        if (!in_array($ext, $permitidos)) {
+            echo json_encode(["status" => "error", "message" => "Formato no permitido."]);
+            exit;
+        }
+
+        $nombre_raiz = substr(preg_replace('/[^A-Za-z0-9\-]/', '', str_replace(' ', '_', pathinfo($originalName, PATHINFO_FILENAME))), 0, 80);
+        $anioActual = date("Y");
+        $rutaRelativa = "academicos/" . $anioActual . "/";
+        $rutaBase = __DIR__ . "/../../views/archivos/" . $rutaRelativa;
+
+        if (!file_exists($rutaBase)) {
+            mkdir($rutaBase, 0777, true);
+        }
+
+        $nombreFinal = date("YmdHis") . "_" . $cod_documento . "_" . $nombre_raiz . "." . $ext;
+        $destinoFull = $rutaBase . $nombreFinal;
+
+ 
+        // 3. Mover archivo 
+         if (move_uploaded_file($archivo_file['tmp_name'], $destinoFull)) {
+             
+            $rutaParaBD = $rutaRelativa . $nombreFinal;
+            
+            // 4. Actualización de BD  
+            $res = $documentos->subsanar($cod_documento, $rutaParaBD);
+             
+            if ($res) {
+                echo json_encode(["status" => "success", "message" => "Subsanación registrada correctamente."]);
+            } else {
+                echo json_encode(["status" => "error", "message" => "Error al actualizar la BD."]);
+            }
+        } else {
+             echo json_encode(["status" => "error", "message" => "Error crítico al mover el archivo."]);
+        }
+
+        break;
 }
