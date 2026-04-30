@@ -3,6 +3,8 @@ let datosUsuarioGlobal = null;
 $(document).ready(function () {
     cargarDatosUsuario();
     listarTramites();
+    listarConteoDocs();
+    listarActividadReciente();
 
     const $contenedor = $('#contenedorSeguimiento');
 
@@ -893,6 +895,132 @@ function procesarSubsanacion(codDocumento) {
     });
 }
 
+function listarConteoDocs() {
+    // DEFINIMOS LA RUTA COMPLETA PARA EVITAR PROBLEMAS DE CONTEXTO EN DIFERENTES PÁGINAS
+    const url = '../controladores/documentos.php?op=listarConteoDocs';
+    // INICIAMOS LA PETICIÓN AJAX
+    fetch(url)
+        .then(response => {
+            // Verificamos que la respuesta sea exitosa
+            if (!response.ok) throw new Error('Error en la respuesta del servidor');
+            return response.json();
+        })
+        // Procesamos los datos recibidos
+        .then(data => {
+            // Verificamos que el formato de datos sea correcto
+            if (data.aaData && data.aaData.length > 0) {
+                const conteos = data.aaData[0];
+                // Extraemos los conteos, asegurándonos de convertirlos a enteros y manejar posibles valores nulos o no numéricos
+                const total      = parseInt(conteos.total)     || 0;
+                const pendientes = parseInt(conteos.pendiente)  || 0;
+                const observados = parseInt(conteos.observado)  || 0;
+                const finalizados= parseInt(conteos.finalizado) || 0;
+
+                // Actualizamos los elementos del DOM con los conteos
+                document.getElementById('totalTramites').textContent   = total;
+                document.getElementById('totalPendientes').textContent  = pendientes;
+                document.getElementById('totalObservados').textContent  = observados;
+                document.getElementById('totalFinalizados').textContent = finalizados;
+
+                // Calculamos los porcentajes, evitando división por cero
+                const pctPend = total > 0 ? (pendientes  / total) * 100 : 0;
+                const pctObs  = total > 0 ? (observados  / total) * 100 : 0;
+                const pctFin  = total > 0 ? (finalizados / total) * 100 : 0;
+
+                // Actualizamos las barras de progreso
+                document.getElementById('pb-total').style.width      = '100%';
+                document.getElementById('pb-pendientes').style.width  = pctPend + '%';
+                document.getElementById('pb-observados').style.width  = pctObs  + '%';
+                document.getElementById('pb-finalizados').style.width = pctFin  + '%';
+
+                // Actualizamos los textos de porcentaje
+                document.getElementById('f-total').textContent = total;
+                document.getElementById('f-proc').textContent  = Math.round(pctPend) + '%';
+                document.getElementById('f-obs').textContent   = Math.round(pctObs)  + '%';
+                document.getElementById('f-fin').textContent   = Math.round(pctFin)  + '%';
+
+                // Cálculo para el gráfico de donut (usamos circunferencia de un círculo con radio 55)
+                const circunferencia = 263.6;
+                // Convertimos los porcentajes a longitudes de arco para cada categoría
+                const dashPend = (pctPend / 100) * circunferencia;
+                const dashFin  = (pctFin  / 100) * circunferencia;
+                const dashObs  = (pctObs  / 100) * circunferencia;
+
+                // Para que las categorías se muestren en orden (Pendientes, Finalizados, Observados), calculamos los offsets acumulativos
+                const offsetPend = 0;
+                const offsetFin  = dashPend;
+                const offsetObs  = dashPend + dashFin;
+                // Función para aplicar los estilos SVG a cada arco del donut
+                function setArc(id, dash, offset) {
+                    const el = document.getElementById(id);
+                    el.style.strokeDasharray  = `${dash} ${circunferencia - dash}`;
+                    el.style.strokeDashoffset = -offset;
+                    el.setAttribute('transform', `rotate(-90 55 55)`);
+                }
+                // Aplicamos los estilos con un pequeño retraso para asegurar que el DOM esté listo y evitar problemas de renderizado
+                setTimeout(() => {
+                    setArc('arc-proc', dashPend, offsetPend);
+                    setArc('arc-fin',  dashFin,  offsetFin);
+                    setArc('arc-obs',  dashObs,  offsetObs);
+                }, 100);
+
+                // Actualizamos el centro del donut con el total de trámites
+                document.getElementById('donut-center').textContent = total;
+                // Actualizamos las leyendas con los conteos y porcentajes
+                document.querySelector('#arc-proc').closest('.donut-wrap')
+                    ?.querySelectorAll('.legend-val')[0]
+                    && (document.querySelectorAll('.legend-val')[0].textContent = pendientes);
+                document.querySelectorAll('.legend-val')[1].textContent = finalizados;
+                document.querySelectorAll('.legend-val')[2].textContent = observados;
+                document.querySelectorAll('.legend-val')[3].textContent = total;
+                // Actualizamos los porcentajes en las leyendas
+                document.querySelectorAll('.legend-pct')[0].textContent = `(${Math.round(pctPend)}%)`;
+                document.querySelectorAll('.legend-pct')[1].textContent = `(${Math.round(pctFin)}%)`;
+                document.querySelectorAll('.legend-pct')[2].textContent = `(${Math.round(pctObs)}%)`;
+            }
+        })
+        .catch(error => console.error('Error al cargar el dashboard:', error));
+}
+
+function listarActividadReciente() {
+    // DEFINIMOS LA RUTA COMPLETA PARA EVITAR PROBLEMAS DE CONTEXTO EN DIFERENTES PÁGINAS
+    const url = '../controladores/documentos.php?op=listarReciente';
+    // INICIAMOS LA PETICIÓN AJAX
+     fetch(url)
+        // Verificamos que la respuesta sea exitosa
+        .then(response => {
+            // Verificamos que la respuesta sea exitosa
+            if (!response.ok) throw new Error('Error en la respuesta del servidor');
+            return response.json();
+        })
+        // Procesamos los datos recibidos
+        .then(data => {
+            const lista = document.querySelector('.activity-list');
+            lista.innerHTML = '';
+            // Verificamos que el formato de datos sea correcto y que haya actividades
+            if (!data.aaData || data.aaData.length === 0) {
+                lista.innerHTML = '<li class="activity-item"><div class="activity-text">No hay actividad reciente.</div></li>';
+                return;
+            }
+            // Iteramos sobre cada actividad y la agregamos a la lista
+            data.aaData.forEach(item => {
+                lista.innerHTML += `
+                    <li class="activity-item">
+                        <div class="activity-dot" style="background:${item.estado_color};"></div>
+                        <div class="activity-text"><strong>SOLICITUD</strong> DE ${item.asunto}</div>
+                        <span class="activity-tag" style="background:${item.estado_bg}; color:${item.estado_color};">
+                            ${item.estado_texto}
+                        </span>
+                        <span class="activity-time">${item.fecha_texto}</span>
+                    </li>`;
+            });
+        })
+        .catch(err => console.error('Error actividad reciente:', err));
+}
+
+ 
+
+ 
 /* function irASeguimiento(codWeb) {
     // Creamos un formulario dinámicamente
     var form = document.createElement("form");
