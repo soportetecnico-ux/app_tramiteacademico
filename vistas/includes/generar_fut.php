@@ -239,7 +239,7 @@ ob_start();
       <span class="font-bold">Autorizo se me notifique al siguiente correo electrónico:</span><br><?= $correo ?>
     </td>
     <td class="font-bold">TELÉFONO: <br> <?= $telefono ?> </td>
-    <td class="font-bold">O CELULAR: <br><?= $celular ?></td>
+    <td class="font-bold">CELULAR: <br><?= $celular ?></td>
   </tr>
 </table>
 
