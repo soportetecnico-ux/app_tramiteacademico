@@ -580,13 +580,7 @@ function tablaSeguimiento(codWeb) {
                         case 2:
                             texto = 'Observado';
                             clase = 'text-bg-danger';
-
-                            boton = `
-                    <button class="btn btn-sm btn btn-outline-dark ms-2"
-                        onclick="subsanarDocumento('${row.cod_web}')">
-                        Subsanar
-                    </button>
-                `;
+            
                             break;
 
                         default:
@@ -599,7 +593,6 @@ function tablaSeguimiento(codWeb) {
                 <span class="badge ${clase} shadow-sm" style="font-size: 12px; padding: 5px 12px;">
                     ${texto}
                 </span>
-                ${boton}
             </div>
         `;
                 }

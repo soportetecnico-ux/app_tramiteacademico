@@ -142,8 +142,8 @@ $login_button = '
                 <div class="w-100 p-5" style="max-width: 400px;">
                     <div class="text-center mb-4">
                         <img src="../imagenes/logo-tramite.png" alt="Escudo" class="mb-3" width="60">
-                        <h5 class="fw-bold text-undc mb-0">TRÁMITES</h5>
-                        <p class="small fw-bold text-undc mb-4">ACADÉMICOS</p>
+                        <h5 class="fw-bold text-undc mb-0">SISTEMA DE TRÁMITES ACADÉMICOS</h5>
+                        <!-- <p class="small fw-bold text-undc mb-4">ACADÉMICOS</p> -->
                         
                         <p class="text-muted small">Iniciar sesión con su correo y contraseña.</p>
                         <?php echo '<div class="d-grid my-3">' . $login_button . '</div>'; ?>
