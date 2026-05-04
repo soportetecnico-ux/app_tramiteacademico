@@ -43,6 +43,7 @@ if (isset($_GET["code"])) {
             $_SESSION['id_estu'] = $fetch->id_estu;
             $_SESSION['correo'] = $fetch->email_estu;
             $_SESSION['id_car']  = $fetch->id_car;
+            $_SESSION['nivel']  = $fetch->nivel;
 
             $_SESSION['nomcompleto'] = 
                 $fetch->nom_estu . ' ' . 

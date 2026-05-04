@@ -47,14 +47,14 @@ include('head.php')
                                             <div class="form-floating">
                                                 <input type="hidden" id="id_estu" name="id_estu" value="<?php echo $_SESSION['id_estu']; ?>">
                                                 <input type="text" class="form-control form-control-sm" id="dni" disabled>
-                                                <label class="small fw-bold">DNI/ID</label>
+                                                <label>DNI / OTROS</label>
                                             </div>
                                         </div>
 
                                         <div class="col-md-3">
                                             <div class="form-floating">
                                                 <input type="text" class="form-control form-control-sm" id="nombres_completos" placeholder="Apellidos y Nombres" disabled>
-                                                <label class="small fw-bold">APELLIDOS Y NOMBRES</label>
+                                                <label>APELLIDOS Y NOMBRES</label>
                                             </div>
                                             <input type="hidden" id="apepa">
                                             <input type="hidden" id="apema">
@@ -64,14 +64,14 @@ include('head.php')
                                         <div class="col-md-2">
                                             <div class="form-floating">
                                                 <input type="text" class="form-control form-control-sm" id="direccion" disabled>
-                                                <label class="small">DOMICILIO ACTUAL</label>
+                                                <label>DOMICILIO ACTUAL</label>
                                             </div>
                                         </div>
 
                                         <div class="col-md-3">
                                             <div class="form-floating">
                                                 <input type="text" class="form-control form-control-sm" id="ubicacion" placeholder="Distrito / Prov / Dep" disabled>
-                                                <label class="small">DISTRITO / PROVINCIA / DEPARTAMENTO</label>
+                                                <label>DISTRITO / PROVINCIA / DEPARTAMENTO</label>
                                             </div>
                                             <input type="hidden" id="distrito">
                                             <input type="hidden" id="provincia">
@@ -81,14 +81,14 @@ include('head.php')
                                         <div class="col-md-2">
                                             <div class="form-floating">
                                                 <input type="email" class="form-control form-control-sm text-primary" id="correo" disabled>
-                                                <label class="small fw-bold">CORREO ELECTRÓNICO</label>
+                                                <label>CORREO ELECTRÓNICO</label>
                                             </div>
                                         </div>
 
                                         <div class="col-md-1">
                                             <div class="form-floating">
                                                 <input type="text" class="form-control form-control-sm" id="celular">
-                                                <label class="small">CELULAR</label>
+                                                <label>CELULAR</label>
                                             </div>
                                         </div>
                                     </div>
@@ -138,10 +138,10 @@ include('head.php')
                                     <div class="row g-1">
 
                                         <div class="col-md-6">
-                                            <div class="form-floating"><input type="text" class="form-control" id="nroComprobante" minlength="6" maxlength="15" ><label class="fw-bold small text-primary">N° COMPROBANTE *</label></div>
+                                            <div class="form-floating"><input type="text" class="form-control" id="nroComprobante" minlength="6" maxlength="15" ><label class="text-primary">N° COMPROBANTE <span class="text-danger" >*</span></label></div>
                                         </div>
                                         <div class="col-md-6">
-                                            <div class="form-floating"><input type="date" class="form-control" id="fechaComprobante" max="<?php echo date('Y-m-d'); ?>"><label class="fw-bold small text-primary">FECHA DE PAGO *</label></div>
+                                            <div class="form-floating"><input type="date" class="form-control" id="fechaComprobante" max="<?php echo date('Y-m-d'); ?>"><label class="text-primary">FECHA DE PAGO <span class="text-danger" >*</span></label></div>
                                         </div>
                                     </div>
                                 </div>

@@ -233,8 +233,7 @@ switch ($_GET["op"]) {
         break;
     
      case 'subsanarDocumento':
-        
-        // 1. Validación de datos
+        // 1. VALIDACION DE DATOS
         $cod_documento = isset($_POST["cod_documento"]) ? $_POST["cod_documento"] : "";
         $archivo_file = isset($_FILES["archivo"]) ? $_FILES["archivo"] : null;
 
@@ -242,8 +241,7 @@ switch ($_GET["op"]) {
              echo json_encode(["status" => "error", "message" => "Faltan datos obligatorios o error en carga."]);
             exit;
         }
-
-        // 2. Configuración y Sanitización
+        // 2. CONFIGURACION Y SANITIZACION DEL ARCHIVO
         $originalName = $archivo_file['name'];
         $ext = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
         $permitidos = ['pdf', 'zip', 'rar'];
@@ -252,7 +250,7 @@ switch ($_GET["op"]) {
             echo json_encode(["status" => "error", "message" => "Formato no permitido."]);
             exit;
         }
-
+        
         $nombre_raiz = substr(preg_replace('/[^A-Za-z0-9\-]/', '', str_replace(' ', '_', pathinfo($originalName, PATHINFO_FILENAME))), 0, 80);
         $anioActual = date("Y");
         $rutaRelativa = "academicos/" . $anioActual . "/";
@@ -265,13 +263,12 @@ switch ($_GET["op"]) {
         $nombreFinal = date("YmdHis") . "_" . $cod_documento . "_" . $nombre_raiz . "." . $ext;
         $destinoFull = $rutaBase . $nombreFinal;
 
- 
-        // 3. Mover archivo 
+        // 3. MOVEMOS EL ARCHIVO 
          if (move_uploaded_file($archivo_file['tmp_name'], $destinoFull)) {
              
             $rutaParaBD = $rutaRelativa . $nombreFinal;
             
-            // 4. Actualización de BD  
+        // 4. ACTUALIZACION EN BD 
             $res = $documentos->subsanar($cod_documento, $rutaParaBD);
              
             if ($res) {
@@ -284,4 +281,88 @@ switch ($_GET["op"]) {
         }
 
         break;
+
+    case 'listarConteoDocs':
+        // 1. PASAMOS LA CABECERA PARA RESPUESTA JSON Y OBTENEMOS EL ID DEL ESTUDIANTE DE LA SESIÓN
+        header('Content-Type: application/json; charset=utf-8');
+        $id_estu = $_SESSION['id_estu'] ?? 0;
+        // 2. OBTENEMOS EL CONTEO DE DOCUMENTOS POR ESTADO PARA EL ESTUDIANTE
+        $data = $documentos->obtenerConteoDocs($id_estu);
+        // 3. PROCESAMOS LOS RESULTADOS EN UN ARRAY PARA DATATABLE
+        $conteoDocs = array();
+        if ($data) {
+            while ($row = mysqli_fetch_assoc($data)) {
+                 $conteoDocs[] = $row;
+            }
+        }
+        // 4. RETORNAMOS LOS RESULTADOS EN EL FORMATO QUE ESPERA DATATABLE
+        $results = array(
+            "sEcho" => 1,
+            "iTotalRecords" => count($conteoDocs),
+            "iTotalDisplayRecords" => count($conteoDocs),
+            "aaData" => $conteoDocs
+        );
+        echo json_encode($results);
+        break;
+
+    case 'listarReciente':
+        // 1. PASAMOS LA CABECERA PARA RESPUESTA JSON Y OBTENEMOS EL ID DEL ESTUDIANTE DE LA SESIÓN
+        header('Content-Type: application/json; charset=utf-8');
+        $id_estu = $_SESSION['id_estu'] ?? 0;
+        // 2. OBTENEMOS LOS DOCUMENTOS RECIENTES DEL ESTUDIANTE
+        $data = $documentos->obtenerRecientes($id_estu);
+        // 3. PROCESAMOS LOS RESULTADOS PARA MAPEAR ESTADOS Y FORMATEAR FECHAS
+        $actividad = array();
+        if ($data) {
+            while ($row = mysqli_fetch_assoc($data)) {
+                // MAPEAMOS EL ESTADO A TEXTO Y COLORES
+                switch ((int)$row['atendido']) {
+                    case 0:
+                        $row['estado_texto'] = 'En proceso';
+                        $row['estado_color'] = '#e8a020';
+                        $row['estado_bg']    = '#fff8ec';
+                        break;
+                    case 1:
+                        $row['estado_texto'] = 'Finalizado';
+                        $row['estado_color'] = '#0f9e6e';
+                        $row['estado_bg']    = '#edfaf4';
+                        break;
+                    case 2:
+                        $row['estado_texto'] = 'Observado';
+                        $row['estado_color'] = '#d63251';
+                        $row['estado_bg']    = '#fff0f3';
+                        break;
+                    default:
+                        $row['estado_texto'] = 'Nuevo';
+                        $row['estado_color'] = '#1a4fba';
+                        $row['estado_bg']    = '#e8effe';
+                }
+
+                // FORMATEAMOS LA FECHA A UN TEXTO MÁS AMIGABLE
+                $fecha    = new DateTime($row['fecha']);
+                $hoy      = new DateTime();
+                $ayer     = (new DateTime())->modify('-1 day');
+                $diffDays = (int)$hoy->diff($fecha)->days;
+
+                if ($fecha->format('Y-m-d') === $hoy->format('Y-m-d')) {
+                    $row['fecha_texto'] = 'Hoy';
+                } elseif ($fecha->format('Y-m-d') === $ayer->format('Y-m-d')) {
+                    $row['fecha_texto'] = 'Ayer';
+                } elseif ($diffDays <= 7) {
+                    $row['fecha_texto'] = 'Hace ' . $diffDays . ' días';
+                } else {
+                    $row['fecha_texto'] = $fecha->format('d M');
+                }
+                // AGREGAMOS EL ROW PROCESADO AL ARRAY DE ACTIVIDAD
+                $actividad[] = $row;
+            }
+        }
+        // 4. RETORNAMOS LOS RESULTADOS EN EL FORMATO QUE ESPERA DATATABLE
+        echo json_encode([
+            "sEcho"                => 1,
+            "iTotalRecords"        => count($actividad),
+            "iTotalDisplayRecords" => count($actividad),
+            "aaData"               => $actividad
+        ]);
+    break;
 }

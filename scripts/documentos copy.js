@@ -396,6 +396,20 @@ function listarTramites() {
                 }
             },
             {
+                // Columna para Vista Previa del FUT
+                data: "cod_web", // Usamos cod_web como referencia
+                className: "text-center align-middle",
+                render: function (data) {
+                    return `
+                        <button onclick="generarFUT('${data}')" 
+                                class="btn btn-sm btn-light-primary border" 
+                                style="font-size: 11px; padding: 4px 8px; border-radius: 6px;"
+                                title="Ver Formulario FUT">
+                            <i class="fas fa-file-invoice me-1"></i> FUT
+                        </button>`;
+                }
+            },
+            {
                 data: "nombre_archivo",
                 className: "align-middle",
                 render: function (data) {
@@ -651,10 +665,17 @@ function generarVistaDetalle(dataArray) {
 
     let html = '';
 
+    // Función auxiliar para imprimir "Observado" en lugar del número 2 en la vista
+    const textoEstado = (val) => {
+        if (val == 2 || String(val).toLowerCase() === 'observado') return 'Observado';
+        return safe(val);
+    };
+
     //Recorrer cada expediente
     Object.values(grupos).forEach((grupo) => {
 
         const principal = grupo[0];
+
 
        // Procesar donde se usó como referencia
         let htmlReferencias = '';
@@ -662,7 +683,7 @@ function generarVistaDetalle(dataArray) {
             const lista = principal.usado_en_referencia.split('|');
             htmlReferencias = `
                 <div class="mt-3" style='font-size:13px;'>
-                    <p class="mb-1 fw-bold text-dark">Usado como referencia en:</p>
+                    <p class="mb-1 text-dark" style='font-size:13px;'>Usado como referencia en:</p>
                     <ul class="list-unstyled mb-0 ms-3">
                         ${lista.map(ref => `<li class="text-muted">• ${ref}</li>`).join('')}
                     </ul>
@@ -670,11 +691,47 @@ function generarVistaDetalle(dataArray) {
         }
 
 
+        // 1. Detección a prueba de fallos (ignora si viene null, en mayúsculas o como número 2)
+        const estaObservado = principal.observado == 2;
+
+        let comentarioObservacion = principal.comentario_observacion 
+            ? principal.comentario_observacion 
+            : "Se han encontrado observaciones en su trámite. Por favor, revise y adjunte los documentos requeridos.";
+
+        if (estaObservado) {
+            html += `
+                <div class="alert mb-4 shadow-sm" role="alert" style="background-color: #fff5f5; border: 1px solid #f5c2c7; border-left: 5px solid #dc3545 !important; border-radius: 0.5rem;">
+                    <div class="d-flex gap-3">
+                        <div class="text-danger mt-1">
+                            <i class="fas fa-exclamation-circle fa-2x"></i>
+                        </div>
+                        <div class="w-100">
+                            <h6 class="alert-heading fw-bold mb-1 text-danger">Acción Requerida: Trámite Observado</h6>
+                            <p class="mb-3 small text-dark">${safe(comentarioObservacion)}</p>
+
+                            <div class="bg-white p-3 rounded-2 border" style="border-color: #f5c2c7 !important;">
+                                <form id="formSubsanar_${principal.cod_documento}" class="m-0">
+                                    <label class="form-label fw-semibold small mb-2 text-dark">Adjuntar documento subsanado:</label>
+                                    <div class="input-group input-group-sm">
+                                        <input type="file" class="form-control" id="archivoSubsanacion_${principal.cod_documento}" required>
+                                        <button class="btn btn-primary px-3" type="button" onclick="procesarSubsanacion('${principal.cod_documento}')">
+                                            <i class="fas fa-upload me-1"></i> Enviar Subsanación
+                                        </button>
+                                    </div>
+                                    <div class="form-text mt-1" style="font-size: 11px;">Solo se permiten archivos PDF o ZIP. Max 50MB.</div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                
+            `;
+        }
+
         html += `
         <div class="card mb-4 border-0 shadow-sm rounded-3">
-
             <div class="card-body">
-
                 <h6 class="fw-semibold mb-3 text-primary" style="font-size: 14px;">
                     DATOS PRINCIPALES DEL TRÁMITE
                 </h6>
@@ -686,14 +743,15 @@ function generarVistaDetalle(dataArray) {
                     </div>
 
                     <div class="col-md-6">
+                        <span class="text-muted">N° Documento:</span><br>
+                        <strong>${principal.num_doc ? String(principal.num_doc).padStart(3, '0') : '---'}</strong>
+                    </div>
+
+                    <div class="col-md-6">
                         <span class="text-muted">Asunto:</span><br>
                         <strong class="text-uppercase">${safe(principal.asunto)}</strong>
                     </div>
 
-                    <div class="col-md-6">
-                        <span class="text-muted">N° Documento:</span><br>
-                        <strong>${principal.num_doc ? String(principal.num_doc).padStart(3, '0') : '---'}</strong>
-                    </div>
 
                     <div class="col-md-6">
                         <span class="text-muted">Estado:</span><br>
@@ -703,7 +761,7 @@ function generarVistaDetalle(dataArray) {
 
                 ${htmlReferencias}
 
-                <div class="table-responsive">
+                <div class="table-responsive mt-2">
                     <table class="table align-middle" style="font-size: 13px; border-collapse: separate; border-spacing: 0 8px;">
                         <thead>
                             <tr class="text-muted small">
@@ -726,7 +784,7 @@ function generarVistaDetalle(dataArray) {
         grupo.forEach((data, index) => {
 
             html += `
-                <tr class="bg-white shadow-sm">
+                <tr class="bg-white">
                     <td class="fw-semibold text-center">${index + 1}</td>
 
                     <td class="text-center fw-semibold">
@@ -775,6 +833,23 @@ function generarVistaDetalle(dataArray) {
     $('#contenedorDetallesTramite').html(html);
 }
 
+
+function generarFUT(cod_web) {
+    // Agregamos "includes/" a la ruta
+    const url = `includes/visor_fut.php?cod=${cod_web}`; 
+    
+    const width = 1000;
+    const height = 800;
+    const left = (screen.width - width) / 2;
+    const top = (screen.height - height) / 2;
+
+    window.open(url, 'Vista FUT', 
+        `width=${width},height=${height},top=${top},left=${left},scrollbars=yes`);
+}
+
+
+
+
 function subsanarDocumento(cod_web) {
 
     $('#cod_web_subsanar').val(cod_web);
@@ -784,6 +859,91 @@ function subsanarDocumento(cod_web) {
 
     const modal = new bootstrap.Modal(document.getElementById('modalSubsanar'));
     modal.show();
+}
+
+
+function procesarSubsanacion(codDocumento) {
+    const docSubsanado = document.getElementById(`archivoSubsanacion_${codDocumento}`);
+    const codWeb = $('#contenedorSeguimiento').data('codweb');
+    if (docSubsanado.files.length === 0) {
+        alert("Por favor, seleccione un archivo para subsanar.");
+        return;
+    }
+    const maxSize = 50 * 1024 * 1024; // 20 MB
+    if (docSubsanado.files[0].size > maxSize) {
+        alert("El archivo excede el límite permitido de 50MB.");
+        return;
+    }
+    const formData = new FormData();
+    formData.append("archivo", docSubsanado.files[0]);
+    formData.append("cod_documento", codDocumento);
+
+    const btnSubmit = event.currentTarget || docSubsanado.nextElementSibling;
+    const originalText = btnSubmit.innerHTML;
+    if (btnSubmit) {
+        btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Enviando...';
+        btnSubmit.disabled = true;
+    }
+
+    $.ajax({
+        url: ' ../controladores/documentos.php?op=subsanarDocumento',  
+        type: 'POST',
+        data: formData,
+        contentType: false, 
+        processData: false,  
+        xhr: function() {
+            var xhr = new window.XMLHttpRequest();
+            xhr.upload.addEventListener("progress", function(evt) {
+                if (evt.lengthComputable) {
+                    var percentComplete = Math.round((evt.loaded / evt.total) * 100);
+                    btnSubmit.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${percentComplete}%`;
+                }
+            }, false);
+            return xhr;
+        },
+        success: function(response) {
+            try {
+                    const res = typeof response === 'string' ? JSON.parse(response) : response;
+                
+                    if (res.status === 'success' || res.success) {
+                        Swal.fire({
+                            title: "Trámite subsanado correctamente.",
+                            icon: "success"
+                        });
+                        //obtenerDetalleCompleto(codWeb);
+                        tablaSeguimiento(codWeb);
+                    } else {
+                        Swal.fire({
+                            title: "Ocurrió un problema.",
+                            text: res.message || "Error al subir el archivo.",
+                            icon: "error"
+                        });
+                    }
+                } catch (error) {
+                    console.error("Error al leer la respuesta del servidor:", response);
+                    Swal.fire({
+                        title: "Error",
+                        text: "El archivo se envió, pero hubo un problema al leer la respuesta.",
+                        icon: "error"
+                    });
+                }
+            },
+                error: function(xhr, status, error) {
+                    console.error("Error de AJAX:", error);
+                    Swal.fire({
+                        title: "Error",
+                        text: "Error de conexión al intentar enviar el documento. Intente nuevamente.",
+                        icon: "error"
+                    });
+            },
+                complete: function() {
+                if (btnSubmit) {
+                    btnSubmit.innerHTML = originalText;
+                    btnSubmit.disabled = false;
+                }
+                docSubsanado.value = '';
+            }
+    });
 }
 
 

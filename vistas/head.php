@@ -153,6 +153,17 @@
                 <ul class="list-unstyled">
 
                     <li class="dropdown pc-h-item header-user-profile">
+                        <span class="badge rounded-pill text-bg-secondary me-2">
+                            <?php
+                            if ($_SESSION["nivel"] == 1) {
+                                echo "Pregrado";
+                            } elseif ($_SESSION["nivel"] == 2) {
+                                echo "Posgrado";
+                            } else {
+                                echo "Nivel no definido";
+                            }
+                            ?>
+                        </span>
                         <a
                             class="pc-head-link dropdown-toggle arrow-none me-0"
                             data-bs-toggle="dropdown"
@@ -173,7 +184,7 @@
                                         <div class="flex-grow-1 ms-3">
                                             <h6 class="mb-1"><?php echo $_SESSION['nomcompleto'] ?></h6>
                                             <span><?php echo $_SESSION["correo"] ?></span>
-                                            <span><?php echo $_SESSION["id_car"] ?></span>
+                                            <!-- <span><?php echo $_SESSION["id_car"] ?></span> -->
                                             <div id="id-usuario" data-usu-id="<?php echo $_SESSION['id_estu'] ?>" style="display: none;"></div>
                                         </div>
                                     </div>

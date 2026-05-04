@@ -305,30 +305,35 @@ class Documento
     {
         global $conexion;
         $eliminado = 0;
-        // 1. Preparamos la sentencia
-        $sql = "SELECT COUNT(*) as total FROM documento WHERE id_estu = ? and eliminado = ?";
+        // 1. Preparamos la sentencia tabla Documento
+        $sql = "SELECT COUNT(*) as total FROM documento 
+        WHERE id_estu = ? and eliminado = ?";
         $stmt = mysqli_prepare($conexion, $sql);
 
+        // 2. Verificamos la preparación
         mysqli_stmt_bind_param($stmt, "ii", $id_estu, $eliminado);
-
+        // 3. Ejecutamos y obtenemos el resultado
         mysqli_stmt_execute($stmt);
         $resultado = mysqli_stmt_get_result($stmt);
         $fila = mysqli_fetch_assoc($resultado);
-
         return $fila['total'] + 1;
     }
 
     public function obtenerDatosFUT($cod_web) {
+        // 1. Limpiamos el SQL: agregamos alias a las tablas para mayor claridad
         $sql = "SELECT d.*, o.nombre AS oficina FROM documento d 
         INNER JOIN historial_documento hd ON hd.cod_documento = d.cod_documento 
         INNER JOIN oficina o ON o.cod_oficina = hd.oficina_destino  
         INNER JOIN tb_tupa t ON t.id_tupa = d.id_tupa 
         INNER JOIN tb_tupa_oficina v ON v.id_tupa = t.id_tupa AND v.cod_oficina = o.cod_oficina 
         WHERE d.cod_web = '$cod_web' and d.eliminado = 0";
+        // 2. Ejecutamos la consulta y devolvemos el resultado
         return ejecutarConsulta($sql);
     }
+    
     public function obtenerFirmaFUT($cod_web) {
-        $sql = "SELECT * FROM tb_firma_fut WHERE cod_web = '$cod_web'";
+        $sql = "SELECT * FROM tb_firma_fut 
+        WHERE cod_web = '$cod_web'";
         return ejecutarConsulta($sql);
     }
 
@@ -339,6 +344,20 @@ class Documento
                     nombre_archivo = '$nombre_archivo' 
                 WHERE cod_documento = '$cod_documento'";
         
+        return ejecutarConsulta($sql);
+    }
+    public function obtenerConteoDocs($id_estu){
+        $sql = "SELECT COUNT(*) AS total,
+            SUM(CASE WHEN atendido = 0 THEN 1 ELSE 0 END) AS pendiente, 
+            SUM(CASE WHEN atendido = 1 THEN 1 ELSE 0 END) AS finalizado, 
+            SUM(CASE WHEN atendido = 2 THEN 1 ELSE 0 END) AS observado 
+            FROM documento WHERE id_estu = $id_estu AND eliminado = 0";
+        return ejecutarConsulta($sql);
+    }
+    public function obtenerRecientes($id_estu){
+        $sql = "SELECT d.cod_documento, d.asunto, d.fecha, d.atendido FROM documento d
+        INNER JOIN historial_documento hd ON d.cod_documento = hd.cod_documento 
+        WHERE d.id_estu = $id_estu AND d.eliminado = 0 ORDER BY d.fecha DESC LIMIT 5";
         return ejecutarConsulta($sql);
     }
 }
