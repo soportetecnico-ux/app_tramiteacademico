@@ -833,7 +833,7 @@ function generarVistaDetalle(dataArray) {
 }
 
 
-function generarFUT(cod_web) {
+function generarFUT1(cod_web) {
     // Agregamos "includes/" a la ruta
     const url = `includes/visor_fut.php?cod=${cod_web}`;
 

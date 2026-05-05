@@ -319,7 +319,7 @@ class Documento
         return $fila['total'] + 1;
     }
 
-    public function obtenerDatosFUT($cod_web) {
+/*     public function obtenerDatosFUT($cod_web) {
         // 1. Limpiamos el SQL: agregamos alias a las tablas para mayor claridad
         $sql = "SELECT d.*, o.nombre AS oficina FROM documento d 
         INNER JOIN historial_documento hd ON hd.cod_documento = d.cod_documento 
@@ -335,6 +335,43 @@ class Documento
         $sql = "SELECT * FROM tb_firma_fut 
         WHERE cod_web = '$cod_web'";
         return ejecutarConsulta($sql);
+    } */
+
+    public function esPropietario($cod_web, $id_estu) {
+        global $conexion; // Asegúrate de tener acceso a tu conexión
+        
+        // Usamos parámetros (?) para prevenir SQL Injection
+        $stmt = $conexion->prepare("SELECT id_estu FROM documento WHERE cod_web = ? AND id_estu = ? AND eliminado = 0");
+        $stmt->bind_param("ss", $cod_web, $id_estu);
+        $stmt->execute();
+        $resultado = $stmt->get_result();
+        
+        return ($resultado->num_rows > 0);
+    }
+
+    public function obtenerDatosFUT($cod_web) {
+        global $conexion;
+        // Usamos preparación de sentencia para seguridad
+        $stmt = $conexion->prepare("
+            SELECT d.*, o.nombre AS oficina 
+            FROM documento d 
+            INNER JOIN historial_documento hd ON hd.cod_documento = d.cod_documento 
+            INNER JOIN oficina o ON o.cod_oficina = hd.oficina_destino  
+            INNER JOIN tb_tupa t ON t.id_tupa = d.id_tupa 
+            INNER JOIN tb_tupa_oficina v ON v.id_tupa = t.id_tupa AND v.cod_oficina = o.cod_oficina 
+            WHERE d.cod_web = ? AND d.eliminado = 0
+        ");
+        $stmt->bind_param("s", $cod_web);
+        $stmt->execute();
+        return $stmt->get_result();
+    }
+    
+    public function obtenerFirmaFUT($cod_web) {
+        global $conexion;
+        $stmt = $conexion->prepare("SELECT * FROM tb_firma_fut WHERE cod_web = ?");
+        $stmt->bind_param("s", $cod_web);
+        $stmt->execute();
+        return $stmt->get_result();
     }
 
     public function subsanar($cod_documento, $nombre_archivo) {
