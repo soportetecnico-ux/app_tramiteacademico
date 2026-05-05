@@ -1,7 +1,7 @@
 <?php
 if (strlen(session_id()) < 1)
     session_start();
-if (!isset($_SESSION['id_estu'])) {
+if (!isset($_SESSION['sistema_academico']['id_estu'])) {
     header("Location: ../index.php");
     exit();
 }
@@ -44,7 +44,7 @@ include('head.php')
                                     <div class="row g-2">
                                         <div class="col-md-1">
                                             <div class="form-floating">
-                                                <input type="hidden" id="id_estu" name="id_estu" value="<?php echo $_SESSION['id_estu']; ?>">
+                                                <input type="hidden" id="id_estu" name="id_estu" value="<?php echo $_SESSION['sistema_academico']['id_estu']; ?>">
                                                 <input type="text" class="form-control form-control-sm" id="dni" disabled>
                                                 <label class="small fw-bold">DNI/ID</label>
                                             </div>

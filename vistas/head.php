@@ -63,7 +63,7 @@
                                 <img src="../assets/images/usuario.png" alt="user-image" class="user-avtar wid-45 rounded-circle" />
                             </div>
                             <div class="flex-grow-1 ms-3 me-2">
-                                <h6 class="mb-0"><?php echo $_SESSION['nomcompleto'] ?></h6>
+                                <h6 class="mb-0"><?php echo $_SESSION['sistema_academico']['nomcompleto'] ?></h6>
                             </div>
                             <a class="btn btn-icon btn-link-secondary avtar" data-bs-toggle="collapse" href="#pc_sidebar_userlink">
                                 <svg class="pc-icon">
@@ -149,9 +149,9 @@
                     <li class="dropdown pc-h-item header-user-profile">
                         <span class="badge rounded-pill text-bg-secondary me-2">
                             <?php
-                            if ($_SESSION["nivel"] == 1) {
+                            if ($_SESSION['sistema_academico']["nivel"] == 1) {
                                 echo "Pregrado";
-                            } elseif ($_SESSION["nivel"] == 2) {
+                            } elseif ($_SESSION['sistema_academico']["nivel"] == 2) {
                                 echo "Posgrado";
                             } else {
                                 echo "Nivel no definido";
@@ -176,10 +176,10 @@
                                             <img src="../assets/images/usuario.png" alt="user-image" class="user-avtar wid-35" />
                                         </div>
                                         <div class="flex-grow-1 ms-3">
-                                            <h6 class="mb-1"><?php echo $_SESSION['nomcompleto'] ?></h6>
-                                            <span><?php echo $_SESSION["correo"] ?></span>
-                                            <!-- <span><?php echo $_SESSION["id_car"] ?></span> -->
-                                            <div id="id-usuario" data-usu-id="<?php echo $_SESSION['id_estu'] ?>" style="display: none;"></div>
+                                            <h6 class="mb-1"><?php echo $_SESSION['sistema_academico']['nomcompleto'] ?></h6>
+                                            <span><?php echo $_SESSION['sistema_academico']["correo"] ?></span>
+                                            <!-- <span><?php echo $_SESSION['sistema_academico']["id_car"] ?></span> -->
+                                            <div id="id-usuario" data-usu-id="<?php echo $_SESSION['sistema_academico']['id_estu'] ?>" style="display: none;"></div>
                                         </div>
                                     </div>
                                     <hr class="border-secondary border-opacity-50" />

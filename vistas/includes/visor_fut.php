@@ -12,12 +12,12 @@ $error_msg = null;
 $mostrar_documento = false;
 
 // 1. Validar Sesión
-if (!isset($_SESSION['id_estu'])) {
+if (!isset($_SESSION['sistema_academico']['id_estu'])) {
     $error_msg = "No se encontró una sesión activa. Por favor, inicie sesión nuevamente.";
 }
 // 2. Si hay sesión, Validar Permisos
 else {
-    $tiene_permiso = $doc->esPropietario($codigo, $_SESSION['id_estu']);
+    $tiene_permiso = $doc->esPropietario($codigo, $_SESSION['sistema_academico']['id_estu']);
     if (!$tiene_permiso) {
         $error_msg = "No tienes permisos para ver este FUT.";
     } else {

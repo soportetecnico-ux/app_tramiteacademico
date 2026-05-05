@@ -13,10 +13,10 @@ $fech_crea = $Date->format("Y-m-d H:i:s");
 switch ($_GET["op"]) {
 
     case 'seleccionarTramite':
-        if (!isset($_SESSION)) {
+        if (!isset($_SESSION['sistema_academico'])) {
             session_start();
         }
-        $id_car = $_SESSION['id_car'];
+        $id_car = $_SESSION['sistema_academico']['id_car'];
 
         $rspta = $documentos->seleccionarTramite($id_car);
         echo '<option value="" disabled selected>Seleccione un trámite</option>';
@@ -131,7 +131,7 @@ switch ($_GET["op"]) {
 
     case 'listarMisTramites':
         header('Content-Type: application/json; charset=utf-8');
-        $id_estu = $_SESSION['id_estu'] ?? 0;
+        $id_estu = $_SESSION['sistema_academico']['id_estu'] ?? 0;
 
         $data = $documentos->listarMisTramites($id_estu);
 
@@ -157,7 +157,7 @@ switch ($_GET["op"]) {
 
         header('Content-Type: application/json; charset=utf-8');
 
-        $id_estu = $_SESSION['id_estu'] ?? 0;
+        $id_estu = $_SESSION['sistema_academico']['id_estu'] ?? 0;
         $cod_web = isset($_GET['cod_web']) ? trim($_GET['cod_web']) : '';
 
         $data = $documentos->mostrarSeguimiento($id_estu, $cod_web);
@@ -182,7 +182,7 @@ switch ($_GET["op"]) {
 
     case 'mostrarSeguimientoInicial':
         header('Content-Type: application/json; charset=utf-8');
-        $id_estu = $_SESSION['id_estu'] ?? 0;
+        $id_estu = $_SESSION['sistema_academico']['id_estu'] ?? 0;
         $cod_web = isset($_GET['cod_web']) ? trim($_GET['cod_web']) : '';
 
         $data = $documentos->mostrarSeguimientoInicial($id_estu, $cod_web);
@@ -206,7 +206,7 @@ switch ($_GET["op"]) {
 
     case 'generarFUT':
         // 1. Sesión
-        if (!isset($_SESSION['id_estu'])) die("Error: Sesión no iniciada.");
+        if (!isset($_SESSION['sistema_academico']['id_estu'])) die("Error: Sesión no iniciada.");
 
         // 2. Cargar modelos
         require_once "../modelos/Documento.php";
@@ -217,7 +217,7 @@ switch ($_GET["op"]) {
         $cod_web = $_GET["cod_web"] ?? '';
 
         // 3. Validación de Seguridad (Segunda capa)
-        if (!$doc->esPropietario($cod_web, $_SESSION['id_estu'])) {
+        if (!$doc->esPropietario($cod_web, $_SESSION['sistema_academico']['id_estu'])) {
             die("Acceso Denegado: No tienes permiso para ver este documento.");
         }
 
@@ -318,7 +318,7 @@ switch ($_GET["op"]) {
     case 'listarConteoDocs':
         // 1. PASAMOS LA CABECERA PARA RESPUESTA JSON Y OBTENEMOS EL ID DEL ESTUDIANTE DE LA SESIÓN
         header('Content-Type: application/json; charset=utf-8');
-        $id_estu = $_SESSION['id_estu'] ?? 0;
+        $id_estu = $_SESSION['sistema_academico']['id_estu'] ?? 0;
         // 2. OBTENEMOS EL CONTEO DE DOCUMENTOS POR ESTADO PARA EL ESTUDIANTE
         $data = $documentos->obtenerConteoDocs($id_estu);
         // 3. PROCESAMOS LOS RESULTADOS EN UN ARRAY PARA DATATABLE
@@ -341,7 +341,7 @@ switch ($_GET["op"]) {
     case 'listarReciente':
         // 1. PASAMOS LA CABECERA PARA RESPUESTA JSON Y OBTENEMOS EL ID DEL ESTUDIANTE DE LA SESIÓN
         header('Content-Type: application/json; charset=utf-8');
-        $id_estu = $_SESSION['id_estu'] ?? 0;
+        $id_estu = $_SESSION['sistema_academico']['id_estu'] ?? 0;
         // 2. OBTENEMOS LOS DOCUMENTOS RECIENTES DEL ESTUDIANTE
         $data = $documentos->obtenerRecientes($id_estu);
         // 3. PROCESAMOS LOS RESULTADOS PARA MAPEAR ESTADOS Y FORMATEAR FECHAS
