@@ -52,7 +52,7 @@ switch ($_GET["op"]) {
 
     case 'obtenerDatosUsuario':
 
-        $id_estu = $_SESSION['id_estu'];
+        $id_estu = $_SESSION['sistema_academico']['id_estu'];
 
         $rspta = $usuarios->obtenerDatosUsuario($id_estu);
 

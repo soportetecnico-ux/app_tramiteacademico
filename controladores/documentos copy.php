@@ -13,10 +13,10 @@ $fech_crea = $Date->format("Y-m-d H:i:s");
 switch ($_GET["op"]) {
 
     case 'seleccionarTramite':
-        if (!isset($_SESSION)) {
+        if (!isset($_SESSION['sistema_academico'])) {
             session_start();
         }
-        $id_car = $_SESSION['id_car'];
+        $id_car = $_SESSION['sistema_academico']['id_car'];
 
         $rspta = $documentos->seleccionarTramite($id_car);
         echo '<option value="" disabled selected>Seleccione un trámite</option>';
@@ -131,7 +131,7 @@ switch ($_GET["op"]) {
 
     case 'listarMisTramites':
         header('Content-Type: application/json; charset=utf-8');
-        $id_estu = $_SESSION['id_estu'] ?? 0;
+        $id_estu = $_SESSION['sistema_academico']['id_estu'] ?? 0;
 
         $data = $documentos->listarMisTramites($id_estu);
 
@@ -154,33 +154,35 @@ switch ($_GET["op"]) {
         break;
 
     case 'mostrarSeguimiento':
+
         header('Content-Type: application/json; charset=utf-8');
-        $id_estu = $_SESSION['id_estu'] ?? 0;
+
+        $id_estu = $_SESSION['sistema_academico']['id_estu'] ?? 0;
         $cod_web = isset($_GET['cod_web']) ? trim($_GET['cod_web']) : '';
 
         $data = $documentos->mostrarSeguimiento($id_estu, $cod_web);
 
-        $tramites = array();
+        $tramites = [];
+
         if ($data) {
             while ($row = mysqli_fetch_assoc($data)) {
                 $tramites[] = $row;
             }
         }
 
-        $results = array(
+        echo json_encode([
             "sEcho" => 1,
             "iTotalRecords" => count($tramites),
             "iTotalDisplayRecords" => count($tramites),
             "aaData" => $tramites
-        );
+        ]);
 
-        echo json_encode($results);
         break;
 
 
     case 'mostrarSeguimientoInicial':
         header('Content-Type: application/json; charset=utf-8');
-        $id_estu = $_SESSION['id_estu'] ?? 0;
+        $id_estu = $_SESSION['sistema_academico']['id_estu'] ?? 0;
         $cod_web = isset($_GET['cod_web']) ? trim($_GET['cod_web']) : '';
 
         $data = $documentos->mostrarSeguimientoInicial($id_estu, $cod_web);
@@ -201,4 +203,34 @@ switch ($_GET["op"]) {
 
         echo json_encode($results);
         break;
+
+    case 'generarFUT':
+    $cod_web = $_GET["cod_web"];
+    
+    require_once "../modelos/Documento.php";
+    $doc = new Documento();
+    $rspta_doc = $doc->obtenerDatosFUT($cod_web);
+    $reg_doc = $rspta_doc->fetch_object();
+
+    if ($reg_doc) {
+        $id_estu = $reg_doc->id_estu;
+
+        require_once "../modelos/Usuario.php";
+        $usuario = new Usuario();
+        $reg_usuario = $usuario->obtenerDatosUsuario($id_estu);
+
+        $rspta_firma = $doc->obtenerFirmaFUT($cod_web);
+        $reg_firma = $rspta_firma->fetch_object();
+
+        // Forzamos la acción de preview para que el PDF se muestre en pantalla
+        $_GET['accion'] = 'preview'; 
+
+        // Cargamos la vista (ahora usará $reg_doc y $reg_usuario)
+        require_once "../vistas/includes/generar_fut.php";
+    } else {
+        echo "Error: No se encontró el trámite.";
+    }
+    break;
+
+        
 }

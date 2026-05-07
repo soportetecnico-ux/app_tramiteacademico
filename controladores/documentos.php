@@ -13,10 +13,10 @@ $fech_crea = $Date->format("Y-m-d H:i:s");
 switch ($_GET["op"]) {
 
     case 'seleccionarTramite':
-        if (!isset($_SESSION)) {
+        if (!isset($_SESSION['sistema_academico'])) {
             session_start();
         }
-        $id_car = $_SESSION['id_car'];
+        $id_car = $_SESSION['sistema_academico']['id_car'];
 
         $rspta = $documentos->seleccionarTramite($id_car);
         echo '<option value="" disabled selected>Seleccione un trámite</option>';
@@ -131,7 +131,7 @@ switch ($_GET["op"]) {
 
     case 'listarMisTramites':
         header('Content-Type: application/json; charset=utf-8');
-        $id_estu = $_SESSION['id_estu'] ?? 0;
+        $id_estu = $_SESSION['sistema_academico']['id_estu'] ?? 0;
 
         $data = $documentos->listarMisTramites($id_estu);
 
@@ -157,7 +157,7 @@ switch ($_GET["op"]) {
 
         header('Content-Type: application/json; charset=utf-8');
 
-        $id_estu = $_SESSION['id_estu'] ?? 0;
+        $id_estu = $_SESSION['sistema_academico']['id_estu'] ?? 0;
         $cod_web = isset($_GET['cod_web']) ? trim($_GET['cod_web']) : '';
 
         $data = $documentos->mostrarSeguimiento($id_estu, $cod_web);
@@ -182,7 +182,7 @@ switch ($_GET["op"]) {
 
     case 'mostrarSeguimientoInicial':
         header('Content-Type: application/json; charset=utf-8');
-        $id_estu = $_SESSION['id_estu'] ?? 0;
+        $id_estu = $_SESSION['sistema_academico']['id_estu'] ?? 0;
         $cod_web = isset($_GET['cod_web']) ? trim($_GET['cod_web']) : '';
 
         $data = $documentos->mostrarSeguimientoInicial($id_estu, $cod_web);
@@ -205,8 +205,41 @@ switch ($_GET["op"]) {
         break;
 
     case 'generarFUT':
+        // 1. Sesión
+        if (!isset($_SESSION['sistema_academico']['id_estu'])) die("Error: Sesión no iniciada.");
+
+        // 2. Cargar modelos
+        require_once "../modelos/Documento.php";
+        require_once "../modelos/Usuario.php";
+        $doc = new Documento();
+        $usuario = new Usuario();
+
+        $cod_web = $_GET["cod_web"] ?? '';
+
+        // 3. Validación de Seguridad (Segunda capa)
+        if (!$doc->esPropietario($cod_web, $_SESSION['sistema_academico']['id_estu'])) {
+            die("Acceso Denegado: No tienes permiso para ver este documento.");
+        }
+
+        // 4. Si pasó la seguridad, traemos los datos (ya no validamos de nuevo, ya es seguro)
+        $rspta_doc = $doc->obtenerDatosFUT($cod_web);
+        $reg_doc = $rspta_doc->fetch_object();
+
+        if ($reg_doc) {
+            $reg_usuario = $usuario->obtenerDatosUsuario($reg_doc->id_estu);
+            $reg_firma = $doc->obtenerFirmaFUT($cod_web)->fetch_object();
+
+            $_GET['accion'] = 'preview';
+            require_once "../vistas/includes/generar_fut.php";
+        } else {
+            echo "Error: No se encontró el trámite.";
+        }
+        break;
+
+
+    case 'generarFUT1':
         $cod_web = $_GET["cod_web"];
-        
+
         require_once "../modelos/Documento.php";
         $doc = new Documento();
         $rspta_doc = $doc->obtenerDatosFUT($cod_web);
@@ -223,7 +256,7 @@ switch ($_GET["op"]) {
             $reg_firma = $rspta_firma->fetch_object();
 
             // Forzamos la acción de preview para que el PDF se muestre en pantalla
-            $_GET['accion'] = 'preview'; 
+            $_GET['accion'] = 'preview';
 
             // Cargamos la vista (ahora usará $reg_doc y $reg_usuario)
             require_once "../vistas/includes/generar_fut.php";
@@ -231,14 +264,14 @@ switch ($_GET["op"]) {
             echo "Error: No se encontró el trámite.";
         }
         break;
-    
-     case 'subsanarDocumento':
+
+    case 'subsanarDocumento':
         // 1. VALIDACION DE DATOS
         $cod_documento = isset($_POST["cod_documento"]) ? $_POST["cod_documento"] : "";
         $archivo_file = isset($_FILES["archivo"]) ? $_FILES["archivo"] : null;
 
         if (empty($cod_documento) || !$archivo_file || $archivo_file['error'] !== UPLOAD_ERR_OK) {
-             echo json_encode(["status" => "error", "message" => "Faltan datos obligatorios o error en carga."]);
+            echo json_encode(["status" => "error", "message" => "Faltan datos obligatorios o error en carga."]);
             exit;
         }
         // 2. CONFIGURACION Y SANITIZACION DEL ARCHIVO
@@ -250,6 +283,7 @@ switch ($_GET["op"]) {
             echo json_encode(["status" => "error", "message" => "Formato no permitido."]);
             exit;
         }
+
         $nombre_raiz = substr(preg_replace('/[^A-Za-z0-9\-]/', '', str_replace(' ', '_', pathinfo($originalName, PATHINFO_FILENAME))), 0, 80);
         $anioActual = date("Y");
         $rutaRelativa = "academicos/" . $anioActual . "/";
@@ -263,20 +297,20 @@ switch ($_GET["op"]) {
         $destinoFull = $rutaBase . $nombreFinal;
 
         // 3. MOVEMOS EL ARCHIVO 
-         if (move_uploaded_file($archivo_file['tmp_name'], $destinoFull)) {
-             
+        if (move_uploaded_file($archivo_file['tmp_name'], $destinoFull)) {
+
             $rutaParaBD = $rutaRelativa . $nombreFinal;
-            
-        // 4. ACTUALIZACION EN BD 
+
+            // 4. ACTUALIZACION EN BD 
             $res = $documentos->subsanar($cod_documento, $rutaParaBD);
-             
+
             if ($res) {
                 echo json_encode(["status" => "success", "message" => "Subsanación registrada correctamente."]);
             } else {
                 echo json_encode(["status" => "error", "message" => "Error al actualizar la BD."]);
             }
         } else {
-             echo json_encode(["status" => "error", "message" => "Error crítico al mover el archivo."]);
+            echo json_encode(["status" => "error", "message" => "Error crítico al mover el archivo."]);
         }
 
         break;
@@ -284,14 +318,14 @@ switch ($_GET["op"]) {
     case 'listarConteoDocs':
         // 1. PASAMOS LA CABECERA PARA RESPUESTA JSON Y OBTENEMOS EL ID DEL ESTUDIANTE DE LA SESIÓN
         header('Content-Type: application/json; charset=utf-8');
-        $id_estu = $_SESSION['id_estu'] ?? 0;
+        $id_estu = $_SESSION['sistema_academico']['id_estu'] ?? 0;
         // 2. OBTENEMOS EL CONTEO DE DOCUMENTOS POR ESTADO PARA EL ESTUDIANTE
         $data = $documentos->obtenerConteoDocs($id_estu);
         // 3. PROCESAMOS LOS RESULTADOS EN UN ARRAY PARA DATATABLE
         $conteoDocs = array();
         if ($data) {
             while ($row = mysqli_fetch_assoc($data)) {
-                 $conteoDocs[] = $row;
+                $conteoDocs[] = $row;
             }
         }
         // 4. RETORNAMOS LOS RESULTADOS EN EL FORMATO QUE ESPERA DATATABLE
@@ -307,7 +341,7 @@ switch ($_GET["op"]) {
     case 'listarReciente':
         // 1. PASAMOS LA CABECERA PARA RESPUESTA JSON Y OBTENEMOS EL ID DEL ESTUDIANTE DE LA SESIÓN
         header('Content-Type: application/json; charset=utf-8');
-        $id_estu = $_SESSION['id_estu'] ?? 0;
+        $id_estu = $_SESSION['sistema_academico']['id_estu'] ?? 0;
         // 2. OBTENEMOS LOS DOCUMENTOS RECIENTES DEL ESTUDIANTE
         $data = $documentos->obtenerRecientes($id_estu);
         // 3. PROCESAMOS LOS RESULTADOS PARA MAPEAR ESTADOS Y FORMATEAR FECHAS
@@ -363,5 +397,5 @@ switch ($_GET["op"]) {
             "iTotalDisplayRecords" => count($actividad),
             "aaData"               => $actividad
         ]);
-    break;
+        break;
 }

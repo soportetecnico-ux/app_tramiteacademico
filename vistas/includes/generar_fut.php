@@ -4,7 +4,7 @@ if (!isset($reg_doc) || !isset($reg_usuario)) {
     exit("Acceso denegado: Datos insuficientes.");
 }
 
-require_once __DIR__ . '/../../vendor/autoload.php';
+require_once __DIR__ . '/../../vendor2/autoload.php';
 use Dompdf\Dompdf;
 use Dompdf\Options;
  
@@ -201,7 +201,7 @@ ob_start();
     <td><?= $dni ?></td>
   </tr>
 
-  <tr>
+  <!-- <tr>
     <th colspan="3" class="font-bold sl">PERSONA JURÍDICA</th>
     <th colspan="1" class="font-bold sl text-center">RUC</th>
   </tr>
@@ -213,7 +213,7 @@ ob_start();
        <span style="color: #666;">------------------------------------------------------</span>
     </td>
     <td class="font-bold" style="vertical-align: middle; width: 40%;">N°</td>
-  </tr>
+  </tr> -->
 </table>
 
 <table>

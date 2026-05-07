@@ -1,7 +1,7 @@
 <?php
 if (strlen(session_id()) < 1)
     session_start();
-if (!isset($_SESSION['id_estu'])) {
+if (!isset($_SESSION['sistema_academico']['id_estu'])) {
     header("Location: ../index.php");
     exit();
 }

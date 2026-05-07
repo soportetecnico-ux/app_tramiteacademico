@@ -37,19 +37,20 @@ if (isset($_GET["code"])) {
 
         if ($rspta && $rspta->num_rows > 0) {
 
-            $fetch = $rspta->fetch_object();
+                       $fetch = $rspta->fetch_object();
 
-            // SESIÓN CON TABLA
-            $_SESSION['id_estu'] = $fetch->id_estu;
-            $_SESSION['correo'] = $fetch->email_estu;
-            $_SESSION['id_car']  = $fetch->id_car;
+            // SESIÓN CON TABLA (ENCAPSULADA EN EL ARRAY 'sistema_academico')
+            $_SESSION['sistema_academico']['id_estu']    = $fetch->id_estu;
+            $_SESSION['sistema_academico']['correo']     = $fetch->email_estu;
+            $_SESSION['sistema_academico']['id_car']     = $fetch->id_car;
+            $_SESSION['sistema_academico']['nivel']      = $fetch->nivel;
 
-            $_SESSION['nomcompleto'] = 
+            $_SESSION['sistema_academico']['nomcompleto'] = 
                 $fetch->nom_estu . ' ' . 
                 $fetch->apepa_estu . ' ' . 
                 $fetch->apema_estu;
 
-            $_SESSION['user_image'] = $data['picture'];
+            $_SESSION['sistema_academico']['user_image'] = $data['picture'];
 
             header('Location: ./vistas/index.php');
             exit;
@@ -141,8 +142,8 @@ $login_button = '
                 <div class="w-100 p-5" style="max-width: 400px;">
                     <div class="text-center mb-4">
                         <img src="../imagenes/logo-tramite.png" alt="Escudo" class="mb-3" width="60">
-                        <h5 class="fw-bold text-undc mb-0">TRÁMITES</h5>
-                        <p class="small fw-bold text-undc mb-4">ACADÉMICOS</p>
+                        <h5 class="fw-bold text-undc mb-0">SISTEMA DE TRÁMITES ACADÉMICOS</h5>
+                        <!-- <p class="small fw-bold text-undc mb-4">ACADÉMICOS</p> -->
                         
                         <p class="text-muted small">Iniciar sesión con su correo y contraseña.</p>
                         <?php echo '<div class="d-grid my-3">' . $login_button . '</div>'; ?>

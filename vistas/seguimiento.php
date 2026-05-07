@@ -1,7 +1,7 @@
 <?php
 if (strlen(session_id()) < 1)
     session_start();
-if (!isset($_SESSION['id_estu'])) {
+if (!isset($_SESSION['sistema_academico']['id_estu'])) {
     header("Location: ../index.php");
     exit();
 }
@@ -49,7 +49,7 @@ $cod_web = $_POST['cod_web'] ?? '';
 
                     <div class="card-body">
                         <div class="table-responsive py-3">
-                            <table id="tablaSeguimiento" class="table table-hover align-middle w-100" >
+                            <table id="tablaSeguimiento" class="table table-hover align-middle w-100">
                                 <thead class="bg-light">
                                     <tr>
                                         <th class="border-0 text-uppercase text-muted" style="font-size: 11px; font-weight: 700;">Asunto</th>
@@ -64,7 +64,7 @@ $cod_web = $_POST['cod_web'] ?? '';
                         </div>
 
                         <div class="mt-4">
-                            
+
                             <div id="contenedorDetallesTramite" class="p-3 border rounded-3 bg-light-subtle">
                                 <p class="text-muted small mb-0 text-center">Seleccione un movimiento para ver detalles adicionales.</p>
                             </div>
@@ -72,6 +72,42 @@ $cod_web = $_POST['cod_web'] ?? '';
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalSubsanar" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-3 shadow">
+
+            <div class="modal-header">
+                <h5 class="modal-title">Subsanar Documento</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+
+                <input type="hidden" id="cod_web_subsanar">
+
+                <div class="mb-3">
+                    <label class="form-label">Adjuntar archivo</label>
+                    <input type="file" id="archivoSubsanar" class="form-control">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Comentario</label>
+                    <textarea id="comentarioSubsanar" class="form-control" rows="3"></textarea>
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button class="btn btn-primary" onclick="guardarSubsanacion()">
+                    Guardar
+                </button>
+            </div>
+
         </div>
     </div>
 </div>

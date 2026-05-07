@@ -8,12 +8,6 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="description"
-        content="Able Pro is a trending dashboard template built with the Bootstrap 5 design framework. It is available in multiple technologies, including Bootstrap, React, Vue, CodeIgniter, Angular, .NET, and more.">
-    <meta name="keywords"
-        content="Bootstrap admin template, Dashboard UI Kit, Dashboard Template, Backend Panel, react dashboard, angular dashboard">
-    <meta name="author" content="Phoenixcoded">
-
     <!-- [Favicon] icon -->
     <link rel="icon" href="../assets/images/sistema/logo-tramite.png" type="image/x-icon"> <!-- [Font] Family -->
     <!-- <link rel="stylesheet" href="../assets/fonts/inter/inter.css" id="main-font-link" /> -->
@@ -66,10 +60,10 @@
                     <div class="card-body">
                         <div class="d-flex align-items-center">
                             <div class="flex-shrink-0">
-                                <img src="../assets/images/user_logo.png" alt="user-image" class="user-avtar wid-45 rounded-circle" />
+                                <img src="../assets/images/usuario.png" alt="user-image" class="user-avtar wid-45 rounded-circle" />
                             </div>
                             <div class="flex-grow-1 ms-3 me-2">
-                                <h6 class="mb-0"><?php echo $_SESSION['nomcompleto'] ?></h6>
+                                <h6 class="mb-0"><?php echo $_SESSION['sistema_academico']['nomcompleto'] ?></h6>
                             </div>
                             <a class="btn btn-icon btn-link-secondary avtar" data-bs-toggle="collapse" href="#pc_sidebar_userlink">
                                 <svg class="pc-icon">
@@ -153,6 +147,17 @@
                 <ul class="list-unstyled">
 
                     <li class="dropdown pc-h-item header-user-profile">
+                        <span class="badge rounded-pill text-bg-secondary me-2">
+                            <?php
+                            if ($_SESSION['sistema_academico']["nivel"] == 1) {
+                                echo "Pregrado";
+                            } elseif ($_SESSION['sistema_academico']["nivel"] == 2) {
+                                echo "Posgrado";
+                            } else {
+                                echo "Nivel no definido";
+                            }
+                            ?>
+                        </span>
                         <a
                             class="pc-head-link dropdown-toggle arrow-none me-0"
                             data-bs-toggle="dropdown"
@@ -161,20 +166,20 @@
                             aria-haspopup="false"
                             data-bs-auto-close="outside"
                             aria-expanded="false">
-                            <img src="../assets/images/user_logo.png" alt="user-image" class="user-avtar" />
+                            <img src="../assets/images/usuario.png" alt="user-image" class="user-avtar" />
                         </a>
                         <div class="dropdown-menu dropdown-user-profile dropdown-menu-end pc-h-dropdown">
                             <div class="dropdown-body">
                                 <div class="profile-notification-scroll position-relative" style="max-height: calc(100vh - 225px)">
                                     <div class="d-flex mb-1">
                                         <div class="flex-shrink-0">
-                                            <img src="../assets/images/user_logo.png" alt="user-image" class="user-avtar wid-35" />
+                                            <img src="../assets/images/usuario.png" alt="user-image" class="user-avtar wid-35" />
                                         </div>
                                         <div class="flex-grow-1 ms-3">
-                                            <h6 class="mb-1"><?php echo $_SESSION['nomcompleto'] ?></h6>
-                                            <span><?php echo $_SESSION["correo"] ?></span>
-                                            <span><?php echo $_SESSION["id_car"] ?></span>
-                                            <div id="id-usuario" data-usu-id="<?php echo $_SESSION['id_estu'] ?>" style="display: none;"></div>
+                                            <h6 class="mb-1"><?php echo $_SESSION['sistema_academico']['nomcompleto'] ?></h6>
+                                            <span><?php echo $_SESSION['sistema_academico']["correo"] ?></span>
+                                            <!-- <span><?php echo $_SESSION['sistema_academico']["id_car"] ?></span> -->
+                                            <div id="id-usuario" data-usu-id="<?php echo $_SESSION['sistema_academico']['id_estu'] ?>" style="display: none;"></div>
                                         </div>
                                     </div>
                                     <hr class="border-secondary border-opacity-50" />
