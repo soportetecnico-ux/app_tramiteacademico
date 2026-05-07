@@ -3,8 +3,11 @@ let datosUsuarioGlobal = null;
 $(document).ready(function () {
     cargarDatosUsuario();
     listarTramites();
-    listarConteoDocs();
-    listarActividadReciente();
+    if ($('#contenedorDashboard').length > 0) {
+        listarConteoDocs();
+        listarActividadReciente();
+    }
+     
 
     const $contenedor = $('#contenedorSeguimiento');
 
@@ -27,6 +30,10 @@ $(document).ready(function () {
     });
     $("#id_tupa").on("change", function () {
         const opt = $(this).find('option:selected');
+
+        //Añadimos para capturar el valor del trámite seleccionado, para usarlo en la verificación en SIVIRENO
+        const idTupa = $(this).val();
+
         const nombreTramite = opt.text();
 
         // 1. OBTENER DATOS DE LA OPCIÓN SELECCIONADA
@@ -45,6 +52,8 @@ $(document).ready(function () {
 
             // Actualizar el texto de la fundamentación según el trámite
             actualizarPlantillaFundamentacion(nombreTramite);
+            // --- NUEVO: LÓGICA DE VERIFICACIÓN EN SIVIRENO ---
+            verificarTramiteEstu(idTupa);
 
         } else {
             // --- SI NO HAY NADA SELECCIONADO (Opción por defecto) ---
@@ -54,6 +63,8 @@ $(document).ready(function () {
             $("#lbl_monto").text("");
 
             actualizarPlantillaFundamentacion("[SELECCIONE UN TRÁMITE]");
+            // NUEVO: Deshabilitar botón si no hay trámite seleccionado
+            $("#btnEnviar").prop("disabled", true);
         }
     });
 });
@@ -1068,7 +1079,41 @@ function listarActividadReciente() {
         .catch(err => console.error('Error actividad reciente:', err));
 }
 
+   /* NUEVA FUNCIÓN: Consulta al controlador de Sivireno*/
+  function verificarTramiteEstu(idTupa) {
+    const btn = $("#btn-enviar"); 
+    btn.prop("disabled", true).html('<i class="fa fa-spinner fa-spin"></i> Verificando...');
 
+    $.post("../controladores/sivireno.php?op=verificarTramite", { id_tupa: idTupa }, function(data) {
+        try {
+            const res = JSON.parse(data);
+            
+            if (res.status) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Requisito cumplido',
+                    text: res.mensaje,
+                    confirmButtonColor: '#3085d6'
+                });
+                // CUMPLE
+                btn.prop("disabled", false).text("Enviar Solicitud").addClass("btn-primary").removeClass("btn-danger");
+             } else {
+                // NO CUMPLE
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Requisito no cumplido',
+                    text: res.mensaje,
+                    confirmButtonColor: '#3085d6'
+                });
+                btn.prop("disabled", false).text("Enviar Solicitud").addClass("btn-primary").removeClass("btn-danger");
+                //btn.text("No disponible").prop("disabled", true).addClass("btn-danger");
+            }
+        } catch (e) {
+            console.error("Error JSON:", data);  
+            btn.text("Error de sistema").prop("disabled", true);
+        }
+    });
+}
 
 
 /* function irASeguimiento(codWeb) {
