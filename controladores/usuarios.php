@@ -14,40 +14,30 @@ $fech_crea = $Date->format("Y-m-d H:i:s");
 switch ($_GET["op"]) {
 
     case 'salir':
-        include('../google/config.php');
-
-        // Revocar token de Google
-        $google_client->revokeToken();
-
-        // Limpiar sesión completamente
-        session_start();
-        $_SESSION = [];
-        session_unset();
-        session_destroy();
-
-        // Eliminar cookies de sesión si existen
-        if (ini_get("session.use_cookies")) {
-            $params = session_get_cookie_params();
-            setcookie(
-                session_name(),
-                '',
-                time() - 42000,
-                $params["path"],
-                $params["domain"],
-                $params["secure"],
-                $params["httponly"]
-            );
+        // 1. Asegurar que tenemos la sesión
+        if (strlen(session_id()) < 1) {
+            session_start();
         }
 
-        // Evitar que el navegador guarde caché
+        // 2. LOGOUT QUIRÚRGICO: Solo eliminamos lo que pertenece a este sistema
+        // Esto mantiene viva la sesión del navegador para que el OTRO sistema no se cierre
+        unset($_SESSION['sistema_academico']);
+        unset($_SESSION['access_token']);
+
+        // 3. Revocar Token de Google (con validación de existencia)
+        include('../google/config.php');
+        if (isset($google_client)) {
+            $google_client->revokeToken();
+        }
+
+        // 4. Prevenir caché (Crucial para que no puedan volver atrás)
         header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
         header("Cache-Control: post-check=0, pre-check=0", false);
         header("Pragma: no-cache");
 
-        // Redireccionar al login
+        // 5. Redireccionar al login
         header("Location: ../index.php");
         exit();
-
 
 
     case 'obtenerDatosUsuario':

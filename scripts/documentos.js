@@ -451,7 +451,7 @@ function listarTramites() {
 
                     // OJO AQUÍ: Si data ya trae "academicos/2026/...", 
                     // solo retrocedemos hasta la carpeta 'archivos' o donde inicie la ruta.
-                    const rutaArchivo = `../../views/archivos/${data}`;
+                    const rutaArchivo = `./../vistas/includes/descargar.php?file=${encodeURIComponent(data)}`;
 
                     return `
             <div class="d-inline-block">
@@ -591,7 +591,7 @@ function tablaSeguimiento(codWeb) {
                         case 2:
                             texto = 'Observado';
                             clase = 'text-bg-danger';
-            
+
                             break;
 
                         default:

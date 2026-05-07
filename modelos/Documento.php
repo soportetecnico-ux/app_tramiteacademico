@@ -36,7 +36,7 @@ class Documento
         try {
 
             $nro_documento = $this->obtenerCorrelativo($data['id_estu']);
-            // --- A. TABLA: documento --- (Tu código existente)
+            
             $sqlDoc = "INSERT INTO documento (asunto, mensaje, folio, fecha, fecha_emision, numero, cod_tipo_documento, cod_oficina, cod_estado_documento, cod_estado_documento2, anexos, cod_usuario, cod_web, id_estu, id_tupa, celular_estu, comprobante, fecha_comprobante, observaciones, nombre_archivo,tipo_tramite) 
                    VALUES (?, ?, 1, NOW(), CURDATE(), ?, 6, 1, 3, 'Derivado', 1, 2, ?, ?, ?, ?, ?, ?, ?, ?, 'TA')";
 
