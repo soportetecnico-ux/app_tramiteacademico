@@ -18,7 +18,7 @@ include('head.php')
             <div class="col-12">
                 <div class="card border-0 shadow-sm mb-4"
                     style="background: linear-gradient(130deg, #1340a8 0%, #2563eb 55%, #4f8ef7 100%); border-radius: 15px !important;">
-                    <div class="card-body-banner p-4">
+                    <div class="card-body-banner p-4" id="contenedorDashboard">
                         <div class="d-flex align-items-center">
                             <div class="d-flex align-items-center justify-content-center rounded-circle flex-shrink-0 shadow-sm"
                                 style="width: 54px; height: 54px; background-color: #fff; color: #0e5fbb; border: 2px solid #edf2ff;">
