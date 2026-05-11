@@ -52,8 +52,48 @@ class Sivireno
         public function numAsigAprobadas($id_estu) {
             $sql = "SELECT COUNT(*) as total_aprobados 
                         FROM asignacion_estudiante 
-                        WHERE id_estu = $id_estu 
+                        WHERE id_estu = '$id_estu' 
                         AND profinal_record >= 11";
+            return ejecutarConsultaSimpleFila2($sql);
+        }
+
+        public function obtenerSemestreCulminado($id_estu) {
+            $sql = "SELECT fm.id_semestre, s.nomsemestre 
+                    FROM ficha_matricula fm
+                    INNER JOIN semestre s ON fm.id_semestre = s.id_semestre
+                    WHERE fm.id_estu = '$id_estu' 
+                    AND s.activo = 'no' 
+                    AND s.tiposemestre = 'r' 
+                    AND fm.anulado = 0 
+                    AND fm.borrado = 0
+                    ORDER BY s.id_semestre DESC 
+                    LIMIT 1";
+             return ejecutarConsultaSimpleFila2($sql);
+        }
+        public function obtenerOrdenMerito($id_estu, $id_semestre_old) {
+            $sql = "SELECT om as 'orden de merito'
+                    FROM ficha_matricula
+                    WHERE id_estu = '$id_estu' 
+                    AND id_semestre = '$id_semestre_old'
+                    AND anulado = 0 
+                    AND borrado = 0";
+            return ejecutarConsultaSimpleFila2($sql);
+        }
+        public function ObtenerEgresado($id_estu){
+            $sql = "SELECT * FROM `egresados`
+             WHERE id_estu=$id_estu;";
+            return ejecutarConsultaSimpleFila2($sql);
+        }
+        public function verificarPractica($id_estu, $id_semestre) {
+            $sql = "SELECT COUNT(*) AS total_practicas 
+                    FROM ficha_matricula fm
+                    INNER JOIN asignacion_estudiante ae ON fm.id_ficham = ae.id_ficham 
+                    INNER JOIN asignatura a ON ae.id_asi = a.id_asi 
+                    WHERE fm.id_estu = '$id_estu' 
+                    AND fm.id_semestre = '$id_semestre'  
+                    AND (UPPER(a.nom_asi) LIKE '%PR%CTICA%PRE%PROFESIONAL%' 
+                        OR UPPER(a.nom_asi) LIKE '%PR%CTICA%PREPROFESIONAL%')";
+            
             return ejecutarConsultaSimpleFila2($sql);
         }
 }

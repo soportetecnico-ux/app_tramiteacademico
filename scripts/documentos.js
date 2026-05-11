@@ -1087,6 +1087,7 @@ function listarActividadReciente() {
     $.post("../controladores/sivireno.php?op=verificarTramite", { id_tupa: idTupa }, function(data) {
         try {
             const res = JSON.parse(data);
+            btn.removeClass("btn-primary btn-danger btn-warning");
             
             if (res.status) {
                 Swal.fire({
@@ -1105,11 +1106,17 @@ function listarActividadReciente() {
                     text: res.mensaje,
                     confirmButtonColor: '#3085d6'
                 });
-                btn.prop("disabled", false).text("Enviar Solicitud").addClass("btn-primary").removeClass("btn-danger");
-                //btn.text("No disponible").prop("disabled", true).addClass("btn-danger");
+                if (res.bloqueo) {
+                    // Bloqueo total (Ej. No es egresado o 0 notas aprobadas)
+                    btn.text("No disponible").prop("disabled", true).addClass("btn-danger");
+                } else {
+                    // Excepción flexible (Puede intentar enviarlo)
+                    btn.prop("disabled", false).text("Enviar Solicitud").addClass("btn-warning");
+                }
             }
         } catch (e) {
             console.error("Error JSON:", data);  
+            btn.removeClass("btn-primary btn-warning").addClass("btn-danger");
             btn.text("Error de sistema").prop("disabled", true);
         }
     });
