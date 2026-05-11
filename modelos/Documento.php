@@ -386,7 +386,7 @@ class Documento
     public function obtenerConteoDocs($id_estu){
         $sql = "SELECT COUNT(*) AS total,
             SUM(CASE WHEN atendido = 0 THEN 1 ELSE 0 END) AS pendiente, 
-            SUM(CASE WHEN atendido = 1 THEN 1 ELSE 0 END) AS finalizado, 
+            SUM(CASE WHEN atendido = 1 THEN 1 ELSE 0 END) AS atendido, 
             SUM(CASE WHEN atendido = 2 THEN 1 ELSE 0 END) AS observado 
             FROM documento WHERE id_estu = $id_estu AND eliminado = 0";
         return ejecutarConsulta($sql);

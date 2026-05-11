@@ -26,7 +26,7 @@ include('head.php')
                             </div>
 
                             <div class="flex-grow-1 ms-3">
-                                <h5 class="mb-1 fw-bold" style="font-size:1.1rem; font-weight:700; color:#fff; margin-bottom:3px; letter-spacing:-.2px;">¡Bienvenido a la Mesa de Partes Académica!</h5>
+                                <h5 class="mb-1 fw-bold" style="font-size:1.1rem; font-weight:700; color:#fff; margin-bottom:3px; letter-spacing:-.2px;">¡Bienvenido al Sistema de Trámites Académicos!</h5>
                                 <p class="mb-0" style="font-size:.85rem; color:rgba(255,255,255);">Gestiona tus solicitudes de forma eficiente y realiza el seguimiento en tiempo real.</p>
                             </div>
                         </div>
@@ -73,7 +73,7 @@ include('head.php')
                         <div class="progress">
                             <div class="progress-fill" id="pb-pendientes"></div>
                         </div>
-                        <p class="stat-footer">Del total <span id="f-proc">89%</span></p>
+                        <p class="stat-footer">En trámite <span id="f-proc">89%</span></p>
                     </div>
                 </div>
             </div>
@@ -103,8 +103,8 @@ include('head.php')
                     <div class="card-body p-4">
                         <div class="d-flex align-items-center justify-content-between mb-3">
                             <div>
-                                <h6 class="text-muted mb-1 fw-bold" style="font-size: 11px; letter-spacing: 0.8px;">FINALIZADOS</h6>
-                                <h3 class="mb-0 fw-bold text-success" id="totalFinalizados">0</h3>
+                                <h6 class="text-muted mb-1 fw-bold" style="font-size: 11px; letter-spacing: 0.8px;">ATENDIDOS</h6>
+                                <h3 class="mb-0 fw-bold text-success" id="totalAtendidos">0</h3>
                             </div>
                             <div class="icon-wrapper d-flex align-items-center justify-content-center rounded-circle"
                                 style="width: 48px; height: 48px; background-color: rgba(25, 135, 84, 0.1); color: #198754;">
@@ -112,7 +112,7 @@ include('head.php')
                             </div>
                         </div>
                         <div class="progress">
-                            <div class="progress-fill" id="pb-finalizados"></div>
+                            <div class="progress-fill" id="pb-atendidos"></div>
                         </div>
                         <p class="stat-footer">Completados <span id="f-fin">11%</span></p>
                     </div>
@@ -125,13 +125,13 @@ include('head.php')
                 <div class="panel h-100 shadow-sm border-0">
                     <p class="panel-title">Distribución de Trámites</p>
                     <div class="donut-wrap">
-                        <svg class="donut-svg" width="110" height="110" viewBox="0 0 110 110">
+                        <svg class="donut-svg" width="130" height="130" viewBox="0 0 110 110">
                             <circle cx="55" cy="55" r="42" fill="none" stroke="#e4eaf5" stroke-width="13" />
                             <circle id="arc-proc" cx="55" cy="55" r="42" fill="none" stroke="#e8a020" stroke-width="13" stroke-dasharray="0 263.6" stroke-linecap="round" transform="rotate(-90 55 55)" style="transition: stroke-dasharray 1.3s cubic-bezier(0.4,0,0.2,1)" />
                             <circle id="arc-fin" cx="55" cy="55" r="42" fill="none" stroke="#0f9e6e" stroke-width="13" stroke-dasharray="0 263.6" stroke-linecap="round" transform="rotate(-90 55 55)" style="transition: stroke-dasharray 1.3s 0.15s cubic-bezier(0.4,0,0.2,1)" />
                             <circle id="arc-obs" cx="55" cy="55" r="42" fill="none" stroke="#d63251" stroke-width="13" stroke-dasharray="0 263.6" stroke-linecap="round" transform="rotate(-90 55 55)" style="transition: stroke-dasharray 1.3s 0.3s cubic-bezier(0.4,0,0.2,1)" />
-                            <text x="55" y="51" text-anchor="middle" font-family="DM Sans" font-size="18" font-weight="700" fill="#0d1b3e" id="donut-center">9</text>
-                            <text x="55" y="65" text-anchor="middle" font-family="DM Sans" font-size="9" fill="#6b7a99">trámites</text>
+                            <text x="55" y="51" text-anchor="middle" font-family="DM Sans" font-size="20" font-weight="700" fill="#0d1b3e" id="donut-center">0</text>
+                            <text x="55" y="65" text-anchor="middle" font-family="DM Sans" font-size="9" fill="#6b7a99">TRÁMITES</text>
                         </svg>
                         <div class="donut-legend">
                             <div class="legend-item">
@@ -141,7 +141,7 @@ include('head.php')
                             </div>
                             <div class="legend-item">
                                 <div class="legend-dot" style="background:#0f9e6e;"></div>
-                                <span class="legend-label">Finalizados</span>
+                                <span class="legend-label">Atendidos</span>
                                 <span class="legend-val"></span><span class="legend-pct"></span>
                             </div>
                             <div class="legend-item">

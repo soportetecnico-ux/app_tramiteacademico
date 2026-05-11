@@ -89,7 +89,7 @@ $login_button = '
             height: 100%;
             margin: 0;
             overflow: hidden;
-            /* Evita scroll doble */
+            font-family: 'Poppins', sans-serif !important;
         }
 
         .vh-100-custom {
@@ -145,11 +145,11 @@ $login_button = '
                 <div class="w-100 p-5" style="max-width: 400px;">
                     <div class="text-center mb-4">
                         <img src="../imagenes/logo-tramite.png" alt="Escudo" class="mb-3" width="60">
-                        <h5 class="fw-bold text-undc mb-0">SISTEMA DE TRÁMITES ACADÉMICOS</h5>
+                        <h5 class="fw-semibold text-undc mb-0">SISTEMA DE TRÁMITES ACADÉMICOS</h5>
                         <!-- <p class="small fw-bold text-undc mb-4">ACADÉMICOS</p> -->
 
-                        <p class="text-muted small">Iniciar sesión con su correo y contraseña.</p>
-                        <?php echo '<div class="d-grid my-3">' . $login_button . '</div>'; ?>
+                        <p class="text-muted small mt-3">Iniciar sesión con su correo institucional</p>
+                        <?php echo '<div class="d-grid my-2">' . $login_button . '</div>'; ?>
                     </div>
                     <div id="mensajeLogin" class="mt-2 text-center text-danger"></div>
 
@@ -180,7 +180,9 @@ $login_button = '
 
     <footer class="fixed-bottom d-flex align-items-center justify-content-center text-white">
         <small class="text-center">
-            © 2025 Universidad Nacional de Cañete - Sistema de Trámite Documentario
+            © <script>
+                document.write(new Date().getFullYear())
+            </script> Universidad Nacional de Cañete - Sistema de Trámites Académicos
         </small>
     </footer>
 

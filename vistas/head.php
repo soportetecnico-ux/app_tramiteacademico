@@ -112,6 +112,12 @@
                                     <use xlink:href="#custom-layer"></use>
                                 </svg> </span><span class="pc-mtext">Mis trámites</span></a>
                     </li>
+                    <li class="pc-item">
+                        <a href="apoyo.php" class="pc-link"><span class="pc-micon">
+                                <svg class="pc-icon">
+                                    <use xlink:href="#custom-layer"></use>
+                                </svg> </span><span class="pc-mtext">Manual de uso</span></a>
+                    </li>
                 </ul>
             </div>
         </div>
