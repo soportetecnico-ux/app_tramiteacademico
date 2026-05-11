@@ -191,3 +191,21 @@ a.unread .mark-read i {
     font-weight: 700;
     color: #999;
 }
+
+
+/* SELECT */
+.select2-container--default .select2-selection--single {
+    height: 31px !important;   /* igual a form-select-sm */
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 13px;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: 29px !important;
+    font-size: 13px;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 29px !important;
+}

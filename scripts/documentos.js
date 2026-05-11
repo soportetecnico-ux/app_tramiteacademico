@@ -3,11 +3,12 @@ let datosUsuarioGlobal = null;
 $(document).ready(function () {
     cargarDatosUsuario();
     listarTramites();
+
     if ($('#contenedorDashboard').length > 0) {
         listarConteoDocs();
         listarActividadReciente();
     }
-     
+
 
     const $contenedor = $('#contenedorSeguimiento');
 
@@ -23,11 +24,23 @@ $(document).ready(function () {
     }
 
     $.post("../controladores/documentos.php?op=seleccionarTramite", function (r) {
+
         if (r.trim() == "") {
             console.log("El controlador devolvió una cadena vacía.");
         }
-        $("#id_tupa").html(r);
+
+        $("#id_tupa").html(r).trigger('change');
     });
+
+
+    $("#id_tupa").select2({
+        placeholder: "Seleccionar trámite",
+        allowClear: true,
+        width: "100%"
+    }).on('select2:open', function () {
+        document.querySelector('.select2-search__field').focus();
+    });
+
     $("#id_tupa").on("change", function () {
         const opt = $(this).find('option:selected');
 
@@ -1079,15 +1092,15 @@ function listarActividadReciente() {
         .catch(err => console.error('Error actividad reciente:', err));
 }
 
-   /* NUEVA FUNCIÓN: Consulta al controlador de Sivireno*/
-  function verificarTramiteEstu(idTupa) {
-    const btn = $("#btn-enviar"); 
+/* NUEVA FUNCIÓN: Consulta al controlador de Sivireno*/
+function verificarTramiteEstu(idTupa) {
+    const btn = $("#btn-enviar");
     btn.prop("disabled", true).html('<i class="fa fa-spinner fa-spin"></i> Verificando...');
 
-    $.post("../controladores/sivireno.php?op=verificarTramite", { id_tupa: idTupa }, function(data) {
+    $.post("../controladores/sivireno.php?op=verificarTramite", { id_tupa: idTupa }, function (data) {
         try {
             const res = JSON.parse(data);
-            
+
             if (res.status) {
                 Swal.fire({
                     icon: 'success',
@@ -1097,7 +1110,7 @@ function listarActividadReciente() {
                 });
                 // CUMPLE
                 btn.prop("disabled", false).text("Enviar Solicitud").addClass("btn-primary").removeClass("btn-danger");
-             } else {
+            } else {
                 // NO CUMPLE
                 Swal.fire({
                     icon: 'warning',
@@ -1109,7 +1122,7 @@ function listarActividadReciente() {
                 //btn.text("No disponible").prop("disabled", true).addClass("btn-danger");
             }
         } catch (e) {
-            console.error("Error JSON:", data);  
+            console.error("Error JSON:", data);
             btn.text("Error de sistema").prop("disabled", true);
         }
     });

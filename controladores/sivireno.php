@@ -14,7 +14,7 @@ switch ($_GET["op"]) {
 
     case 'verificarTramite':
     if (!isset($_SESSION)) { session_start(); }
-    $id_estu = $_SESSION['id_estu'];
+    $id_estu =  $_SESSION['sistema_academico']['id_estu'];
     
     $res = ["status" => false, "mensaje" => ""];
 
