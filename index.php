@@ -24,37 +24,35 @@ if (isset($_GET["code"])) {
         $email = $data['email'];
 
         //solo correos institucionales
-       
+
         if (!str_ends_with($email, '@undc.edu.pe')) {
             $_SESSION['error_message'] = "Solo correos institucionales";
             header('Location: ./index.php');
             exit;
         }
-    
+
         //VALIDAR EN BD
         $usuarios = new Usuario();
         $rspta = $usuarios->verificarLogeo($email);
 
         if ($rspta && $rspta->num_rows > 0) {
 
-                       $fetch = $rspta->fetch_object();
+            $fetch = $rspta->fetch_object();
 
-            // SESIÓN CON TABLA (ENCAPSULADA EN EL ARRAY 'sistema_academico')
             $_SESSION['sistema_academico']['id_estu']    = $fetch->id_estu;
             $_SESSION['sistema_academico']['correo']     = $fetch->email_estu;
             $_SESSION['sistema_academico']['id_car']     = $fetch->id_car;
             $_SESSION['sistema_academico']['nivel']      = $fetch->nivel;
 
-            $_SESSION['sistema_academico']['nomcompleto'] = 
-                $fetch->nom_estu . ' ' . 
-                $fetch->apepa_estu . ' ' . 
+            $_SESSION['sistema_academico']['nomcompleto'] =
+                $fetch->nom_estu . ' ' .
+                $fetch->apepa_estu . ' ' .
                 $fetch->apema_estu;
 
             $_SESSION['sistema_academico']['user_image'] = $data['picture'];
 
             header('Location: ./vistas/index.php');
             exit;
-
         } else {
             // NO REGISTRADO
             unset($_SESSION['access_token']);
@@ -86,14 +84,17 @@ $login_button = '
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
-        html, body {
+        html,
+        body {
             height: 100%;
             margin: 0;
-            overflow: hidden; /* Evita scroll doble */
+            overflow: hidden;
+            font-family: 'Poppins', sans-serif !important;
         }
 
         .vh-100-custom {
-            height: calc(100vh - 56px); /* Altura total menos el footer */
+            height: calc(100vh - 56px);
+            /* Altura total menos el footer */
         }
 
         .bg-login-image {
@@ -105,13 +106,15 @@ $login_button = '
 
         /* Colores exactos de la imagen */
         .btn-ingresar {
-            background-color: #0c234a !important; /* Azul marino muy oscuro */
+            background-color: #0c234a !important;
+            /* Azul marino muy oscuro */
             border: none;
             color: white;
         }
 
         .btn-registro {
-            background-color: #28a745 !important; /* Verde registro */
+            background-color: #28a745 !important;
+            /* Verde registro */
             border: none;
             color: white;
         }
@@ -137,16 +140,16 @@ $login_button = '
 
     <div class="container-fluid p-0">
         <div class="row g-0 vh-100-custom">
-            
+
             <div class="col-lg-4 d-flex align-items-center justify-content-center bg-white shadow-lg">
                 <div class="w-100 p-5" style="max-width: 400px;">
                     <div class="text-center mb-4">
                         <img src="../imagenes/logo-tramite.png" alt="Escudo" class="mb-3" width="60">
-                        <h5 class="fw-bold text-undc mb-0">SISTEMA DE TRÁMITES ACADÉMICOS</h5>
+                        <h5 class="fw-semibold text-undc mb-0">SISTEMA DE TRÁMITES ACADÉMICOS</h5>
                         <!-- <p class="small fw-bold text-undc mb-4">ACADÉMICOS</p> -->
-                        
-                        <p class="text-muted small">Iniciar sesión con su correo y contraseña.</p>
-                        <?php echo '<div class="d-grid my-3">' . $login_button . '</div>'; ?>
+
+                        <p class="text-muted small mt-3">Iniciar sesión con su correo institucional</p>
+                        <?php echo '<div class="d-grid my-2">' . $login_button . '</div>'; ?>
                     </div>
                     <div id="mensajeLogin" class="mt-2 text-center text-danger"></div>
 
@@ -161,13 +164,13 @@ $login_button = '
                     </div>
 
                     <p class="mt-3 text-muted" style="font-size: 0.9rem; text-align: center;">
-                        Al hacer clic en <strong>"Ingresar"</strong>, aceptas nuestros 
-                        <a href="#" class="text-undc">Términos y Condiciones</a> y nuestra 
+                        Al hacer clic en <strong>"Ingresar"</strong>, aceptas nuestros
+                        <a href="#" class="text-undc">Términos y Condiciones</a> y nuestra
                         <a href="#" class="text-undc">Política de Privacidad</a>.
                     </p>
                 </div>
             </div>
-            
+
             <div class="col-lg-8 d-none d-lg-block">
                 <div class="bg-login-image"></div>
             </div>
@@ -177,7 +180,9 @@ $login_button = '
 
     <footer class="fixed-bottom d-flex align-items-center justify-content-center text-white">
         <small class="text-center">
-            © 2025 Universidad Nacional de Cañete - Sistema de Trámite Documentario
+            © <script>
+                document.write(new Date().getFullYear())
+            </script> Universidad Nacional de Cañete - Sistema de Trámites Académicos
         </small>
     </footer>
 

@@ -356,7 +356,7 @@ switch ($_GET["op"]) {
                         $row['estado_bg']    = '#fff8ec';
                         break;
                     case 1:
-                        $row['estado_texto'] = 'Finalizado';
+                        $row['estado_texto'] = 'Atendido';
                         $row['estado_color'] = '#0f9e6e';
                         $row['estado_bg']    = '#edfaf4';
                         break;

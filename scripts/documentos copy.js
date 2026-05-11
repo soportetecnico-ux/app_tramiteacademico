@@ -3,6 +3,8 @@ let datosUsuarioGlobal = null;
 $(document).ready(function () {
     cargarDatosUsuario();
     listarTramites();
+    listarConteoDocs();
+    listarActividadReciente();
 
     const $contenedor = $('#contenedorSeguimiento');
 
@@ -438,7 +440,7 @@ function listarTramites() {
 
                     // OJO AQUÍ: Si data ya trae "academicos/2026/...", 
                     // solo retrocedemos hasta la carpeta 'archivos' o donde inicie la ruta.
-                    const rutaArchivo = `../../views/archivos/${data}`;
+                    const rutaArchivo = `./../vistas/includes/descargar.php?file=${encodeURIComponent(data)}`;
 
                     return `
             <div class="d-inline-block">
@@ -579,12 +581,6 @@ function tablaSeguimiento(codWeb) {
                             texto = 'Observado';
                             clase = 'text-bg-danger';
 
-                            boton = `
-                    <button class="btn btn-sm btn btn-outline-dark ms-2"
-                        onclick="subsanarDocumento('${row.cod_web}')">
-                        Subsanar
-                    </button>
-                `;
                             break;
 
                         default:
@@ -597,14 +593,13 @@ function tablaSeguimiento(codWeb) {
                 <span class="badge ${clase} shadow-sm" style="font-size: 12px; padding: 5px 12px;">
                     ${texto}
                 </span>
-                ${boton}
             </div>
         `;
                 }
             }
         ],
         initComplete: function (settings, json) {
-            
+
             if (codWeb) {
                 obtenerDetalleCompleto(codWeb);
             }
@@ -677,7 +672,7 @@ function generarVistaDetalle(dataArray) {
         const principal = grupo[0];
 
 
-       // Procesar donde se usó como referencia
+        // Procesar donde se usó como referencia
         let htmlReferencias = '';
         if (principal.usado_en_referencia) {
             const lista = principal.usado_en_referencia.split('|');
@@ -694,8 +689,8 @@ function generarVistaDetalle(dataArray) {
         // 1. Detección a prueba de fallos (ignora si viene null, en mayúsculas o como número 2)
         const estaObservado = principal.observado == 2;
 
-        let comentarioObservacion = principal.comentario_observacion 
-            ? principal.comentario_observacion 
+        let comentarioObservacion = principal.comentario_observacion
+            ? principal.comentario_observacion
             : "Se han encontrado observaciones en su trámite. Por favor, revise y adjunte los documentos requeridos.";
 
         if (estaObservado) {
@@ -728,56 +723,60 @@ function generarVistaDetalle(dataArray) {
                 
             `;
         }
-
         html += `
-        <div class="card mb-4 border-0 shadow-sm rounded-3">
-            <div class="card-body">
-                <h6 class="fw-semibold mb-3 text-primary" style="font-size: 14px;">
-                    DATOS PRINCIPALES DEL TRÁMITE
-                </h6>
+<div class="card mb-4 border-0 shadow-sm rounded-3">
+    <div class="card-body p-4">
+        <h6 class="fw-bold mb-4" style="color:#085ec5; font-size: 14px;">DATOS PRINCIPALES DEL TRÁMITE</h6>
 
-                <div class="row g-2 mb-4" style='font-size:13px;'>
-                    <div class="col-md-6">
-                        <span class="text-muted">Expediente:</span><br>
-                        <strong>${safe(principal.cod_documento)}</strong>
-                    </div>
-
-                    <div class="col-md-6">
-                        <span class="text-muted">N° Documento:</span><br>
-                        <strong>${principal.num_doc ? String(principal.num_doc).padStart(3, '0') : '---'}</strong>
-                    </div>
-
-                    <div class="col-md-6">
-                        <span class="text-muted">Asunto:</span><br>
-                        <strong class="text-uppercase">${safe(principal.asunto)}</strong>
-                    </div>
-
-
-                    <div class="col-md-6">
-                        <span class="text-muted">Estado:</span><br>
-                        <strong>${safe(principal.estado)}</strong>
-                    </div>
+        <div class="row mb-4">
+            <div class="col-md-6 mb-4">
+                <span class="text-muted d-block" style="font-size: 13px;">Expediente:</span>
+                <div class="border-bottom pb-2 mt-1">
+                    <strong class="text-dark">${safe(principal.cod_documento)}</strong>
                 </div>
+            </div>
 
-                ${htmlReferencias}
+            <div class="col-md-6 mb-4">
+                <span class="text-muted d-block" style="font-size: 13px;">N° Documento:</span>
+                <div class="border-bottom pb-2 mt-1">
+                    <strong class="text-dark">${principal.num_doc ? String(principal.num_doc).padStart(3, '0') : '---'}</strong>
+                </div>
+            </div>
 
-                <div class="table-responsive mt-2">
-                    <table class="table align-middle" style="font-size: 13px; border-collapse: separate; border-spacing: 0 8px;">
-                        <thead>
-                            <tr class="text-muted small">
-                                <th>#</th>
-                                <th>N° Proveído</th>
-                                <th>Oficina Origen</th>
-                                <th>Fecha Envío</th>
-                                <th>Oficina Destino</th>
-                                <th>Fecha Recepción</th>
-                                <th>Estado</th>
-                                <th>Comentario</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-        `;
+            <!-- Fila 2: Asunto y Estado -->
+            <div class="col-md-6 mb-3">
+                <span class="text-muted d-block" style="font-size: 13px;">Asunto:</span>
+                <div class="border-bottom pb-2 mt-1">
+                    <strong class="text-dark text-uppercase">${safe(principal.asunto)}</strong>
+                </div>
+            </div>
 
+            <div class="col-md-6 mb-3">
+                <span class="text-muted d-block" style="font-size: 13px;">Estado:</span>
+                <div class="border-bottom pb-2 mt-1">
+                    <strong class="text-dark">${safe(principal.estado)}</strong>
+                </div>
+            </div>
+        </div>
+
+        ${htmlReferencias}
+
+        <div class="table-responsive mt-3">
+            <table class="table table-bordered align-middle" style="font-size: 12px; border: 1px solid #dee2e6;">
+                <thead class="bg-light text-muted">
+                    <tr>
+                        <th class="py-3 px-2 text-center">#</th>
+                        <th class="py-3">N° PROVEÍDO</th>
+                        <th class="py-3">OFICINA ORIGEN</th>
+                        <th class="py-3">FECHA ENVÍO</th>
+                        <th class="py-3">OFICINA DESTINO</th>
+                        <th class="py-3">FECHA RECEPCIÓN</th>
+                        <th class="py-3">ESTADO</th>
+                        <th class="py-3">COMENTARIO</th>
+                    </tr>
+                </thead>
+                <tbody>
+`;
         // 🔹 Invertir orden dentro del grupo
         grupo = [...grupo].reverse();
 
@@ -787,7 +786,7 @@ function generarVistaDetalle(dataArray) {
                 <tr class="bg-white">
                     <td class="fw-semibold text-center">${index + 1}</td>
 
-                    <td class="text-center fw-semibold">
+                    <td class="text-center">
                         ${safe(data.n_proveido)}
                     </td>
 
@@ -808,7 +807,7 @@ function generarVistaDetalle(dataArray) {
                     </td>
 
                     <td class="text-center">
-                        <span class="badge bg-success-subtle text-success rounded-pill" style="font-size:11px">
+                        <span class="badge bg-light-dark rounded-pill" style="font-size:11px">
                             ${safe(data.estado2)}
                         </span>
                     </td>
@@ -836,14 +835,14 @@ function generarVistaDetalle(dataArray) {
 
 function generarFUT(cod_web) {
     // Agregamos "includes/" a la ruta
-    const url = `includes/visor_fut.php?cod=${cod_web}`; 
-    
+    const url = `includes/visor_fut.php?cod=${cod_web}`;
+
     const width = 1000;
     const height = 800;
     const left = (screen.width - width) / 2;
     const top = (screen.height - height) / 2;
 
-    window.open(url, 'Vista FUT', 
+    window.open(url, 'Vista FUT',
         `width=${width},height=${height},top=${top},left=${left},scrollbars=yes`);
 }
 
@@ -886,14 +885,14 @@ function procesarSubsanacion(codDocumento) {
     }
 
     $.ajax({
-        url: ' ../controladores/documentos.php?op=subsanarDocumento',  
+        url: ' ../controladores/documentos.php?op=subsanarDocumento',
         type: 'POST',
         data: formData,
-        contentType: false, 
-        processData: false,  
-        xhr: function() {
+        contentType: false,
+        processData: false,
+        xhr: function () {
             var xhr = new window.XMLHttpRequest();
-            xhr.upload.addEventListener("progress", function(evt) {
+            xhr.upload.addEventListener("progress", function (evt) {
                 if (evt.lengthComputable) {
                     var percentComplete = Math.round((evt.loaded / evt.total) * 100);
                     btnSubmit.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${percentComplete}%`;
@@ -901,50 +900,180 @@ function procesarSubsanacion(codDocumento) {
             }, false);
             return xhr;
         },
-        success: function(response) {
+        success: function (response) {
             try {
-                    const res = typeof response === 'string' ? JSON.parse(response) : response;
-                
-                    if (res.status === 'success' || res.success) {
-                        Swal.fire({
-                            title: "Trámite subsanado correctamente.",
-                            icon: "success"
-                        });
-                        //obtenerDetalleCompleto(codWeb);
-                        tablaSeguimiento(codWeb);
-                    } else {
-                        Swal.fire({
-                            title: "Ocurrió un problema.",
-                            text: res.message || "Error al subir el archivo.",
-                            icon: "error"
-                        });
-                    }
-                } catch (error) {
-                    console.error("Error al leer la respuesta del servidor:", response);
+                const res = typeof response === 'string' ? JSON.parse(response) : response;
+
+                if (res.status === 'success' || res.success) {
                     Swal.fire({
-                        title: "Error",
-                        text: "El archivo se envió, pero hubo un problema al leer la respuesta.",
+                        title: "Trámite subsanado correctamente.",
+                        icon: "success"
+                    });
+                    //obtenerDetalleCompleto(codWeb);
+                    tablaSeguimiento(codWeb);
+                } else {
+                    Swal.fire({
+                        title: "Ocurrió un problema.",
+                        text: res.message || "Error al subir el archivo.",
                         icon: "error"
                     });
                 }
-            },
-                error: function(xhr, status, error) {
-                    console.error("Error de AJAX:", error);
-                    Swal.fire({
-                        title: "Error",
-                        text: "Error de conexión al intentar enviar el documento. Intente nuevamente.",
-                        icon: "error"
-                    });
-            },
-                complete: function() {
-                if (btnSubmit) {
-                    btnSubmit.innerHTML = originalText;
-                    btnSubmit.disabled = false;
-                }
-                docSubsanado.value = '';
+            } catch (error) {
+                console.error("Error al leer la respuesta del servidor:", response);
+                Swal.fire({
+                    title: "Error",
+                    text: "El archivo se envió, pero hubo un problema al leer la respuesta.",
+                    icon: "error"
+                });
             }
+        },
+        error: function (xhr, status, error) {
+            console.error("Error de AJAX:", error);
+            Swal.fire({
+                title: "Error",
+                text: "Error de conexión al intentar enviar el documento. Intente nuevamente.",
+                icon: "error"
+            });
+        },
+        complete: function () {
+            if (btnSubmit) {
+                btnSubmit.innerHTML = originalText;
+                btnSubmit.disabled = false;
+            }
+            docSubsanado.value = '';
+        }
     });
 }
 
+function listarConteoDocs() {
+    // DEFINIMOS LA RUTA COMPLETA PARA EVITAR PROBLEMAS DE CONTEXTO EN DIFERENTES PÁGINAS
+    const url = '../controladores/documentos.php?op=listarConteoDocs';
+    // INICIAMOS LA PETICIÓN AJAX
+    fetch(url)
+        .then(response => {
+            // Verificamos que la respuesta sea exitosa
+            if (!response.ok) throw new Error('Error en la respuesta del servidor');
+            return response.json();
+        })
+        // Procesamos los datos recibidos
+        .then(data => {
+            // Verificamos que el formato de datos sea correcto
+            if (data.aaData && data.aaData.length > 0) {
+                const conteos = data.aaData[0];
+                // Extraemos los conteos, asegurándonos de convertirlos a enteros y manejar posibles valores nulos o no numéricos
+                const total = parseInt(conteos.total) || 0;
+                const pendientes = parseInt(conteos.pendiente) || 0;
+                const observados = parseInt(conteos.observado) || 0;
+                const finalizados = parseInt(conteos.finalizado) || 0;
 
+                // Actualizamos los elementos del DOM con los conteos
+                document.getElementById('totalTramites').textContent = total;
+                document.getElementById('totalPendientes').textContent = pendientes;
+                document.getElementById('totalObservados').textContent = observados;
+                document.getElementById('totalFinalizados').textContent = finalizados;
+
+                // Calculamos los porcentajes, evitando división por cero
+                const pctPend = total > 0 ? (pendientes / total) * 100 : 0;
+                const pctObs = total > 0 ? (observados / total) * 100 : 0;
+                const pctFin = total > 0 ? (finalizados / total) * 100 : 0;
+
+                // Actualizamos las barras de progreso
+                document.getElementById('pb-total').style.width = '100%';
+                document.getElementById('pb-pendientes').style.width = pctPend + '%';
+                document.getElementById('pb-observados').style.width = pctObs + '%';
+                document.getElementById('pb-finalizados').style.width = pctFin + '%';
+
+                // Actualizamos los textos de porcentaje
+                document.getElementById('f-total').textContent = total;
+                document.getElementById('f-proc').textContent = Math.round(pctPend) + '%';
+                document.getElementById('f-obs').textContent = Math.round(pctObs) + '%';
+                document.getElementById('f-fin').textContent = Math.round(pctFin) + '%';
+
+                // Cálculo para el gráfico de donut (usamos circunferencia de un círculo con radio 55)
+                const circunferencia = 263.6;
+                // Convertimos los porcentajes a longitudes de arco para cada categoría
+                const dashPend = (pctPend / 100) * circunferencia;
+                const dashFin = (pctFin / 100) * circunferencia;
+                const dashObs = (pctObs / 100) * circunferencia;
+
+                // Para que las categorías se muestren en orden (Pendientes, Finalizados, Observados), calculamos los offsets acumulativos
+                const offsetPend = 0;
+                const offsetFin = dashPend;
+                const offsetObs = dashPend + dashFin;
+                // Función para aplicar los estilos SVG a cada arco del donut
+                function setArc(id, dash, offset) {
+                    const el = document.getElementById(id);
+                    el.style.strokeDasharray = `${dash} ${circunferencia - dash}`;
+                    el.style.strokeDashoffset = -offset;
+                    el.setAttribute('transform', `rotate(-90 55 55)`);
+                }
+                // Aplicamos los estilos con un pequeño retraso para asegurar que el DOM esté listo y evitar problemas de renderizado
+                setTimeout(() => {
+                    setArc('arc-proc', dashPend, offsetPend);
+                    setArc('arc-fin', dashFin, offsetFin);
+                    setArc('arc-obs', dashObs, offsetObs);
+                }, 100);
+
+                // Actualizamos el centro del donut con el total de trámites
+                document.getElementById('donut-center').textContent = total;
+                // Actualizamos las leyendas con los conteos y porcentajes
+                document.querySelector('#arc-proc').closest('.donut-wrap')
+                    ?.querySelectorAll('.legend-val')[0]
+                    && (document.querySelectorAll('.legend-val')[0].textContent = pendientes);
+                document.querySelectorAll('.legend-val')[1].textContent = finalizados;
+                document.querySelectorAll('.legend-val')[2].textContent = observados;
+                document.querySelectorAll('.legend-val')[3].textContent = total;
+                // Actualizamos los porcentajes en las leyendas
+                document.querySelectorAll('.legend-pct')[0].textContent = `(${Math.round(pctPend)}%)`;
+                document.querySelectorAll('.legend-pct')[1].textContent = `(${Math.round(pctFin)}%)`;
+                document.querySelectorAll('.legend-pct')[2].textContent = `(${Math.round(pctObs)}%)`;
+            }
+        })
+        .catch(error => console.error('Error al cargar el dashboard:', error));
+}
+
+function listarActividadReciente() {
+    // DEFINIMOS LA RUTA COMPLETA PARA EVITAR PROBLEMAS DE CONTEXTO EN DIFERENTES PÁGINAS
+    const url = '../controladores/documentos.php?op=listarReciente';
+    // INICIAMOS LA PETICIÓN AJAX
+    fetch(url)
+        // Verificamos que la respuesta sea exitosa
+        .then(response => {
+            // Verificamos que la respuesta sea exitosa
+            if (!response.ok) throw new Error('Error en la respuesta del servidor');
+            return response.json();
+        })
+        // Procesamos los datos recibidos
+        .then(data => {
+            const lista = document.querySelector('.activity-list');
+            lista.innerHTML = '';
+            // Verificamos que el formato de datos sea correcto y que haya actividades
+            if (!data.aaData || data.aaData.length === 0) {
+                lista.innerHTML = '<li class="activity-item"><div class="activity-text">No hay actividad reciente.</div></li>';
+                return;
+            }
+            // Iteramos sobre cada actividad y la agregamos a la lista
+            data.aaData.forEach(item => {
+                lista.innerHTML += `
+                    <li class="activity-item">
+                        <div class="activity-dot" style="background:${item.estado_color};"></div>
+                        <div class="activity-text"><strong>SOLICITUD</strong> DE ${item.asunto}</div>
+                        <span class="activity-tag" style="background:${item.estado_bg}; color:${item.estado_color};">
+                            ${item.estado_texto}
+                        </span>
+                        <span class="activity-time">${item.fecha_texto}</span>
+                    </li>`;
+            });
+        })
+        .catch(err => console.error('Error actividad reciente:', err));
+}
+
+
+
+
+/* function irASeguimiento(codWeb) {
+    // Creamos un formulario dinámicamente
+    var form = document.createElement("form");
+    form.method = "POST";
+    form.action = "seguimiento.php";*/
 

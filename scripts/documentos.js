@@ -3,11 +3,12 @@ let datosUsuarioGlobal = null;
 $(document).ready(function () {
     cargarDatosUsuario();
     listarTramites();
+
     if ($('#contenedorDashboard').length > 0) {
         listarConteoDocs();
         listarActividadReciente();
     }
-     
+
 
     const $contenedor = $('#contenedorSeguimiento');
 
@@ -23,11 +24,23 @@ $(document).ready(function () {
     }
 
     $.post("../controladores/documentos.php?op=seleccionarTramite", function (r) {
+
         if (r.trim() == "") {
             console.log("El controlador devolvió una cadena vacía.");
         }
-        $("#id_tupa").html(r);
+
+        $("#id_tupa").html(r).trigger('change');
     });
+
+
+    $("#id_tupa").select2({
+        placeholder: "Seleccionar trámite",
+        allowClear: true,
+        width: "100%"
+    }).on('select2:open', function () {
+        document.querySelector('.select2-search__field').focus();
+    });
+
     $("#id_tupa").on("change", function () {
         const opt = $(this).find('option:selected');
 
@@ -451,7 +464,7 @@ function listarTramites() {
 
                     // OJO AQUÍ: Si data ya trae "academicos/2026/...", 
                     // solo retrocedemos hasta la carpeta 'archivos' o donde inicie la ruta.
-                    const rutaArchivo = `../../views/archivos/${data}`;
+                    const rutaArchivo = `./../vistas/includes/descargar.php?file=${encodeURIComponent(data)}`;
 
                     return `
             <div class="d-inline-block">
@@ -484,7 +497,7 @@ function listarTramites() {
                             clase = 'text-bg-warning';
                             break;
                         case 1:
-                            texto = 'Finalizado';
+                            texto = 'Atendido';
                             clase = 'text-bg-success';
                             break;
                         case 2:
@@ -584,14 +597,14 @@ function tablaSeguimiento(codWeb) {
                             break;
 
                         case 1:
-                            texto = 'Finalizado';
+                            texto = 'Atendido';
                             clase = 'text-bg-success';
                             break;
 
                         case 2:
                             texto = 'Observado';
                             clase = 'text-bg-danger';
-            
+
                             break;
 
                         default:
@@ -702,18 +715,21 @@ function generarVistaDetalle(dataArray) {
 
         let comentarioObservacion = principal.comentario_observacion
             ? principal.comentario_observacion
-            : "Se han encontrado observaciones en su trámite. Por favor, revise y adjunte los documentos requeridos.";
+            : "---";
 
         if (estaObservado) {
             html += `
-                <div class="alert mb-4 shadow-sm" role="alert" style="background-color: #fff5f5; border: 1px solid #f5c2c7; border-left: 5px solid #dc3545 !important; border-radius: 0.5rem;">
+                <div class="alert mt-2 mb-4 shadow-sm" role="alert" style="background-color: #fff5f5; border: 1px solid #f5c2c7; border-left: 5px solid #dc3545 !important; border-radius: 0.5rem;">
                     <div class="d-flex gap-3">
                         <div class="text-danger mt-1">
                             <i class="fas fa-exclamation-circle fa-2x"></i>
                         </div>
                         <div class="w-100">
-                            <h6 class="alert-heading fw-bold mb-1 text-danger">Acción Requerida: Trámite Observado</h6>
-                            <p class="mb-3 small text-dark">${safe(comentarioObservacion)}</p>
+                            <h6 class="alert-heading fw-semibold mb-1 text-danger">TRÁMITE OBSERVADO</h6>
+                            <p class="mt-2 mb-3 small text-danger">
+                                Se han identificado observaciones en su trámite. Por favor, revise las observaciones y vuelva a adjuntar la <b>DOCUMENTACIÓN COMPLETA</b> para continuar con la atención de su solicitud.
+                            </p>
+                            <span class="badge bg-light-secondary mt-2 mb-3 text-dark" style="font-size:12px"><b>Observación:</b> ${safe(comentarioObservacion)}</span>
 
                             <div class="bg-white p-3 rounded-2 border" style="border-color: #f5c2c7 !important;">
                                 <form id="formSubsanar_${principal.cod_documento}" class="m-0">
@@ -724,14 +740,12 @@ function generarVistaDetalle(dataArray) {
                                             <i class="fas fa-upload me-1"></i> Enviar Subsanación
                                         </button>
                                     </div>
-                                    <div class="form-text mt-1" style="font-size: 11px;">Solo se permiten archivos PDF o ZIP. Max 50MB.</div>
+                                    <div class="form-text mt-1" style="font-size: 11px;">Archivos permitidos: PDF, RAR, ZIP. Máximo 50MB.</div>
                                 </form>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                
             `;
         }
         html += `
@@ -975,24 +989,24 @@ function listarConteoDocs() {
                 const total = parseInt(conteos.total) || 0;
                 const pendientes = parseInt(conteos.pendiente) || 0;
                 const observados = parseInt(conteos.observado) || 0;
-                const finalizados = parseInt(conteos.finalizado) || 0;
+                const atendidos = parseInt(conteos.atendido) || 0;
 
                 // Actualizamos los elementos del DOM con los conteos
                 document.getElementById('totalTramites').textContent = total;
                 document.getElementById('totalPendientes').textContent = pendientes;
                 document.getElementById('totalObservados').textContent = observados;
-                document.getElementById('totalFinalizados').textContent = finalizados;
+                document.getElementById('totalAtendidos').textContent = atendidos;
 
                 // Calculamos los porcentajes, evitando división por cero
                 const pctPend = total > 0 ? (pendientes / total) * 100 : 0;
                 const pctObs = total > 0 ? (observados / total) * 100 : 0;
-                const pctFin = total > 0 ? (finalizados / total) * 100 : 0;
+                const pctFin = total > 0 ? (atendidos / total) * 100 : 0;
 
                 // Actualizamos las barras de progreso
                 document.getElementById('pb-total').style.width = '100%';
                 document.getElementById('pb-pendientes').style.width = pctPend + '%';
                 document.getElementById('pb-observados').style.width = pctObs + '%';
-                document.getElementById('pb-finalizados').style.width = pctFin + '%';
+                document.getElementById('pb-atendidos').style.width = pctFin + '%';
 
                 // Actualizamos los textos de porcentaje
                 document.getElementById('f-total').textContent = total;
@@ -1007,7 +1021,7 @@ function listarConteoDocs() {
                 const dashFin = (pctFin / 100) * circunferencia;
                 const dashObs = (pctObs / 100) * circunferencia;
 
-                // Para que las categorías se muestren en orden (Pendientes, Finalizados, Observados), calculamos los offsets acumulativos
+                // Para que las categorías se muestren en orden (Pendientes, atendidos, Observados), calculamos los offsets acumulativos
                 const offsetPend = 0;
                 const offsetFin = dashPend;
                 const offsetObs = dashPend + dashFin;
@@ -1031,7 +1045,7 @@ function listarConteoDocs() {
                 document.querySelector('#arc-proc').closest('.donut-wrap')
                     ?.querySelectorAll('.legend-val')[0]
                     && (document.querySelectorAll('.legend-val')[0].textContent = pendientes);
-                document.querySelectorAll('.legend-val')[1].textContent = finalizados;
+                document.querySelectorAll('.legend-val')[1].textContent = atendidos;
                 document.querySelectorAll('.legend-val')[2].textContent = observados;
                 document.querySelectorAll('.legend-val')[3].textContent = total;
                 // Actualizamos los porcentajes en las leyendas
@@ -1079,12 +1093,12 @@ function listarActividadReciente() {
         .catch(err => console.error('Error actividad reciente:', err));
 }
 
-   /* NUEVA FUNCIÓN: Consulta al controlador de Sivireno*/
-  function verificarTramiteEstu(idTupa) {
-    const btn = $("#btn-enviar"); 
+/* NUEVA FUNCIÓN: Consulta al controlador de Sivireno*/
+function verificarTramiteEstu(idTupa) {
+    const btn = $("#btn-enviar");
     btn.prop("disabled", true).html('<i class="fa fa-spinner fa-spin"></i> Verificando...');
 
-    $.post("../controladores/sivireno.php?op=verificarTramite", { id_tupa: idTupa }, function(data) {
+    $.post("../controladores/sivireno.php?op=verificarTramite", { id_tupa: idTupa }, function (data) {
         try {
             const res = JSON.parse(data);
             btn.removeClass("btn-primary btn-danger btn-warning");
@@ -1098,7 +1112,7 @@ function listarActividadReciente() {
                 });
                 // CUMPLE
                 btn.prop("disabled", false).text("Enviar Solicitud").addClass("btn-primary").removeClass("btn-danger");
-             } else {
+            } else {
                 // NO CUMPLE
                 Swal.fire({
                     icon: 'warning',

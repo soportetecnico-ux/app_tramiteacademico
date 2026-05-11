@@ -29,6 +29,7 @@
     <!-- Incluir el CSS de Quill -->
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
 </head>
 <!-- [Head] end -->
@@ -110,6 +111,12 @@
                                 <svg class="pc-icon">
                                     <use xlink:href="#custom-layer"></use>
                                 </svg> </span><span class="pc-mtext">Mis trámites</span></a>
+                    </li>
+                    <li class="pc-item">
+                        <a href="apoyo.php" class="pc-link"><span class="pc-micon">
+                                <svg class="pc-icon">
+                                    <use xlink:href="#custom-layer"></use>
+                                </svg> </span><span class="pc-mtext">Manual de uso</span></a>
                     </li>
                 </ul>
             </div>
