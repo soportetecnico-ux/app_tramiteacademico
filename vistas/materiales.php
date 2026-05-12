@@ -43,7 +43,7 @@ $cod_web = $_POST['cod_web'] ?? '';
                     <div class="card-body">
                         <div class="row">
 
-                            <div class="col-md-4">
+                            <div class="col-md-3">
 
                                 <p style="font-size:12px; color:#777;">
                                     Selecciona una opción para visualizar el contenido.
@@ -65,7 +65,7 @@ $cod_web = $_POST['cod_web'] ?? '';
 
                             </div>
 
-                            <div class="col-md-8">
+                            <div class="col-md-9">
 
                                 <div id="previewBox" style="border:1px solid #eee;border-radius:10px;height:600px;overflow:hidden;background:#f9f9f9;">
 
