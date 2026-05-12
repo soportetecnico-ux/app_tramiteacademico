@@ -234,7 +234,7 @@ include('head.php')
                             <div class="d-flex justify-content-end mb-2 gap-2 mt-4">
                                 <!-- <button type="button" class="btn btn-light border" onclick="history.back()">Volver</button> -->
                                 <!-- <button type="button" class="btn btn-outline-primary" onclick="abrirVistaPreviaFUT()"><i class="ti ti-eye"></i> Vista Previa</button> -->
-                                <button id="btn-enviar" type="button" class="btn btn-success px-4" onclick="confirmarEnvioDirecto()"><i class="ti ti-send"></i> Enviar Trámite</button>
+                                <button id="btn-enviar" type="button" class="btn btn-success px-4" onclick="confirmarEnvioDirecto()"><i class="ti ti-send"></i> Enviar Solicitud</button>
                             </div>
 
                         </form>

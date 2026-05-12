@@ -46,25 +46,23 @@ $cod_web = $_POST['cod_web'] ?? '';
                             <!-- OPCIONES IZQUIERDA -->
                             <div class="col-md-4">
 
+                                <p style="font-size:12px; color:#777;">
+                                    Selecciona una opción para visualizar el contenido.
+                                </p>
+
                                 <div style="display:flex; flex-direction:column; gap:10px;">
 
                                     <button onclick="mostrarPDF()" class="btn btn-danger btn-block"
                                         style="border-radius:8px;">
-                                        📄 Ver Manual PDF
+                                        Ver Manual PDF
                                     </button>
 
                                     <button onclick="mostrarVideo()" class="btn btn-success btn-block"
                                         style="border-radius:8px;">
-                                        🎥 Ver Video Tutorial
+                                        Ver Video Tutorial
                                     </button>
 
                                 </div>
-
-                                <hr>
-
-                                <p style="font-size:12px; color:#777;">
-                                    Selecciona una opción para visualizar el contenido.
-                                </p>
 
                             </div>
 
@@ -74,7 +72,7 @@ $cod_web = $_POST['cod_web'] ?? '';
                                 <div id="previewBox" style="
                                 border:1px solid #eee;
                                 border-radius:10px;
-                                height:500px;
+                                height:600px;
                                 overflow:hidden;
                                 background:#f9f9f9;
                             ">
@@ -123,4 +121,4 @@ include('footer.php')
 
 
 
-<script src="../scripts/documentos.js"></script>
+<script src="../scripts/materiales.js"></script>

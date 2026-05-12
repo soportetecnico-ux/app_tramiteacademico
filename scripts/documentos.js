@@ -1110,7 +1110,7 @@ function verificarTramiteEstu(idTupa) {
                     confirmButtonColor: '#3085d6'
                 });
                 // CUMPLE
-                btn.prop("disabled", false).text("Enviar Solicitud").addClass("btn-primary").removeClass("btn-danger");
+                btn.prop("disabled", false).html('<i class="ti ti-send"></i> Enviar Solicitud').addClass("btn btn-success px-4").removeClass("btn-danger");
             } else {
                 // NO CUMPLE
                 Swal.fire({
@@ -1119,7 +1119,7 @@ function verificarTramiteEstu(idTupa) {
                     text: res.mensaje,
                     confirmButtonColor: '#3085d6'
                 });
-                btn.prop("disabled", false).text("Enviar Solicitud").addClass("btn-primary").removeClass("btn-danger");
+                btn.prop("disabled", false).html('<i class="ti ti-send"></i> Enviar Solicitud').addClass("btn btn-success px-4").removeClass("btn-danger");
                 //btn.text("No disponible").prop("disabled", true).addClass("btn-danger");
             }
         } catch (e) {
