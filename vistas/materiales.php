@@ -43,7 +43,6 @@ $cod_web = $_POST['cod_web'] ?? '';
                     <div class="card-body">
                         <div class="row">
 
-                            <!-- OPCIONES IZQUIERDA -->
                             <div class="col-md-4">
 
                                 <p style="font-size:12px; color:#777;">
@@ -66,26 +65,11 @@ $cod_web = $_POST['cod_web'] ?? '';
 
                             </div>
 
-                            <!-- VISTA PREVIA DERECHA -->
                             <div class="col-md-8">
 
-                                <div id="previewBox" style="
-                                border:1px solid #eee;
-                                border-radius:10px;
-                                height:600px;
-                                overflow:hidden;
-                                background:#f9f9f9;
-                            ">
+                                <div id="previewBox" style="border:1px solid #eee;border-radius:10px;height:600px;overflow:hidden;background:#f9f9f9;">
 
-                                    <!-- Default -->
-                                    <div style="
-                                    display:flex;
-                                    align-items:center;
-                                    justify-content:center;
-                                    height:100%;
-                                    color:#999;
-                                    font-size:14px;
-                                ">
+                                    <div style="display:flex;align-items:center;justify-content:center;height:100%;color:#999;font-size:14px;">
                                         Selecciona PDF o Video
                                     </div>
 
