@@ -19,26 +19,26 @@ switch ($_GET["op"]) {
         $id_car = $_SESSION['sistema_academico']['id_car'];
 
         $rspta = $documentos->seleccionarTramite($id_car);
-        echo '<option value="" disabled selected>Seleccione un trámite</option>';
 
         while ($reg = $rspta->fetch_object()) {
             $oficina = !empty($reg->nombre_oficina) ? $reg->nombre_oficina : "OFICINA POR ASIGNAR";
             $cod = !empty($reg->cod_oficina) ? $reg->cod_oficina : "";
-
-            // Si no hay anexos, enviamos cadena vacía
             $anexos = !empty($reg->nombres_anexos) ? $reg->nombres_anexos : "";
 
+            $requisitos_safe = htmlspecialchars($reg->requisitos, ENT_QUOTES, 'UTF-8');
+            $oficina_safe = htmlspecialchars($oficina, ENT_QUOTES, 'UTF-8');
+            $denominacion_safe = htmlspecialchars($reg->denominacion, ENT_QUOTES, 'UTF-8');
+
             echo '<option value="' . $reg->id_tupa . '" 
-                    data-requisito="' . $reg->requisitos . '" 
-                    data-monto="' . $reg->monto . '"
-                    data-oficina="' . $oficina . '"
-                    data-codoficina="' . $cod . '"
-                    data-anexos="' . $anexos . '">' // <-- NUEVO ATRIBUTO
-                . $reg->denominacion .
+                data-requisito="' . $requisitos_safe . '" 
+                data-monto="' . $reg->monto . '"
+                data-oficina="' . $oficina_safe . '"
+                data-codoficina="' . $cod . '"
+                data-anexos="' . $anexos . '">'
+                . $denominacion_safe .
                 '</option>';
         }
         break;
-
     case 'registrarDocumento':
 
         if (ob_get_contents()) ob_end_clean();
@@ -352,23 +352,22 @@ switch ($_GET["op"]) {
                 switch ((int)$row['atendido']) {
                     case 0:
                         $row['estado_texto'] = 'En proceso';
-                        $row['estado_color'] = '#e8a020';
-                        $row['estado_bg']    = '#fff8ec';
+                        $row['estado_badge'] = 'warning';
                         break;
+
                     case 1:
                         $row['estado_texto'] = 'Atendido';
-                        $row['estado_color'] = '#0f9e6e';
-                        $row['estado_bg']    = '#edfaf4';
+                        $row['estado_badge'] = 'success';
                         break;
+
                     case 2:
                         $row['estado_texto'] = 'Observado';
-                        $row['estado_color'] = '#d63251';
-                        $row['estado_bg']    = '#fff0f3';
+                        $row['estado_badge'] = 'danger';
                         break;
+
                     default:
                         $row['estado_texto'] = 'Nuevo';
-                        $row['estado_color'] = '#1a4fba';
-                        $row['estado_bg']    = '#e8effe';
+                        $row['estado_badge'] = 'primary';
                 }
 
                 // FORMATEAMOS LA FECHA A UN TEXTO MÁS AMIGABLE

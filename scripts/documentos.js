@@ -1,5 +1,7 @@
 let datosUsuarioGlobal = null;
 
+let choicesTupa = null;
+
 $(document).ready(function () {
     cargarDatosUsuario();
     listarTramites();
@@ -23,39 +25,97 @@ $(document).ready(function () {
         }
     }
 
-    $.post("../controladores/documentos.php?op=seleccionarTramite", function (r) {
 
+    // Función para inicializar o reiniciar Choices.js
+    function inicializarChoices() {
+        const elemento = document.getElementById('id_tupa');
+
+        if (choicesTupa) {
+            choicesTupa.destroy();
+        }
+
+        choicesTupa = new Choices(elemento, {
+            searchEnabled: true,       // Activa la búsqueda
+            searchChoices: true,       // Filtra los elementos
+            removeItemButton: true,
+            itemSelectText: '',
+            placeholder: true,
+            placeholderValue: 'Seleccionar trámite',
+            containerCssClass: 'select2-dark-container',
+            dropdownCssClass: 'select2-dark-dropdown',
+
+            // Esto obliga al navegador a no recordar búsquedas previas de color negro
+            callbackOnInit: function () {
+                this.input.element.setAttribute('autocomplete', 'off');
+
+                const input = this.input.element;
+
+                const aplicarEstilo = () => {
+                    const theme = document.documentElement.getAttribute('data-bs-theme');
+
+                    if (theme === 'dark') {
+                        input.style.color = "#ffffff";
+                        input.style.backgroundColor = "#343a40";
+                    } else {
+                        input.style.color = "#212529";
+                        input.style.backgroundColor = "#ffffff";
+                    }
+                };
+
+                // aplicar al inicio
+                aplicarEstilo();
+
+                // 🔥 cuando se abre el dropdown (CLAVE)
+                this.passedElement.element.addEventListener('showDropdown', aplicarEstilo);
+
+                // 🔥 detectar cambio dinámico de tema
+                const observer = new MutationObserver(aplicarEstilo);
+                observer.observe(document.documentElement, { attributes: true });
+            }
+        });
+    }
+
+    $.post("../controladores/documentos.php?op=seleccionarTramite", function (r) {
         if (r.trim() == "") {
             console.log("El controlador devolvió una cadena vacía.");
         }
 
-        $("#id_tupa").html(r).trigger('change');
+        $("#id_tupa").html(r);
+
+        inicializarChoices();
     });
 
 
-    $("#id_tupa").select2({
-        placeholder: "Seleccionar trámite",
-        allowClear: true,
-        width: "100%"
-    }).on('select2:open', function () {
-        document.querySelector('.select2-search__field').focus();
-    });
+    // Choices.js dispara un evento nativo de JS llamado 'change'
+    document.getElementById('id_tupa').addEventListener('change', function (event) {
 
-    $("#id_tupa").on("change", function () {
-        const opt = $(this).find('option:selected');
+        // Si se limpió la selección o no hay un valor válido
+        if (!event.target.value) {
+            // --- SI NO HAY NADA SELECCIONADO (Opción por defecto / Limpiado) ---
+            $("#detalle_tupa").hide();
+            $("#dependencia").val("");
+            $("#lbl_requisito").text("");
+            $("#lbl_monto").text("");
 
-        //Añadimos para capturar el valor del trámite seleccionado, para usarlo en la verificación en SIVIRENO
-        const idTupa = $(this).val();
+            actualizarPlantillaFundamentacion("[SELECCIONE UN TRÁMITE]");
+            $("#btnEnviar").prop("disabled", true);
+            return;
+        }
 
-        const nombreTramite = opt.text();
+        // Obtenemos el ID del trámite seleccionado
+        const idTupa = event.target.value;
 
-        // 1. OBTENER DATOS DE LA OPCIÓN SELECCIONADA
-        const requisito = opt.data('requisito');
-        const monto = opt.data('monto');
-        const oficina = opt.data('oficina');
-        const codOficina = opt.data('codoficina');
+        // Buscamos la opción HTML real que está seleccionada para leer sus data-* atributos
+        const opt = event.target.options[event.target.selectedIndex];
+        const nombreTramite = opt.text;
 
-        if (requisito !== undefined) {
+        // Obtener datos personalizados desde los atributos data-* de tu PHP
+        const requisito = opt.getAttribute('data-requisito');
+        const monto = opt.getAttribute('data-monto');
+        const oficina = opt.getAttribute('data-oficina');
+        const codOficina = opt.getAttribute('data-codoficina');
+
+        if (requisito !== null && requisito !== undefined) {
             // --- LÓGICA DE DETALLES DEL TRÁMITE ---
             $("#lbl_requisito").text(requisito);
             $("#lbl_monto").text(monto);
@@ -65,19 +125,18 @@ $(document).ready(function () {
 
             // Actualizar el texto de la fundamentación según el trámite
             actualizarPlantillaFundamentacion(nombreTramite);
-            // --- NUEVO: LÓGICA DE VERIFICACIÓN EN SIVIRENO ---
+
+            // Lógica de verificación en SIVIRENO
             verificarTramiteEstu(idTupa);
+        }
+    });
 
-        } else {
-            // --- SI NO HAY NADA SELECCIONADO (Opción por defecto) ---
-            $("#detalle_tupa").hide();
-            $("#dependencia").val("");
-            $("#lbl_requisito").text("");
-            $("#lbl_monto").text("");
-
-            actualizarPlantillaFundamentacion("[SELECCIONE UN TRÁMITE]");
-            // NUEVO: Deshabilitar botón si no hay trámite seleccionado
-            $("#btnEnviar").prop("disabled", true);
+    // 4. MANEJO DEL FOCUS AL ABRIR (Equivalente a select2:open)
+    document.getElementById('id_tupa').addEventListener('showDropdown', function () {
+        // Choices.js maneja su propio buscador interno, le hacemos focus automáticamente
+        const searchField = choicesTupa.dropdown.element.querySelector('.choices__input');
+        if (searchField) {
+            searchField.focus();
         }
     });
 });
@@ -168,82 +227,92 @@ function validarArchivo(input) {
 
 function confirmarEnvioDirecto() {
 
-    // --- I. VALIDACIÓN DE DATOS DEL SOLICITANTE ---
+    // --- I. SOLICITANTE ---
     const celular = $("#celular").val().trim();
-    if (celular === "") {
-        Swal.fire({ title: "Campo requerido", text: "Por favor, ingrese un número de celular de contacto.", icon: "warning", width: '380px' });
-        return;
+
+    if (!celular) {
+        return alerta("Campo requerido", "Por favor, ingrese un número de celular de contacto.");
     }
 
-    // --- II. VALIDACIÓN DE SOLICITUD Y PAGO ---
-    const idTupa = $("#id_tupa").val();
+    if (!/^\d{9}$/.test(celular)) {
+        return alerta("Celular inválido", "Ingrese un número de 9 dígitos válido.", "error");
+    }
+
+    // --- II. SOLICITUD ---
+    const idTupa = choicesTupa?.getValue(true);
+
     if (!idTupa) {
-        Swal.fire({ title: "Campo requerido", text: "Debe seleccionar un Tipo de Solicitud.", icon: "warning", width: '380px' });
-        return;
+        return alerta("Campo requerido", "Debe seleccionar un Tipo de Solicitud.");
     }
 
+    const dependencia = $("#dependencia").val()?.trim();
+    const codDep = $("#dependencia").attr("data-cod");
+
+    if (!dependencia || !codDep) {
+        return alerta(
+            "Dependencia no asignada",
+            "El trámite seleccionado no tiene una dependencia válida. Seleccione otro trámite."
+        );
+    }
+    // --- COMPROBANTE ---
     const nroComprobante = $("#nroComprobante").val().trim();
-    if (nroComprobante === "") {
-        Swal.fire({ title: "Campo requerido", text: "Ingrese el número de comprobante de pago.", icon: "warning", width: '380px' });
-        return;
+
+    if (!nroComprobante) {
+        return alerta("Campo requerido", "Ingrese el número de comprobante de pago.");
     }
-    // 2. Validar longitud
+
     if (nroComprobante.length < 6 || nroComprobante.length > 15) {
-        Swal.fire({ title: "Voucher inválido", text: "El número debe tener entre 6 y 15 caracteres.", icon: "error", width: '380px' });
-        return;
-    }
-    // 3. Validar longitud de observación
-    if (observaciones.length > 250) {
-        Swal.fire({ title: "Texto muy largo", text: "La observación no puede superar los 250 caracteres.", icon: "error", width: '380px' });
-        return;
+        return alerta("Comprobante inválido", "Debe tener entre 6 y 15 caracteres.", "error");
     }
 
+    // --- FECHA ---
     const fechaComprobante = $("#fechaComprobante").val();
-    if (fechaComprobante === "") {
-        Swal.fire({ title: "Campo requerido", text: "Seleccione la fecha en la que realizó el pago.", icon: "warning", width: '380px' });
-        return;
+    const hoy = new Date().toISOString().split("T")[0];
+
+    if (!fechaComprobante) {
+        return alerta("Campo requerido", "Seleccione la fecha de pago.");
     }
-    const hoy = new Date().toISOString().split('T')[0]; // Obtiene fecha actual YYYY-MM-DD
+
     if (fechaComprobante > hoy) {
-        Swal.fire({ title: "Fecha inválida", text: "La fecha de pago no puede ser mayor a la fecha actual.", icon: "error", width: '380px' });
-        return;
+        return alerta("Fecha inválida", "La fecha no puede ser mayor a hoy.", "error");
     }
 
-    // --- III. VALIDACIÓN DE FUNDAMENTACIÓN ---
+    // --- OBSERVACIONES (si existe) ---
+    const observaciones = ($("#observaciones").val() || "").trim();
+
+    if (observaciones.length > 250) {
+        return alerta("Texto muy largo", "Máximo 250 caracteres en observaciones.", "error");
+    }
+
+    // --- III. FUNDAMENTACIÓN ---
     const fundamentacion = $("#txtFundamentacion").val().trim();
+
     if (fundamentacion.length < 10) {
-        Swal.fire({ title: "Fundamentación", text: "Explique brevemente el motivo de su trámite (mínimo 10 caracteres).", icon: "warning", width: '380px' });
-        return;
+        return alerta(
+            "Fundamentación insuficiente",
+            "Debe explicar el motivo del trámite (mínimo 10 caracteres)."
+        );
     }
 
-    // --- IV. VALIDACIÓN DE ANEXOS ---
-    let hayArchivo = false;
-    $("input[name='archivo_tupa[]']").each(function () {
-        if ($(this).val() !== "") {
-            hayArchivo = true;
-        }
-    });
+    // --- IV. ANEXOS ---
+    const hayArchivo = $("input[name='archivo_tupa[]']").toArray()
+        .some(input => $(input).val().trim() !== "");
 
     if (!hayArchivo) {
-        Swal.fire({ title: "Anexo requerido", text: "Debe adjuntar al menos un archivo.", icon: "warning", width: '380px' });
-        return;
+        return alerta("Anexo requerido", "Debe adjuntar al menos un archivo.");
     }
 
-    // --- V. VALIDACIÓN DE FIRMA DIGITAL ---
+    // --- V. FIRMA DIGITAL ---
     const firmaVisible = $("#previewFirmaContainer").is(":visible");
     const nombreFirma = $("#nombreFirma").text().trim();
 
-    if (!firmaVisible || nombreFirma === "") {
-        Swal.fire({
-            title: "Firma requerida",
-            text: "Debe hacer clic en el botón 'Estampar Firma' antes de enviar.",
-            icon: "error",
-            width: '380px'
-        });
-        return;
+    if (!firmaVisible || !nombreFirma) {
+        return alerta(
+            "Firma requerida",
+            "Debe estampar su firma antes de enviar.",
+            "error"
+        );
     }
-
-
     // --- VI. PREPARACIÓN DE DATOS (BLINDAJE DE DISABLED) ---
     let formElement = document.getElementById("formTramiteCompleto");
     let formData = new FormData(formElement);
@@ -320,6 +389,15 @@ function confirmarEnvioDirecto() {
     });
 }
 
+function alerta(titulo, texto, icono = "warning") {
+    Swal.fire({
+        title: titulo,
+        text: texto,
+        icon: icono,
+        width: "380px"
+    });
+}
+
 function generarFirmaDigital() {
     const container = document.getElementById('previewFirmaContainer');
     if (container) container.style.display = 'flex'; // Usamos flex para mantener el alineado de la imagen
@@ -380,7 +458,7 @@ function listarTramites() {
                 data: null,
                 className: "text-center align-middle",
                 render: function (data, type, row, meta) {
-                    return `<span class="badge rounded-pill bg-light text-dark fw-medium px-2" style="font-size:12px;">${meta.row + 1}</span>`;
+                    return `<span class="badge rounded-pill text-dark bg-light fw-medium px-2" style="font-size:12px;">${meta.row + 1}</span>`;
                 }
             },
             {
@@ -390,7 +468,7 @@ function listarTramites() {
                 render: function (data) {
                     return `
                         <div class="d-flex align-items-center">
-                            <span class="text-secondary fw-medium" style="font-size: 12px;">${data}</span>
+                            <span class="fw-medium" style="font-size: 12px;">${data}</span>
                         </div>`;
                 }
             },
@@ -398,7 +476,10 @@ function listarTramites() {
                 data: "cod_web",
                 className: "align-middle",
                 render: function (data) {
-                    return `<span class="badge bg-light-secondary" style="letter-spacing: 0.5px; font-size: 12px;">${data}</span>`;
+                    return `
+                        <div class="d-flex align-items-center">
+                            <span class="small text-uppercase" style="font-size: 12px;">${data}</span>
+                        </div>`;
                 }
             },
             {
@@ -407,7 +488,7 @@ function listarTramites() {
                 render: function (data) {
                     return `
                         <div class="d-flex align-items-center">
-                            <span class="text-muted small text-uppercase" style="font-size: 12px;">${data}</span>
+                            <span class="small text-uppercase" style="font-size: 12px;">${data}</span>
                         </div>`;
                 }
             },
@@ -417,7 +498,7 @@ function listarTramites() {
                 render: function (data) {
                     return `
                         <div class="d-flex align-items-center">
-                            <span class="text-muted small text-uppercase" style="font-size: 12px;">${data}</span>
+                            <span class="small text-uppercase" style="font-size: 12px;">${data}</span>
                         </div>`;
                 }
             },
@@ -439,7 +520,7 @@ function listarTramites() {
                 data: "nombre_archivo",
                 className: "align-middle",
                 render: function (data) {
-                    if (!data) return '<span class="text-muted small">Sin archivo</span>';
+                    if (!data) return '<span class="small">Sin archivo</span>';
 
                     const extension = data.split('.').pop().toLowerCase();
 
@@ -476,8 +557,8 @@ function listarTramites() {
                     <i class="${icono} ${color} me-2" style="font-size: 1.1rem;"></i>
                     
                     <div class="d-flex flex-column" style="line-height: 1.1;">
-                        <span class="text-dark fw-bold" style="font-size: 0.6rem; white-space: nowrap;">${nombreCorto}</span>
-                        <span class="text-muted" style="font-size: 0.5rem;">${extension.toUpperCase()}</span>
+                        <span class="fw-bold" style="font-size: 0.6rem; white-space: nowrap;">${nombreCorto}</span>
+                        <span style="font-size: 0.5rem;">${extension.toUpperCase()}</span>
                     </div>
                 </a>
             </div>`;
@@ -571,11 +652,11 @@ function tablaSeguimiento(codWeb) {
             {
                 data: "asunto",
                 className: "ps-4",
-                render: data => `<span class="text-muted" style="font-size: 12px;">${data.toUpperCase()}</span>`
+                render: data => `<span style="font-size: 12px;">${data.toUpperCase()}</span>`
             },
             {
                 data: "fecha",
-                render: data => `<span class="text-muted" style="font-size: 12px;">${data.toUpperCase()}</span>`
+                render: data => `<span style="font-size: 12px;">${data.toUpperCase()}</span>`
             },
             {
                 data: "nombre_oficina",
@@ -665,7 +746,7 @@ function obtenerDetalleCompleto(codWeb) {
 function generarVistaDetalle(dataArray) {
 
     if (!dataArray || dataArray.length === 0) {
-        $('#contenedorDetallesTramite').html('<p class="text-muted">No hay información disponible.</p>');
+        $('#contenedorDetallesTramite').html('<p>No hay información disponible.</p>');
         return;
     }
 
@@ -702,9 +783,9 @@ function generarVistaDetalle(dataArray) {
             const lista = principal.usado_en_referencia.split('|');
             htmlReferencias = `
                 <div class="mt-3" style='font-size:13px;'>
-                    <p class="mb-1 text-dark" style='font-size:13px;'>Usado como referencia en:</p>
+                    <p class="mb-1" style='font-size:13px;'>Usado como referencia en:</p>
                     <ul class="list-unstyled mb-0 ms-3">
-                        ${lista.map(ref => `<li class="text-muted">• ${ref}</li>`).join('')}
+                        ${lista.map(ref => `<li>• ${ref}</li>`).join('')}
                     </ul>
                 </div>`;
         }
@@ -729,11 +810,11 @@ function generarVistaDetalle(dataArray) {
                             <p class="mt-2 mb-3 small text-danger">
                                 Se han identificado observaciones en su trámite. Por favor, revise las observaciones y vuelva a adjuntar la <b>DOCUMENTACIÓN COMPLETA</b> para continuar con la atención de su solicitud.
                             </p>
-                            <span class="badge bg-light-secondary mt-2 mb-3 text-dark" style="font-size:12px"><b>Observación:</b> ${safe(comentarioObservacion)}</span>
+                            <span class="badge bg-light-secondary mt-2 mb-3" style="font-size:12px"><b>Observación:</b> ${safe(comentarioObservacion)}</span>
 
-                            <div class="bg-white p-3 rounded-2 border" style="border-color: #f5c2c7 !important;">
+                            <div class="p-3 rounded-2 border" style="border-color: #f5c2c7 !important;">
                                 <form id="formSubsanar_${principal.cod_documento}" class="m-0">
-                                    <label class="form-label fw-semibold small mb-2 text-dark">Adjuntar documento subsanado:</label>
+                                    <label class="form-label fw-semibold small mb-2">Adjuntar documento subsanado:</label>
                                     <div class="input-group input-group-sm">
                                         <input type="file" class="form-control" id="archivoSubsanacion_${principal.cod_documento}" required>
                                         <button class="btn btn-primary px-3" type="button" onclick="procesarSubsanacion('${principal.cod_documento}')">
@@ -748,38 +829,39 @@ function generarVistaDetalle(dataArray) {
                 </div>
             `;
         }
+
         html += `
-<div class="card mb-4 border-0 shadow-sm rounded-3">
+<div class="card mb-4 border-2 shadow-sm rounded-3">
     <div class="card-body p-4">
         <h6 class="fw-bold mb-4" style="color:#085ec5; font-size: 14px;">DATOS PRINCIPALES DEL TRÁMITE</h6>
 
         <div class="row mb-4">
             <div class="col-md-6 mb-4">
-                <span class="text-muted d-block" style="font-size: 13px;">Expediente:</span>
+                <span class="d-block" style="font-size: 13px;">Expediente:</span>
                 <div class="border-bottom pb-2 mt-1">
-                    <strong class="text-dark">${safe(principal.cod_documento)}</strong>
+                    <strong>${safe(principal.cod_documento)}</strong>
                 </div>
             </div>
 
             <div class="col-md-6 mb-4">
-                <span class="text-muted d-block" style="font-size: 13px;">N° Documento:</span>
+                <span class="d-block" style="font-size: 13px;">N° Documento:</span>
                 <div class="border-bottom pb-2 mt-1">
-                    <strong class="text-dark">${principal.num_doc ? String(principal.num_doc).padStart(3, '0') : '---'}</strong>
+                    <strong>${principal.num_doc ? String(principal.num_doc).padStart(3, '0') : '---'}</strong>
                 </div>
             </div>
 
             <!-- Fila 2: Asunto y Estado -->
             <div class="col-md-6 mb-3">
-                <span class="text-muted d-block" style="font-size: 13px;">Asunto:</span>
+                <span class="d-block" style="font-size: 13px;">Asunto:</span>
                 <div class="border-bottom pb-2 mt-1">
-                    <strong class="text-dark text-uppercase">${safe(principal.asunto)}</strong>
+                    <strong class="text-uppercase">${safe(principal.asunto)}</strong>
                 </div>
             </div>
 
             <div class="col-md-6 mb-3">
-                <span class="text-muted d-block" style="font-size: 13px;">Estado:</span>
+                <span class="d-block" style="font-size: 13px;">Estado:</span>
                 <div class="border-bottom pb-2 mt-1">
-                    <strong class="text-dark">${safe(principal.estado)}</strong>
+                    <strong>${safe(principal.estado)}</strong>
                 </div>
             </div>
         </div>
@@ -788,7 +870,7 @@ function generarVistaDetalle(dataArray) {
 
         <div class="table-responsive mt-3">
             <table class="table table-bordered align-middle" style="font-size: 12px; border: 1px solid #dee2e6;">
-                <thead class="bg-light text-muted">
+                <thead>
                     <tr>
                         <th class="py-3 px-2 text-center">#</th>
                         <th class="py-3">N° PROVEÍDO</th>
@@ -808,7 +890,7 @@ function generarVistaDetalle(dataArray) {
         grupo.forEach((data, index) => {
 
             html += `
-                <tr class="bg-white">
+                <tr>
                     <td class="fw-semibold text-center">${index + 1}</td>
 
                     <td class="text-center">
@@ -816,19 +898,19 @@ function generarVistaDetalle(dataArray) {
                     </td>
 
                     <td>
-                        <div class="text-muted">${safe(data.nombre_oficina_origen)}</div>
+                        <div>${safe(data.nombre_oficina_origen)}</div>
                     </td>
 
                     <td>
-                        <div class="text-muted">${safe(data.fecha)}</div>
+                        <div>${safe(data.fecha)}</div>
                     </td>
 
                     <td>
-                        <div class="text-muted">${safe(data.nombre_oficina)}</div>
+                        <div>${safe(data.nombre_oficina)}</div>
                     </td>
 
                     <td>
-                        <div class="text-muted">${safe(data.fecha_recepcion)}</div>
+                        <div>${safe(data.fecha_recepcion)}</div>
                     </td>
 
                     <td class="text-center">
@@ -837,8 +919,25 @@ function generarVistaDetalle(dataArray) {
                         </span>
                     </td>
 
-                    <td class="text-muted">
-                        ${safe(data.comentario)}
+                    <td>
+                        ${(() => {
+
+                            let c1 = data.comentario ?? "";
+                            let c2 = data.comentario2 ?? "";
+
+                            let html = "";
+
+                            if (c1 && c1.trim() !== "") {
+                                html += `<div style="background:#ededed;padding:6px;border-radius:6px;margin-bottom:${(c2 && c2.trim() !== "") ? '6px' : '0'};white-space:pre-line;font-size:12px;">${c1}</div>`;
+                            }
+
+                            if (c2 && c2.trim() !== "") {
+                                html += `<div style="background:#dfefff;padding:6px;border-radius:6px;white-space:pre-line;font-size:12px;">${c2}</div>`;
+                            }
+
+                            return html || `<span class="text-muted">---</span>`;
+
+                        })()}
                     </td>
                 </tr>
             `;
@@ -1080,14 +1179,21 @@ function listarActividadReciente() {
             // Iteramos sobre cada actividad y la agregamos a la lista
             data.aaData.forEach(item => {
                 lista.innerHTML += `
-                    <li class="activity-item">
-                        <div class="activity-dot" style="background:${item.estado_color};"></div>
-                        <div class="activity-text"><strong>SOLICITUD</strong> DE ${item.asunto}</div>
-                        <span class="activity-tag" style="background:${item.estado_bg}; color:${item.estado_color};">
-                            ${item.estado_texto}
-                        </span>
-                        <span class="activity-time">${item.fecha_texto}</span>
-                    </li>`;
+                <li class="activity-item">
+
+                    <div class="activity-dot bg-${item.estado_badge}"></div>
+
+                    <div class="activity-text">
+                        <strong>SOLICITUD</strong> DE ${item.asunto}
+                    </div>
+
+                    <span class="activity-tag badge bg-light-${item.estado_badge} text-${item.estado_badge}">
+                        ${item.estado_texto}
+                    </span>
+
+                    <span class="activity-time">${item.fecha_texto}</span>
+
+                </li>`;
             });
         })
         .catch(err => console.error('Error actividad reciente:', err));
@@ -1101,6 +1207,7 @@ function verificarTramiteEstu(idTupa) {
     $.post("../controladores/sivireno.php?op=verificarTramite", { id_tupa: idTupa }, function (data) {
         try {
             const res = JSON.parse(data);
+            btn.removeClass("btn-primary btn-danger btn-warning");
 
             if (res.status) {
                 Swal.fire({
@@ -1119,11 +1226,21 @@ function verificarTramiteEstu(idTupa) {
                     text: res.mensaje,
                     confirmButtonColor: '#3085d6'
                 });
+
                 btn.prop("disabled", false).html('<i class="ti ti-send"></i> Enviar Solicitud').addClass("btn btn-success px-4").removeClass("btn-danger");
                 //btn.text("No disponible").prop("disabled", true).addClass("btn-danger");
+
+                if (res.bloqueo) {
+                    // Bloqueo total (Ej. No es egresado o 0 notas aprobadas)
+                    btn.text("No disponible").prop("disabled", true).addClass("btn-danger");
+                } else {
+                    // Excepción flexible (Puede intentar enviarlo)
+                    btn.prop("disabled", false).text("Enviar Solicitud").addClass("btn-warning");
+                }
             }
         } catch (e) {
             console.error("Error JSON:", data);
+            btn.removeClass("btn-primary btn-warning").addClass("btn-danger");
             btn.text("Error de sistema").prop("disabled", true);
         }
     });

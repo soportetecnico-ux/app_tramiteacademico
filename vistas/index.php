@@ -20,8 +20,8 @@ include('head.php')
                     style="background: linear-gradient(130deg, #1340a8 0%, #2563eb 55%, #4f8ef7 100%); border-radius: 15px !important;">
                     <div class="card-body-banner p-4" id="contenedorDashboard">
                         <div class="d-flex align-items-center">
-                            <div class="d-flex align-items-center justify-content-center rounded-circle flex-shrink-0 shadow-sm"
-                                style="width: 54px; height: 54px; background-color: #fff; color: #0e5fbb; border: 2px solid #edf2ff;">
+                            <div class="d-flex align-items-center justify-content-center rounded-circle flex-shrink-0 shadow-sm bg-light-custom"
+                                style="width: 54px; height: 54px; color: #0e5fbb; border: 2px solid #edf2ff;">
                                 <i class="ti ti-school fs-2"></i>
                             </div>
 

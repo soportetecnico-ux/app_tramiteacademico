@@ -64,8 +64,8 @@ $cod_web = $_POST['cod_web'] ?? '';
                         </div>
 
                         <div class="mt-4">
-                            <div id="contenedorDetallesTramite" class="p-3 border rounded-3 bg-light-subtle">
-                                <p class="text-muted small mb-0 text-center">Seleccione un movimiento para ver detalles adicionales.</p>
+                            <div id="contenedorDetallesTramite" class="p-3 border rounded-3">
+                                <p class="small mb-0 text-center">Seleccione un movimiento para ver detalles adicionales.</p>
                             </div>
                         </div>
                     </div>

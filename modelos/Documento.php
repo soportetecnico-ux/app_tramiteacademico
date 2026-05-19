@@ -206,6 +206,8 @@ class Documento
                     hd.fecha_recepcion,
                     hd.estado2 AS estado2,
                     hd.proveido as comentario,
+                    hd.proveido2 as comentario2,
+                    hd.archivo_archivado as archivo_archivado,
                  
                 (SELECT GROUP_CONCAT(CONCAT('EXPEDIENTE N° ', r.cod_documento, ' - ', o.nombre) SEPARATOR '|')
                  FROM referencia r

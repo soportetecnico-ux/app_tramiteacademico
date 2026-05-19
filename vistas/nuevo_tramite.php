@@ -17,22 +17,19 @@ include('head.php')
         z-index: 1051 !important;
         position: absolute;
     }
-    
 </style>
 <!-- [ Main Content ] start -->
 <div class="pc-container">
     <div class="pc-content"><!-- [ breadcrumb ] start -->
 
-
-
         <div class="row justify-content-center mt-2">
 
             <div class="col-md-12">
                 <div class="card">
-                    <div class="card-header bg-white py-3 border-bottom" style="border-radius: 12px 12px 0 0;">
+                    <div class="card-header py-3 border-bottom" style="border-radius: 12px 12px 0 0;">
                         <div class="d-flex align-items-center justify-content-center">
                             <img src="../assets/images/logo-tramite.png" alt="Logo" class="me-2" style="height: 22px;">
-                            <h6 class="mb-0 fw-bold text-dark">FORMULARIO ÚNICO DE TRÁMITE (FUT)</h6>
+                            <h6 class="mb-0 fw-bold">FORMULARIO ÚNICO DE TRÁMITE (FUT)</h6>
                         </div>
                     </div>
                     <div class="card-body table-border-style">
@@ -41,20 +38,20 @@ include('head.php')
                                 <div class="card-header py-2 px-3 bg-light">
                                     <h6 class="mb-0 fw-bold small text-uppercase">I. DATOS DEL SOLICITANTE</h6>
                                 </div>
-                                <div class="card-body p-2 bg-light-subtle">
+                                <div class="card-body p-2">
                                     <div class="row g-2">
                                         <div class="col-md-1">
                                             <div class="form-floating">
                                                 <input type="hidden" id="id_estu" name="id_estu" value="<?php echo $_SESSION['sistema_academico']['id_estu']; ?>">
                                                 <input type="text" class="form-control form-control-sm" id="dni" disabled>
-                                                <label>DNI / OTROS</label>
+                                                <label class="text-muted">DNI / OTROS</label>
                                             </div>
                                         </div>
 
                                         <div class="col-md-3">
                                             <div class="form-floating">
                                                 <input type="text" class="form-control form-control-sm" id="nombres_completos" placeholder="Apellidos y Nombres" disabled>
-                                                <label>APELLIDOS Y NOMBRES</label>
+                                                <label class="text-muted">APELLIDOS Y NOMBRES</label>
                                             </div>
                                             <input type="hidden" id="apepa">
                                             <input type="hidden" id="apema">
@@ -64,14 +61,14 @@ include('head.php')
                                         <div class="col-md-2">
                                             <div class="form-floating">
                                                 <input type="text" class="form-control form-control-sm" id="direccion" disabled>
-                                                <label>DOMICILIO ACTUAL</label>
+                                                <label class="text-muted">DOMICILIO ACTUAL</label>
                                             </div>
                                         </div>
 
                                         <div class="col-md-3">
                                             <div class="form-floating">
                                                 <input type="text" class="form-control form-control-sm" id="ubicacion" placeholder="Distrito / Prov / Dep" disabled>
-                                                <label>DISTRITO / PROVINCIA / DEPARTAMENTO</label>
+                                                <label class="text-muted">DISTRITO / PROVINCIA / DEPARTAMENTO</label>
                                             </div>
                                             <input type="hidden" id="distrito">
                                             <input type="hidden" id="provincia">
@@ -80,15 +77,15 @@ include('head.php')
 
                                         <div class="col-md-2">
                                             <div class="form-floating">
-                                                <input type="email" class="form-control form-control-sm text-primary" id="correo" disabled>
-                                                <label>CORREO ELECTRÓNICO</label>
+                                                <input type="email" class="form-control form-control-sm" id="correo" disabled>
+                                                <label class="text-muted">CORREO ELECTRÓNICO</label>
                                             </div>
                                         </div>
 
                                         <div class="col-md-1">
                                             <div class="form-floating">
                                                 <input type="text" class="form-control form-control-sm" id="celular">
-                                                <label>CELULAR</label>
+                                                <label class="text-muted">CELULAR</label>
                                             </div>
                                         </div>
                                     </div>
@@ -102,12 +99,12 @@ include('head.php')
                                 <div class="card-body p-2">
                                     <div class="row g-2 mb-2">
                                         <div class="col-md-6">
-                                            <label class="fw-bold small mb-1">SOLICITO:</label>
+                                            <label class="fw-bold small mb-1 ">SOLICITO:</label>
                                             <select class="form-select form-select-sm" id="id_tupa"></select>
                                         </div>
                                         <div class="col-md-6">
                                             <label class="fw-bold small mb-1">DIRIGIDO A:</label>
-                                            <input type="text" class="form-control form-control-sm bg-light" id="dependencia" disabled>
+                                            <input type="text" class="form-control form-control-sm" id="dependencia" disabled>
                                         </div>
                                     </div>
 
@@ -138,10 +135,10 @@ include('head.php')
                                     <div class="row g-1">
 
                                         <div class="col-md-6">
-                                            <div class="form-floating"><input type="text" class="form-control" id="nroComprobante" minlength="6" maxlength="15" ><label class="text-primary">N° COMPROBANTE <span class="text-danger" >*</span></label></div>
+                                            <div class="form-floating"><input type="text" class="form-control" id="nroComprobante" minlength="6" maxlength="15"><label class="text-muted">N° COMPROBANTE <span class="text-danger">*</span></label></div>
                                         </div>
                                         <div class="col-md-6">
-                                            <div class="form-floating"><input type="date" class="form-control" id="fechaComprobante" max="<?php echo date('Y-m-d'); ?>"><label class="text-primary">FECHA DE PAGO <span class="text-danger" >*</span></label></div>
+                                            <div class="form-floating"><input type="date" class="form-control" id="fechaComprobante" max="<?php echo date('Y-m-d'); ?>"><label class="text-muted">FECHA DE PAGO <span class="text-danger">*</span></label></div>
                                         </div>
                                     </div>
                                 </div>
@@ -170,13 +167,14 @@ include('head.php')
                                                     <input type="file" class="form-control" name="archivo_tupa[]" onchange="validarArchivo(this)">
                                                 </div>
                                             </div>
-                                            <div class="mt-2 p-2 rounded" style="background-color: #f8f9fa;">
-                                                <span class="text-muted d-block" style="font-size: 0.75rem; line-height: 1.4;">
-                                                    <i class="ti ti-info-circle fw-bold text-primary"></i>
+                                            <div class="alert alert-secondary alert-custom mt-2 p-2 border-0">
+                                                <div class="small lh-sm">
+                                                    <i class="ti ti-info-circle"></i>
                                                     <strong>Archivos permitidos:</strong> PDF, RAR, ZIP. <br>
                                                     <strong>Tamaño máximo:</strong> 50 MB. <br>
-                                                    <span class="text-danger fw-bold">Nota:</span> Se deben adjuntar todos los documentos indicados en los requisitos del trámite para evitar observaciones.
-                                                </span>
+                                                    <span class="fw-bold text-danger">Nota:</span>
+                                                    Se deben adjuntar todos los documentos indicados en los requisitos del trámite para evitar observaciones.
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -194,18 +192,18 @@ include('head.php')
                                         </div>
                                         <div class="card-body p-1 d-flex flex-column align-items-center mt-1 mb-0">
 
-                                            <div id="previewFirmaContainer" style="display: none; align-items: center; background: #fff; font-family: Arial, sans-serif; padding: 6px; width: 242px;">
+                                            <div id="previewFirmaContainer" style="display: none; align-items: center; font-family: Arial, sans-serif; padding: 6px; width: 242px;">
                                                 <div style="padding-right: 10px; flex-shrink: 0; border-right: 1px solid #eee; display: flex; align-items: center; height: 60px;">
                                                     <img src="../assets/images/logo-tramite.png" alt="Escudo" style="height: 55px; width: auto; display: block;">
                                                 </div>
-                                                <div style="padding-left: 10px; text-align: justify; color: #000; line-height: 1.2; flex-grow: 1;">
-                                                    <div style="font-size: 10px; color: #333; margin-bottom: 2px;">
+                                                <div style="padding-left: 10px; text-align: justify; line-height: 1.2; flex-grow: 1;">
+                                                    <div style="font-size: 10px; margin-bottom: 2px;">
                                                         Firmado digitalmente por: <span id="nombreFirma" style="text-transform: uppercase; display: block; width: 100%;"></span>
                                                     </div>
                                                     <div style="font-size: 10px; font-weight: bold; margin-bottom: 2px; text-align: left;">
                                                         <span id="dniFirma"></span>
                                                     </div>
-                                                    <div style="font-size: 10px; color: #444; text-align: left;">
+                                                    <div style="font-size: 10px; text-align: left;">
                                                         <div style="margin-bottom: 1px;">Motivo: Soy el autor del documento</div>
                                                         <div>Fecha: <span id="fechaFirma"></span></div>
                                                     </div>
@@ -249,7 +247,7 @@ include('head.php')
 
 <!-- [ Main Content ] end -->
 
- 
+
 
 <?php
 include('footer.php')
