@@ -17,7 +17,7 @@ class Documento
                 o.nombre AS nombre_oficina
             FROM tb_tupa t
             LEFT JOIN tb_tupa_oficina v ON v.id_tupa = t.id_tupa 
-                AND (v.id_car = '$id_car_sesion' OR v.id_car = 0)
+                AND (v.id_car = '$id_car_sesion' OR v.id_car = NULL)
             LEFT JOIN oficina o ON v.cod_oficina = o.cod_oficina
             WHERE t.estado = 1
             GROUP BY t.id_tupa
@@ -208,6 +208,8 @@ class Documento
                     hd.proveido as comentario,
                     hd.proveido2 as comentario2,
                     hd.archivo_archivado as archivo_archivado,
+                    hd.visible as visible,
+                    hd.fecha_atencion,
                  
                 (SELECT GROUP_CONCAT(CONCAT('EXPEDIENTE N° ', r.cod_documento, ' - ', o.nombre) SEPARATOR '|')
                  FROM referencia r

@@ -10066,7 +10066,7 @@ fieldset:disabled .introjs-tooltip .introjs-button,
 
 [data-pc-direction=ltr] .text-primary {
   --bs-text-opacity: 1;
-  color: rgba(var(--bs-primary-rgb), var(--bs-text-opacity)) !important;
+  color: #1340a8 !important;
 }
 
 [data-pc-direction=ltr] .text-secondary {

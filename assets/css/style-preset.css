@@ -7288,3 +7288,23 @@ $btn-border-radius-lg: 14px; */
     background-color: #e9ecef;
 }
 
+/* SOLO DARK MODE (pisamos tus estilos inline) */
+[data-bs-theme="dark"] .alert[style*="#fff5f5"] {
+    background-color: #2b1a1c !important;
+    border: 1px solid #842029 !important;
+    border-left: 5px solid #ff6b6b !important;
+}
+
+[data-bs-theme="dark"] .alert[style*="#fff5f5"] .text-danger {
+    color: #ff6b6b !important;
+}
+
+[data-bs-theme="dark"] .alert[style*="#fff5f5"] .border {
+    border-color: #842029 !important;
+}
+
+[data-bs-theme="dark"] .alert[style*="#fff5f5"] .badge {
+    background-color: #3a2a2c !important;
+    color: #f8d7da !important;
+}
+

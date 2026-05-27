@@ -550,7 +550,7 @@ function listarTramites() {
                     return `
             <div class="d-inline-block">
                 <a href="${rutaArchivo}" download 
-                   class="d-flex align-items-center text-decoration-none p-1 px-2" 
+                   class="d-flex align-items-center text-decoration-none p-1 px-2 text-dark" 
                    style="background-color: #f1f3f5; border-radius: 6px; border: 1px solid #e9ecef; transition: all 0.2s;"
                    title="${nombreReal}"> 
                     
@@ -814,7 +814,7 @@ function generarVistaDetalle(dataArray) {
 
                             <div class="p-3 rounded-2 border" style="border-color: #f5c2c7 !important;">
                                 <form id="formSubsanar_${principal.cod_documento}" class="m-0">
-                                    <label class="form-label fw-semibold small mb-2">Adjuntar documento subsanado:</label>
+                                     <p class="mt-2 mb-3 small text-dark fw-semibold">Adjuntar documento subsanado:</p>
                                     <div class="input-group input-group-sm">
                                         <input type="file" class="form-control" id="archivoSubsanacion_${principal.cod_documento}" required>
                                         <button class="btn btn-primary px-3" type="button" onclick="procesarSubsanacion('${principal.cod_documento}')">
@@ -914,31 +914,137 @@ function generarVistaDetalle(dataArray) {
                     </td>
 
                     <td class="text-center">
-                        <span class="badge bg-light-dark rounded-pill" style="font-size:11px">
-                            ${safe(data.estado2)}
-                        </span>
+                        ${(() => {
+
+                    const isDark = document.documentElement.getAttribute("data-bs-theme") === "dark";
+
+                    const bg = isDark ? "#2a2f34" : "#f8f9fa";
+                    const color = isDark ? "#e6e6e6" : "#212529";
+
+                    return `
+                            <span class="badge rounded-pill" style="
+                                background:${bg};
+                                color:${color};
+                                font-size:11px;
+                            ">
+                                ${safe(data.estado2)}
+                            </span>`;
+
+                })()}
                     </td>
 
                     <td>
-                        ${(() => {
+                    ${(() => {
 
-                            let c1 = data.comentario ?? "";
-                            let c2 = data.comentario2 ?? "";
+                    let c1 = data.comentario ?? "";
+                    let c2 = data.comentario2 ?? "";
 
-                            let html = "";
+                    let html = "";
 
-                            if (c1 && c1.trim() !== "") {
-                                html += `<div style="background:#ededed;padding:6px;border-radius:6px;margin-bottom:${(c2 && c2.trim() !== "") ? '6px' : '0'};white-space:pre-line;font-size:12px;">${c1}</div>`;
-                            }
+                    const isDark = document.documentElement.getAttribute("data-bs-theme") === "dark";
 
-                            if (c2 && c2.trim() !== "") {
-                                html += `<div style="background:#dfefff;padding:6px;border-radius:6px;white-space:pre-line;font-size:12px;">${c2}</div>`;
-                            }
+                    const bg1 = isDark ? "#2a2f34" : "#ededed";
+                    const bg2 = isDark ? "#1e2a38" : "#dfefff";
+                    const color1 = isDark ? "#e6e6e6" : "#000";
+                    const color2 = isDark ? "#cfe2ff" : "#000";
 
-                            return html || `<span class="text-muted">---</span>`;
+                    // COMENTARIOS
+                    if (c1.trim() !== "") {
+                        html += `<div style="
+        background:${bg1};
+        color:${color1};
+        padding:6px;
+        border-radius:6px;
+        margin-bottom:${c2.trim() ? '6px' : '0'};
+        font-size:12px;
+        max-width:300px;
+        word-wrap:break-word;
+        white-space: pre-line;
+    ">${c1}</div>`;
+                    }
 
-                        })()}
-                    </td>
+                    if (c2.trim() !== "") {
+                        html += `<div style="
+        background:${bg2};
+        color:${color2};
+        padding:6px;
+        border-radius:6px;
+        font-size:12px;
+        max-width:300px;
+        word-wrap:break-word;
+        white-space: pre-line;
+    ">${c2}</div>`;
+                    }
+
+                    // ARCHIVO
+                    if (parseInt(data.visible) === 1 && data.archivo_archivado) {
+
+                        const archivo = `./../vistas/includes/descargar_archivado.php?file=${data.archivo_archivado}`;
+                        const nombre = data.archivo_archivado.toLowerCase();
+
+                        // Estilo EXACTO a tu imagen pero con un ancho fijo más cómodo
+                        const cardEstilo = `
+                            display: inline-flex; 
+                            align-items: center; 
+                            gap: 10px; 
+                            background-color: #f1f4f8; 
+                            border: 1px solid #e2e8f0; 
+                            border-radius: 10px; 
+                            padding: 4px 12px; 
+                            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+                            margin-top: 6px;
+                            width: 120px; /* Ajusta este valor si lo quieres aún más ancho */
+                            box-sizing: border-box;
+                            font-family: system-ui, -apple-system, sans-serif;
+                        `;
+
+                        // Estilo para los textos (Negrita arriba, gris abajo)
+                        const textoEstilo = `
+                            display: flex; 
+                            flex-direction: column; 
+                            font-size: 11px; 
+                            line-height: 1.2;
+                            white-space: nowrap;
+                            overflow: hidden;
+                            text-overflow: ellipsis;
+                            width: 100%;
+                        `;
+
+                        if (nombre.endsWith(".pdf")) {
+                            html += `
+                        <div style="${cardEstilo} cursor: pointer;" 
+                            onclick="abrirModalArchivo('${archivo}', '${data.fecha_atencion}')">
+                            
+                            <i class="fas fa-file-pdf" style="font-size: 22px; color: #e11d48;"></i>
+                            
+                            <div style="${textoEstilo}">
+                                <span style="color: #000000; font-weight: 700; overflow: hidden; text-overflow: ellipsis;">${data.archivo_archivado}</span>
+                                <span style="color: #64748b; font-weight: 500; font-size: 10px; text-transform: uppercase;">PDF</span>
+                            </div>
+                        </div>`;
+                        }
+
+                        else if (nombre.endsWith(".zip") || nombre.endsWith(".rar")) {
+                            const extension = nombre.endsWith(".zip") ? "ZIP" : "RAR";
+
+                            html += `
+                        <a href="${archivo}" target="_blank" style="${cardEstilo} text-decoration: none; color: inherit;">
+                            
+                            <i class="fas fa-file-archive" style="font-size: 22px; color: #ea580c;"></i>
+                            
+                            <div style="${textoEstilo}">
+                                <span style="color: #000000; font-weight: 700; overflow: hidden; text-overflow: ellipsis;">${data.archivo_archivado}</span>
+                                <span style="color: #64748b; font-weight: 500; font-size: 10px; text-transform: uppercase;">${extension}</span>
+                            </div>
+                        </a>`;
+                        }
+                    }
+
+
+                    return html || `<span class="text-muted"></span>`;
+
+                })()}
+            </td>
                 </tr>
             `;
         });
@@ -956,6 +1062,73 @@ function generarVistaDetalle(dataArray) {
     $('#contenedorDetallesTramite').html(html);
 }
 
+function abrirModalArchivo(url, fechaAtencion) {
+
+    const iframe = document.getElementById("iframePDF");
+    const zipBox = document.getElementById("zipContainer");
+    const icon = document.getElementById("modalIcon");
+
+    const estadoEl = document.getElementById("pdfEstado");
+    const oficinaEl = document.getElementById("pdfOficina");
+    const comentarioEl = document.getElementById("pdfComentario");
+    const descargarBtn = document.getElementById("pdfDescargar");
+
+    const lower = url.toLowerCase();
+
+    // Reset
+    iframe.style.display = "none";
+    zipBox.style.display = "none";
+    iframe.src = "";
+
+    if (lower.includes(".pdf")) {
+        iframe.src = url;
+        iframe.style.display = "block";
+        icon.className = "fas fa-file-pdf text-danger";
+    }
+    else if (lower.includes(".zip") || lower.includes(".rar")) {
+        zipBox.style.display = "block";
+        icon.className = "fas fa-file-archive text-warning";
+    }
+
+    // Estado fijo
+    estadoEl.innerText = "Atendido";
+    estadoEl.className = "badge bg-success";
+
+    // Fecha formateada 12h
+    oficinaEl.innerText = formatearFecha12h(fechaAtencion);
+
+    // Comentario formal
+    comentarioEl.textContent = "El trámite ha sido atendido y concluido conforme a lo registrado.";
+
+    const nombreArchivo = url.split('/').pop();
+
+    descargarBtn.href = url;
+    descargarBtn.setAttribute("download", nombreArchivo);
+
+    const modal = new bootstrap.Modal(document.getElementById("modalPDF"));
+    modal.show();
+}
+
+function formatearFecha12h(fechaStr) {
+    if (!fechaStr) return "-";
+
+    const fecha = new Date(fechaStr);
+
+    if (isNaN(fecha)) return fechaStr;
+
+    let horas = fecha.getHours();
+    const minutos = fecha.getMinutes().toString().padStart(2, "0");
+
+    const ampm = horas >= 12 ? "PM" : "AM";
+    horas = horas % 12;
+    horas = horas ? horas : 12; // 0 -> 12
+
+    const dia = fecha.getDate().toString().padStart(2, "0");
+    const mes = (fecha.getMonth() + 1).toString().padStart(2, "0");
+    const anio = fecha.getFullYear();
+
+    return `${dia}/${mes}/${anio} ${horas}:${minutos} ${ampm}`;
+}
 
 function generarFUT(cod_web) {
     // Agregamos "includes/" a la ruta

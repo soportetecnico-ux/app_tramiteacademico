@@ -39,18 +39,18 @@ include('head.php')
                     </div>
                     <div class="card-body table-border-style">
                         <div class="table-responsive">
-                            <table class="table table-hover" id="tablaTramites">
-                                <thead>
+                            <table id="tablaTramites" class="table table-hover align-middle w-100 border-0">
+                                <thead class="bg-light">
                                     <tr style="letter-spacing: 0.5px;">
-                                        <th class="text-center px-3" style="width: 50px;">#</th>
-                                        <th style="width: 150px;">FECHA EMISIÓN</th>
-                                        <th style="width: 140px;">CÓDIGO WEB</th>
-                                        <th>ASUNTO</th>
-                                        <th>DEPENDENCIA DESTINO</th>
-                                        <th>FUT</th>
-                                        <th>ADJUNTO</th>
-                                        <th>ESTADO</th>
-                                        <th class="text-center" style="width: 120px;">ACCIONES</th>
+                                        <th class="text-center px-3 border-0 text-uppercase text-muted">#</th>
+                                        <th class="border-0 text-uppercase text-muted">FECHA EMISIÓN</th>
+                                        <th class="border-0 text-uppercase text-muted">CÓDIGO WEB</th>
+                                        <th class="border-0 text-uppercase text-muted">ASUNTO</th>
+                                        <th class="border-0 text-uppercase text-muted">DEPENDENCIA DESTINO</th>
+                                        <th class="border-0 text-uppercase text-muted">FUT</th>
+                                        <th class="border-0 text-uppercase text-muted">ADJUNTO</th>
+                                        <th class="border-0 text-uppercase text-muted">ESTADO</th>
+                                        <th class="border-0 text-uppercase text-muted">ACCIONES</th>
                                     </tr>
                                 </thead>
                                 <tbody>
