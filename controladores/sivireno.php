@@ -170,19 +170,23 @@ switch ($_GET["op"]) {
                     $res['mensaje'] = "No cumples con los requisitos minimos. Necesitas al menos 1 asignatura aprobada para solicitar el Record Integral de Notas.";
                 }
             break;
-            case '8': // solicitud de certificado de practicas pre profesionales
-                 $asignaturas_aprobadas = $sivireno->numAsigAprobadas($id_estu);
-                $certificadoPracticas= $sivireno->numAsigAprobadas($id_estu);
-                $total_aprobadas = (isset($asignaturas_aprobadas['total_aprobados'])) ? $asignaturas_aprobadas['total_aprobados'] : 0;
-                 if ($total_aprobadas >= 1) {
+            case '8': // Expedición de Certificado de Práctica Preprofesional
+                // 1. Buscamos en todas las asignaciones del estudiante donde haya aprobado al menos 1 práctica
+                $practicasHistorial = $sivireno->verificarPracticasAprobadas($id_estu);
+
+                // 2. Extraemos el valor manejando casos de null o arreglos vacíos
+                $total_aprobadas = (is_array($practicasHistorial) && isset($practicasHistorial['practicas_aprobadas'])) ? (int)$practicasHistorial['practicas_aprobadas'] : 0;
+
+                // 3. Evaluamos
+                if ($total_aprobadas >= 1) {
                     $res['status'] = true;
-                    $res['mensaje'] = "Cumples con los requisitos minimos. Apto para solicitar el Record Integral de Notas.";
+                    $res['mensaje'] = "Puedes solicitar el Certificado de Prácticas Preprofesionales. Debes haber aprobado las asignaturas de prácticas de tu plan.";
                 } else {
                     $res['status'] = false; 
-                    $res['bloqueo'] = true;
-                    $res['mensaje'] = "No cumples con los requisitos minimos. Necesitas al menos 1 asignatura aprobada para solicitar el Record Integral de Notas.";
+                    $res['bloqueo'] = false; 
+                    $res['mensaje'] = "Recordatorio: Para emitir este certificado es requisito haber aprobado tus Prácticas Preprofesionales.  Actualmente no se registra ninguna práctica aprobada en tu historial académico.";
                 }
-            break;
+                break;
             case '9': // Solicitud de Carta de Prácticas Pre Profesionales
                 // 1. Obtenemos el semestre actual
                 $datos_actuales = $sivireno->semestreDatos($id_estu);
@@ -231,15 +235,257 @@ switch ($_GET["op"]) {
                     $res['mensaje'] = "Requisitos cumplidos. Puede proceder con su solicitud de Sustentación de Tesis de Suficiencia.";
                 } else {
                     $res['status'] = false;
-                    $res['mensaje'] = "No cumple con los requisitos para solicitar este tramite.";
+                    $res['mensaje'] = "No cumple con los requisitos para solicitar la Sustentación de Tesis de Suficiencia.";
                     $res['bloqueo'] = true;  
                 }
             break;
+            case '12': // RECTIFICACIÓN DE MATRICULA
+                $datos_actuales = $sivireno->semestreDatos($id_estu);
+
+                if ($datos_actuales && isset($datos_actuales['id_semestre'])) {
+                    $res['status'] = true;
+                    $res['mensaje'] = "Puede proceder con su solicitud de Rectificación de Matrícula. Recuerde que el plazo para solicitar son las 4 primeras semanas posteriores al inicio de clases.";
+                } else {
+                    $res['status'] = false;
+                    $res['mensaje'] = "No cumple con los requisitos para solicitar la Rectificación de Matrícula. Debe estar matriculado en el semestre actual para solicitar este trámite.";
+                    $res['bloqueo'] = true;  
+                }
+            break;
+             case '13': // RETIRO DEL SEMESTRE ACADÉMICO
+                $datos_actuales = $sivireno->semestreDatos($id_estu);
+
+                if ($datos_actuales && isset($datos_actuales['id_semestre'])) {
+                    $res['status'] = true;
+                    $res['mensaje'] = "Puede proceder con su solicitud de Retiro del Semestre Académico. Recuerde que el plazo para solicitar son las 2 primeras semanas posteriores al inicio de clases.";
+                } else {
+                    $res['status'] = false;
+                    $res['mensaje'] = "No cumple con los requisitos para solicitar la Rectificación de Matrícula. Debe estar matriculado en el semestre actual para solicitar este trámite.";
+                    $res['bloqueo'] = true;  
+                }
+            break;
+            case '16': // RETIRO DE ASIGNATURA
+                $datos_actuales = $sivireno->semestreDatos($id_estu);
+                if ($datos_actuales && isset($datos_actuales['id_semestre'])) {
+                    $res['status'] = true;
+                    $res['mensaje'] = "Puede proceder con su solicitud de Retiro de Asignatura. Recuerde revisar el calendario académico y solicitarlo en el periodo correspondiente.";
+                } else {
+                    $res['status'] = false;
+                    $res['mensaje'] = "No cumple con los requisitos para solicitar el Retiro de Asignatura. Debe estar matriculado en el semestre actual para solicitar este trámite.";
+                    $res['bloqueo'] = true;  
+                }
+            break;
+            case '17': // JUSTIFICACIÓN DE INASISTENCIA
+                 $datos_actuales = $sivireno->semestreDatos($id_estu);
+                if ($datos_actuales && isset($datos_actuales['id_semestre'])) {
+                    $res['status'] = true;
+                    $res['mensaje'] = "Puede proceder con su solicitud de Justificación de Inasistencia.";
+                } else {
+                    $res['status'] = false;
+                    $res['mensaje'] = "No cumple con los requisitos para solicitar la Justificación de Inasistencia. Debe estar matriculado en el semestre actual para solicitar este trámite.";
+                    $res['bloqueo'] = true;  
+                }
+            break;
+            case '19': //DIPLOMA DE BACHILLER
+                $egresado = $sivireno->ObtenerEgresado($id_estu);
+                if ($egresado) {
+                    $res['status'] = true;
+                    $res['mensaje'] = "Requisitos cumplidos. Puede proceder con su solicitud de Diploma de Bachiller.";
+                } else {
+                    $res['status'] = false;
+                    $res['mensaje'] = "No cumple con los requisitos para solicitar el Diploma de Bachiller.";
+                    $res['bloqueo'] = true;  
+                }
+                break;
+            case '20': //DIPLOMA DE TITULO
+                $egresado = $sivireno->ObtenerEgresado($id_estu);
+                if ($egresado) {
+                    $res['status'] = true;
+                    $res['mensaje'] = "Requisitos cumplidos. Puede proceder con su solicitud de Diploma de Título Profesional.";
+                } else {
+                    $res['status'] = false;
+                    $res['mensaje'] = "No cumple con los requisitos para solicitar el Diploma de Título Profesional.";
+                    $res['bloqueo'] = true;  
+                }
+                break;
+            case '21': //DIPLOMA DE BACHILLER DUPLICADO
+                $egresado = $sivireno->ObtenerEgresado($id_estu);
+                if ($egresado) {
+                    $res['status'] = true;
+                    $res['mensaje'] = "Requisitos cumplidos. Puede proceder con su solicitud de Diploma de Bachiller Duplicado.";
+                } else {
+                    $res['status'] = false;
+                    $res['mensaje'] = "No cumple con los requisitos para solicitar el Diploma de Bachiller Duplicado.";
+                    $res['bloqueo'] = true;  
+                }
+                break;
+            case '22': //DIPLOMA DE TITULO DUPLICADO
+                $egresado = $sivireno->ObtenerEgresado($id_estu);
+                if ($egresado) {
+                    $res['status'] = true;
+                    $res['mensaje'] = "Requisitos cumplidos. Puede proceder con su solicitud de Diploma de Título Profesional Duplicado.";
+                } else {
+                    $res['status'] = false;
+                    $res['mensaje'] = "No cumple con los requisitos para solicitar el Diploma de Título Profesional Duplicado.";
+                    $res['bloqueo'] = true;  
+                }
+                break;
+            case '23': //CONSTANCIA DE SIMILITUD
+                $egresado = $sivireno->ObtenerEgresado($id_estu);
+                if ($egresado) {
+                    $res['status'] = true;
+                    $res['mensaje'] = "Requisitos cumplidos. Puede proceder con su solicitud de Constancia de Similitud.";
+                } else {
+                    $res['status'] = false;
+                    $res['mensaje'] = "No cumple con los requisitos para solicitar la Constancia de Similitud.";
+                    $res['bloqueo'] = true;  
+                }
+                break;
+            case '24': //CONSTANCIA DE INGRESO
+                 
+                break;
+            case '25': //DUPLICADO DE REPORTE DE MATRÍCULA
+                 $datos_actuales = $sivireno->semestreDatos($id_estu);
+                if ($datos_actuales) {
+                    $res['status'] = true;
+                    $res['mensaje'] = "Requisitos cumplidos. Puede proceder con su solicitud de Duplicado de Reporte de Matrícula.";
+                } else {
+                    $res['status'] = false;
+                    $res['mensaje'] = "No cumple con los requisitos para solicitar el Duplicado de Reporte de Matrícula.";
+                    $res['bloqueo'] = true;  
+                }
+                break;
+            case '26': //HISTORIAL ACADEMICO
+                $asignaturas_aprobadas = $sivireno->numAsigAprobadas($id_estu);
+                $total_aprobadas = (isset($asignaturas_aprobadas['total_aprobados'])) ? $asignaturas_aprobadas['total_aprobados'] : 0;
+                if ($total_aprobadas >= 1) { 
+                    $res['status'] = true;
+                    $res['mensaje'] = "Requisitos cumplidos. Puede proceder con su solicitud de HISTORIAL ACADEMICO.";
+                } else {
+                    $res['status'] = false;
+                    $res['mensaje'] = "No cumple con los requisitos para solicitar el HISTORIAL ACADEMICO.";
+                    $res['bloqueo'] = true;  
+                }
+                break;
+             case '27': //CARNET DE BIBLIOTECA
+                $datos_actuales = $sivireno->semestreDatos($id_estu);
+                if ($datos_actuales) {
+                    $res['status'] = true;
+                    $res['mensaje'] = "Puede proceder con su solicitud de CARNET DE BIBLIOTECA.";
+                } else {
+                    $res['status'] = false;
+                    $res['mensaje'] = "No cumple con los requisitos para solicitar el CARNET DE BIBLIOTECA.";
+                    $res['bloqueo'] = true;  
+                }
+                break;
+             case '28': //DUPLICADO CARNET DE BIBLIOTECA
+                $datos_actuales = $sivireno->semestreDatos($id_estu);
+                if ($datos_actuales) {
+                    $res['status'] = true;
+                    $res['mensaje'] = "Puede proceder con su solicitud de DUPLICADO DE CARNET DE BIBLIOTECA.";
+                } else {
+                    $res['status'] = false;
+                    $res['mensaje'] = "No cumple con los requisitos para solicitar el DUPLICADO DE CARNET DE BIBLIOTECA.";
+                    $res['bloqueo'] = true;  
+                }
+                break;
+             case '29': //CONSTANCIA DE NO ADEUDO DE LIBROS
+                $egresado = $sivireno->ObtenerEgresado($id_estu);
+                if ($egresado) {
+                    $res['status'] = true;
+                    $res['mensaje'] = "Requisitos cumplidos. Puede proceder con su solicitud de CONSTANCIA DE NO ADEUDO DE LIBROS.";
+                } else {
+                    $res['status'] = false;
+                    $res['mensaje'] = "No cumple con los requisitos para solicitar el CONSTANCIA DE NO ADEUDO DE LIBROS.";
+                    $res['bloqueo'] = true;  
+                }
+                break;
+             case '30': //REVISIÓN DE NOTAS DE EXAMENES
+                $datos_actuales = $sivireno->semestreDatos($id_estu);
+                if ($datos_actuales) {
+                    $res['status'] = true;
+                    $res['mensaje'] = "Puede proceder con su solicitud de REVISIÓN DE NOTAS DE EXAMENES.";
+                } else {
+                    $res['status'] = false;
+                    $res['mensaje'] = "No cumple con los requisitos para solicitar el REVISIÓN DE NOTAS DE EXAMENES.";
+                    $res['bloqueo'] = true;  
+                }
+                break;
+            case '31': //CAMBIO DE PLAN DE ESTUDIOS
+                $asignaturas_aprobadas = $sivireno->numAsigAprobadas($id_estu);
+                $total_aprobadas = (isset($asignaturas_aprobadas['total_aprobados'])) ? $asignaturas_aprobadas['total_aprobados'] : 0;  
+                 if ($total_aprobadas >= 1) {
+                    $res['status'] = true;
+                    $res['mensaje'] = "Puede proceder con su solicitud de CAMBIO DE PLAN DE ESTUDIOS.";
+                } else {
+                    $res['status'] = false;
+                    $res['mensaje'] = "No cumple con los requisitos para solicitar el CAMBIO DE PLAN DE ESTUDIOS.";
+                    $res['bloqueo'] = true;  
+                }
+                break;
+            case '32': //CAMBIO DE TURNO
+                $datos_actuales = $sivireno->semestreDatos($id_estu);
+                if ($datos_actuales) {
+                    $res['status'] = true;
+                    $res['mensaje'] = "Puede proceder con su solicitud de Cambio de Turno.";
+                } else {
+                    $res['status'] = false;
+                    $res['mensaje'] = "No cumple con los requisitos para solicitar el Cambio de Turno.";
+                    $res['bloqueo'] = true;  
+                }
+                break;
+            case '34': //ANULACIÓN DE INGRESO A LA UNDC - MESA DE PARTES GENERAL
+                
+                break;
+            case '35': //TRASLADO INTERNO
+                $res['status'] = true;
+                $res['mensaje'] = "Puede proceder con su solicitud de Traslado Interno.";
+           
+                break;
+            case '36': //DUPLICADO DE BOLETA DE PAGO - MESA DE PARTES GENERAL
+                
+                break;
+            case '37': //COPIA FEDATEADA POR PAGINA - MESA DE PARTES GENERAL
+                
+                break;
+            case '38': //CONVALIDACIÓN DE PRACTICAS PREPROFESIONALES
+                $res['status'] = true;
+                $res['mensaje'] = "Puede proceder con su solicitud de Convalidación de Practicas Preprofesionales.";
+                break;
+            case '39': // INSCRIPCIÓN Y VALIDACIÓN DE PRÁCTICAS PRE PROFESIONALES
+                
+                break;
+            case '40': //CERTIFICADO DE PROYECCIÓN SOCIAL
+                
+                break;
+            case '41': //CONSTANCIA DE NO ADEUDO DE BIENES A LA ESCUELA PROFESIONAL
+                
+                break;
+            case '42': //CURSOS DIRIGIDOS
+                
+                break;
+            case '43': //CERTIFICADO DE ASISTENCIA A CURSOS- MESA DE PARTES GENERAL
+                
+                break;
+            case '44': //ADMISIÓN, CONVALIDACIÓN Y/O RECONOCIMIENTO - MESA DE PARTES GENERAL
+                
+                break;
 
             default:
-                $res['status'] = true; // trámites que quizás no requieren validación
-                $res['mensaje'] = "Trámite sin restricciones académicas.";
-                break;
+                $tramite = match ($id_tupa) {
+                    '14' => 'Reserva de Matrícula',
+                    '15' => 'Reincorporación a Estudios',   
+                    '18' => 'Convalidación de Asignaturas',
+                    '33' => 'Anulación de Matrícula',
+                    default => null,
+                };
+                if ($tramite !== null) {
+                    $res['status'] = true;
+                    $res['mensaje'] = "Puede proceder con su solicitud de $tramite. Recuerde revisar el calendario académico y solicitarlo en el periodo correspondiente.";
+                } else {
+                    $res['status'] = false;
+                    $res['mensaje'] = "El trámite solicitado no es reconocido o no está disponible.";
+                }
+            break;
         }
     } else {
         $res['mensaje'] = "No se recibió el ID del trámite.";

@@ -96,4 +96,17 @@ class Sivireno
             
             return ejecutarConsultaSimpleFila2($sql);
         }
+        public function verificarPracticasAprobadas($id_estu) {
+            //IMPORTANTE: Reemplaza 'promedio_final' por el nombre real de tu columna de nota
+            $sql = "SELECT COUNT(*) AS practicas_aprobadas 
+                    FROM asignacion_estudiante ae
+                    INNER JOIN ficha_matricula fm ON ae.id_ficham = fm.id_ficham
+                    INNER JOIN asignatura a ON ae.id_asi = a.id_asi 
+                    WHERE fm.id_estu = '$id_estu' 
+                    AND ae.profinal_record >= 11  
+                    AND (UPPER(a.nom_asi) LIKE '%PR%CTICA%PRE%PROFESIONAL%' 
+                        OR UPPER(a.nom_asi) LIKE '%PR%CTICA%PREPROFESIONAL%')";
+            
+            return ejecutarConsultaSimpleFila2($sql);
+        }
 }
