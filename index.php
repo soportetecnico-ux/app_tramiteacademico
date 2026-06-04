@@ -59,7 +59,7 @@ if (isset($_GET["code"])) {
             $google_client->revokeToken();
 
             $_SESSION['error_message'] = "Sin acceso";
-            header('Location: ./index.php');
+            header('Location: index.php');
             exit;
         }
     }
@@ -82,7 +82,9 @@ $login_button = '
     <link rel="shortcut icon" type="image/png" href="imagenes/undcico.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
+    <link rel="icon" href="./assets/images/sistema/logo-tramite.png" type="image/x-icon">
+    <link rel="stylesheet" href="./assets/css/style-preset.css">
+    <link rel="stylesheet" href="./assets/fonts/tabler-icons.min.css">
     <style>
         html,
         body {
@@ -146,20 +148,23 @@ $login_button = '
                     <div class="text-center mb-4">
                         <img src="../imagenes/logo-tramite.png" alt="Escudo" class="mb-3" width="60">
                         <h5 class="fw-semibold text-undc mb-0">SISTEMA DE TRÁMITES ACADÉMICOS</h5>
-                        <!-- <p class="small fw-bold text-undc mb-4">ACADÉMICOS</p> -->
 
                         <p class="text-muted small mt-3">Iniciar sesión con su correo institucional</p>
                         <?php echo '<div class="d-grid my-2">' . $login_button . '</div>'; ?>
                     </div>
-                    <div id="mensajeLogin" class="mt-2 text-center text-danger"></div>
+                    <div id="mensajeLogin" class="mt-2 text-center"></div>
 
                     <!-- Recuperar contraseña -->
                     <div class="text-center">
                         <a href="#" class="text-decoration-none small" data-bs-toggle="collapse" data-bs-target="#mensajeRecuperar" style="color: #0547a3;">
                             ¿Olvidó su contraseña?
                         </a>
-                        <div id="mensajeRecuperar" class="collapse mt-2 text-muted small">
-                            Escriba a la Oficina de Tecnologías de la Información: <a href="mailto:sistemas@undc.edu.pe">sistemas@undc.edu.pe</a>
+                        <div id="mensajeRecuperar" class="collapse mt-2 small">
+                            <div class="alert alert-info p-2 mb-0 small">
+                                Si tiene problemas de acceso, comuníquese con la Oficina de Tecnologías de la Información al correo:
+                                <a href="mailto:sistemas@undc.edu.pe">sistemas@undc.edu.pe</a><br>
+                                Adjunte su <strong>DNI</strong> y proporcione sus datos completos (nombres y apellidos) para su validación.
+                            </div>
                         </div>
                     </div>
 
@@ -191,24 +196,22 @@ $login_button = '
 
     <?php
     if ($error_message == "Sin acceso") {
-        echo
-        '<script>
-          const Toast = Swal.mixin({
-            toast: true,
-            position: "top-end",
-            showConfirmButton: false,
-            timer: 4000,
-            timerProgressBar: true,
-            didOpen: (toast) => {
-              toast.onmouseenter = Swal.stopTimer;
-              toast.onmouseleave = Swal.resumeTimer;
-            }
-          });
-          Toast.fire({
-            icon: "error",
-            title: "No tienes acceso al sistema."
-          });
-        </script>';
+
+        echo '<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        let div = document.getElementById("mensajeLogin");
+
+        div.innerHTML = `
+    <div class="alert alert-danger d-flex justify-content-center align-items-center text-center p-2" role="alert">
+        <i class="ti ti-alert-triangle me-2 fs-3"></i>
+        <div>El correo no tiene acceso.</div>
+    </div>
+`;
+        setTimeout(() => {
+            div.innerHTML = "";
+        }, 6000);
+    });
+    </script>';
     }
     ?>
 

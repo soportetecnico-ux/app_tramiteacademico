@@ -113,7 +113,7 @@
                                 </svg> </span><span class="pc-mtext">Mis trámites</span></a>
                     </li>
                     <li class="pc-item">
-                        <a href="apoyo.php" class="pc-link"><span class="pc-micon">
+                        <a href="materiales.php" class="pc-link"><span class="pc-micon">
                                 <svg class="pc-icon">
                                     <use xlink:href="#custom-layer"></use>
                                 </svg> </span><span class="pc-mtext">Manual de uso</span></a>
@@ -129,7 +129,7 @@
                 <ul class="list-unstyled">
                     <!-- ======= Menu collapse Icon ===== -->
                     <li class="pc-h-item pc-sidebar-collapse">
-                        <a href="#" class="pc-head-link ms-0 bg-white" id="sidebar-hide">
+                        <a href="#" class="pc-head-link ms-0" id="sidebar-hide">
                             <i class="ti ti-menu-2"></i>
                         </a>
                     </li>
@@ -165,6 +165,13 @@
                             }
                             ?>
                         </span>
+                        <button class="btn btn-sm btn-light"
+                            onclick="cambiarTema()"
+                            id="btnTema"
+                            aria-label="Cambiar tema claro u oscuro">
+                            🌙
+                        </button>
+
                         <a
                             class="pc-head-link dropdown-toggle arrow-none me-0"
                             data-bs-toggle="dropdown"
@@ -206,5 +213,33 @@
             </div>
         </div>
     </header>
+    <script>
+        function cambiarTema() {
+            let body = document.body;
+            let temaActual = body.getAttribute("data-pc-theme");
 
+            if (temaActual === "dark") {
+                body.setAttribute("data-pc-theme", "light");
+                localStorage.setItem("tema", "light");
+                document.getElementById("btnTema").innerHTML = "🌙";
+            } else {
+                body.setAttribute("data-pc-theme", "dark");
+                localStorage.setItem("tema", "dark");
+                document.getElementById("btnTema").innerHTML = "☀️";
+            }
+        }
+
+        // 🔥 Mantener tema al recargar
+        document.addEventListener("DOMContentLoaded", function() {
+            let temaGuardado = localStorage.getItem("tema");
+
+            if (temaGuardado) {
+                document.body.setAttribute("data-pc-theme", temaGuardado);
+
+                if (temaGuardado === "dark") {
+                    document.getElementById("btnTema").innerHTML = "☀️";
+                }
+            }
+        });
+    </script>
     <!-- [ Header ] end -->

@@ -9,12 +9,21 @@ class Usuario
     public function __construct() {}
 
     //UsuarioLogeo
-    public function verificarLogeo($email)
+    public function verificarLogeo1($email)
     {
         $sql = "SELECT e.*, d.id_car 
             FROM estudiante e
             INNER JOIN detestudiante d ON e.id_estu = d.id_estu
             WHERE e.email_estu = '$email' 
+            LIMIT 1";
+        return ejecutarConsulta2($sql);
+    }
+    public function verificarLogeo($email)
+    {
+        $sql = "SELECT e.*, IFNULL(d.id_car, 0) AS id_car
+            FROM estudiante e
+            LEFT JOIN detestudiante d ON e.id_estu = d.id_estu
+            WHERE e.email_estu = '$email'
             LIMIT 1";
         return ejecutarConsulta2($sql);
     }

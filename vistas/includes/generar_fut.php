@@ -201,19 +201,6 @@ ob_start();
     <td><?= $dni ?></td>
   </tr>
 
-  <!-- <tr>
-    <th colspan="3" class="font-bold sl">PERSONA JURÍDICA</th>
-    <th colspan="1" class="font-bold sl text-center">RUC</th>
-  </tr>
-  <tr>
-    <td class="font-bold" style="vertical-align: middle; width: 100%;" colspan="4">Razón Social</td>
-  </tr>
-  <tr>
-     <td colspan="3" class="h-30" style="vertical-align: middle; text-align: center;">
-       <span style="color: #666;">------------------------------------------------------</span>
-    </td>
-    <td class="font-bold" style="vertical-align: middle; width: 40%;">N°</td>
-  </tr> -->
 </table>
 
 <table>
@@ -249,7 +236,7 @@ ob_start();
 </table>
 
 <table>
-  <tr><th>VII. ANEXOS (Relación de Documentos y Anexos que se adjunta:</th></tr>
+  <tr><th>VII. ANEXOS (Relación de Documentos y Anexos que se adjunta):</th></tr>
   <tr><td class="h-60" style="white-space: pre-wrap; padding-left: 25px;"><?= $anexos ?></td></tr>
 </table>
 

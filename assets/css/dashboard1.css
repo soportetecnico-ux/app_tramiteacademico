@@ -1,0 +1,315 @@
+     /* ── VARIABLES Y ESTILOS GENERALES ── */
+     :root {
+         --bg: #f0f4fa;
+         --surface: #ffffff;
+         --surface2: #f8faff;
+         --primary: #1a4fba;
+         --primary-light: #e8effe;
+         --primary-mid: #3b6fd4;
+         --warning: #e8a020;
+         --warning-light: #fff8ec;
+         --danger: #d63251;
+         --danger-light: #fff0f3;
+         --success: #0f9e6e;
+         --success-light: #edfaf4;
+         --text: #0d1b3e;
+         --text-muted: #6b7a99;
+         --border: #e4eaf5;
+         --shadow: 0 4px 24px rgba(26, 79, 186, 0.07);
+         --shadow-lg: 0 12px 40px rgba(26, 79, 186, 0.13);
+         --radius: 18px;
+         --radius-sm: 12px;
+     }
+
+     /* ── ESTILOS PARA EL BANNER DE LA TARJETA ── */
+     .card-body-banner::before {
+         content: '';
+         position: absolute;
+         top: -70px;
+         right: -50px;
+         width: 200px;
+         height: 200px;
+         border-radius: 50%;
+         background: rgba(255, 255, 255, .07);
+     }
+
+     /* Un segundo círculo para agregar profundidad al banner */
+     .card-body-banner::after {
+         content: '';
+         position: absolute;
+         bottom: -80px;
+         right: 120px;
+         width: 160px;
+         height: 160px;
+         border-radius: 50%;
+         background: rgba(255, 255, 255, .05);
+     }
+
+     /* ── FILA SUPERIOR DE ESTADÍSTICAS ── */
+     .stat-card {
+         background: var(--surface);
+         position: relative;
+         overflow: hidden;
+         border-radius: 12px;
+     }
+
+     /* El banner de color en la parte superior de cada tarjeta */
+     .stat-card::before {
+         content: '';
+         position: absolute;
+         top: 0;
+         left: 0;
+         right: 0;
+         height: 3px;
+         border-radius: var(--radius) var(--radius) 0 0;
+     }
+
+     /* Colores para cada tipo de estadística */
+     .stat-card.blue::before {
+         background: linear-gradient(90deg, #1a4fba, #60a5fa);
+     }
+
+     .stat-card.amber::before {
+         background: linear-gradient(90deg, #e8a020, #fcd34d);
+     }
+
+     .stat-card.red::before {
+         background: linear-gradient(90deg, #d63251, #fb7185);
+     }
+
+     .stat-card.green::before {
+         background: linear-gradient(90deg, #0f9e6e, #34d399);
+     }
+
+     /* Contenido de la tarjeta */
+     .progress {
+         height: 5px;
+         background: var(--border);
+         border-radius: 999px;
+         overflow: hidden;
+         margin-top: 4px;
+     }
+
+     /* El relleno de progreso que se anima al cargar la tarjeta */
+     .progress-fill {
+         height: 100%;
+         border-radius: 999px;
+         width: 0%;
+         transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+     }
+
+     /* Colores para el relleno de progreso, combinando con el banner superior */
+     .stat-card.blue .progress-fill {
+         background: linear-gradient(90deg, #1a4fba, #60a5fa);
+     }
+
+     .stat-card.amber .progress-fill {
+         background: linear-gradient(90deg, #e8a020, #fcd34d);
+     }
+
+     .stat-card.red .progress-fill {
+         background: linear-gradient(90deg, #d63251, #fb7185);
+     }
+
+     .stat-card.green .progress-fill {
+         background: linear-gradient(90deg, #0f9e6e, #34d399);
+     }
+
+     /* El pie de cada tarjeta con información adicional o contexto */
+     .stat-footer {
+         margin-top: 10px;
+         font-size: 0.72rem;
+         color: var(--text-muted);
+         font-weight: 500;
+     }
+
+     /* Resaltamos la parte más importante del pie de la tarjeta, como el porcentaje o el conteo total */
+     .stat-footer span {
+         font-weight: 700;
+         font-size: 0.78rem;
+     }
+
+     /* Colores para el texto destacado en el pie de cada tarjeta, combinando con el tema general de la tarjeta */
+     .stat-card.blue .stat-footer span {
+         color: var(--primary);
+     }
+
+     .stat-card.amber .stat-footer span {
+         color: var(--warning);
+     }
+
+     .stat-card.red .stat-footer span {
+         color: var(--danger);
+     }
+
+     .stat-card.green .stat-footer span {
+         color: var(--success);
+     }
+
+     /* ── PANEL ── */
+     .panel {
+         background: var(--surface);
+         border-radius: var(--radius);
+         border: 1px solid var(--border);
+         box-shadow: var(--shadow);
+         padding: 22px;
+     }
+
+     .panel-title {
+         font-size: 0.75rem;
+         font-weight: 700;
+         letter-spacing: 0.8px;
+         text-transform: uppercase;
+         color: var(--text-muted);
+         margin-bottom: 18px;
+     }
+
+     /* ── DONUT ── */
+     .donut-wrap {
+         display: flex;
+         align-items: center;
+         gap: 24px;
+     }
+
+     .donut-legend {
+         flex: 1;
+     }
+
+     .legend-item {
+         display: flex;
+         align-items: center;
+         gap: 10px;
+         margin-bottom: 10px;
+     }
+
+     .legend-dot {
+         width: 10px;
+         height: 10px;
+         border-radius: 3px;
+         flex-shrink: 0;
+     }
+
+     .legend-label {
+         font-size: 0.8rem;
+         color: var(--text-muted);
+         flex: 1;
+     }
+
+     .legend-val {
+         font-size: 0.85rem;
+         font-weight: 700;
+         color: var(--text);
+     }
+
+     .legend-pct {
+         font-size: 0.7rem;
+         color: var(--text-muted);
+         margin-left: 2px;
+     }
+
+     /* ── ACTIVIDADES ── */
+     .activity-list {
+         list-style: none;
+         padding: 0;
+         margin: 0;
+     }
+
+     .activity-item {
+         display: flex;
+         align-items: center;
+         gap: 12px;
+         padding: 9px 0;
+         border-bottom: 1px solid var(--border);
+     }
+
+     .activity-item:last-child {
+         border-bottom: none;
+     }
+
+     .activity-dot {
+         width: 8px;
+         height: 8px;
+         border-radius: 50%;
+         flex-shrink: 0;
+     }
+
+     .activity-text {
+         flex: 1;
+         font-size: 0.8rem;
+         color: var(--text);
+     }
+
+     .activity-text strong {
+         font-weight: 600;
+         color: var(--text);
+
+     }
+
+     .activity-time {
+         font-size: 0.7rem;
+         color: var(--text-muted);
+         white-space: nowrap;
+     }
+
+     .activity-tag {
+         font-size: 0.65rem;
+         font-weight: 700;
+         padding: 3px 9px;
+         border-radius: 999px;
+         white-space: nowrap;
+     }
+
+
+     /* 🌙 MODO OSCURO - TUS COMPONENTES PERSONALIZADOS */
+
+     [data-pc-theme="dark"] .stat-card {
+         background-color: #1e293b !important;
+         color: #e5e7eb !important;
+     }
+
+     [data-pc-theme="dark"] .panel {
+         background-color: #1e293b !important;
+         color: #e5e7eb !important;
+     }
+
+     /* textos dentro */
+     [data-pc-theme="dark"] .stat-card h3,
+     [data-pc-theme="dark"] .stat-card h6,
+     [data-pc-theme="dark"] .panel p,
+     [data-pc-theme="dark"] .panel span {
+         color: #e5e7eb !important;
+     }
+
+     /* progress */
+     [data-pc-theme="dark"] .progress {
+         background-color: #334155 !important;
+     }
+
+     /* footer text */
+     [data-pc-theme="dark"] .stat-footer {
+         color: #cbd5e1 !important;
+     }
+
+     .bg-light-custom {
+         background-color: #ffffff;
+     }
+
+     [data-pc-theme="dark"] .bg-light-custom {
+         background-color: #1e293b;
+     }
+
+     [data-pc-theme="dark"] .activity-text {
+         color: var(--text);
+     }
+
+     [data-pc-theme="dark"] .activity-text strong {
+         color: #ffffff;
+     }
+
+     [data-pc-theme="dark"] .activity-time {
+         color: var(--text-muted);
+     }
+
+     [data-pc-theme="dark"] .activity-item {
+         border-bottom: 1px solid var(--border);
+     }
