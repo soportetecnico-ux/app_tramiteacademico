@@ -206,11 +206,15 @@ class Documento
                     hd.fecha_recepcion,
                     hd.estado2 AS estado2,
                     hd.proveido as comentario,
+<<<<<<< Updated upstream
                     hd.proveido2 as comentario2,
                     hd.archivo_archivado as archivo_archivado,
                     hd.visible as visible,
                     hd.fecha_atencion,
                  
+=======
+                  -- LÓGICA: ¿En qué otros expedientes se usó este como referencia?
+>>>>>>> Stashed changes
                 (SELECT GROUP_CONCAT(CONCAT('EXPEDIENTE N° ', r.cod_documento, ' - ', o.nombre) SEPARATOR '|')
                  FROM referencia r
                  INNER JOIN documento d_hijo ON r.cod_documento = d_hijo.cod_documento
@@ -314,7 +318,11 @@ class Documento
         WHERE id_estu = ? and eliminado = ?";
         $stmt = mysqli_prepare($conexion, $sql);
 
+<<<<<<< Updated upstream
         // 2. Verificamos la preparación
+=======
+
+>>>>>>> Stashed changes
         mysqli_stmt_bind_param($stmt, "ii", $id_estu, $eliminado);
         // 3. Ejecutamos y obtenemos el resultado
         mysqli_stmt_execute($stmt);

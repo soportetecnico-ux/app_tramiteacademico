@@ -196,8 +196,11 @@ class Documento
                     d.cod_documento,
                     d.asunto,
                     d.numero as num_doc,
+<<<<<<< Updated upstream
                     d.atendido as observado,
                     d.obs_atendido as comentario_observacion,
+=======
+>>>>>>> Stashed changes
                     d.cod_estado_documento2 as estado,
                     hd.cod_historial_documento as n_proveido,
                     o_orig.nombre AS nombre_oficina_origen,
@@ -206,7 +209,11 @@ class Documento
                     hd.fecha_recepcion,
                     hd.estado2 AS estado2,
                     hd.proveido as comentario,
+<<<<<<< Updated upstream
                  
+=======
+                  -- LÓGICA: ¿En qué otros expedientes se usó este como referencia?
+>>>>>>> Stashed changes
                 (SELECT GROUP_CONCAT(CONCAT('EXPEDIENTE N° ', r.cod_documento, ' - ', o.nombre) SEPARATOR '|')
                  FROM referencia r
                  INNER JOIN documento d_hijo ON r.cod_documento = d_hijo.cod_documento
@@ -309,12 +316,20 @@ class Documento
         $sql = "SELECT COUNT(*) as total FROM documento WHERE id_estu = ? and eliminado = ?";
         $stmt = mysqli_prepare($conexion, $sql);
 
+<<<<<<< Updated upstream
         mysqli_stmt_bind_param($stmt, "ii", $id_estu, $eliminado);
 
+=======
+
+        mysqli_stmt_bind_param($stmt, "ii", $id_estu, $eliminado);
+
+        // 3. Ejecutamos y obtenemos el resultado
+>>>>>>> Stashed changes
         mysqli_stmt_execute($stmt);
         $resultado = mysqli_stmt_get_result($stmt);
         $fila = mysqli_fetch_assoc($resultado);
 
+<<<<<<< Updated upstream
         return $fila['total'] + 1;
     }
 
@@ -341,4 +356,9 @@ class Documento
         
         return ejecutarConsulta($sql);
     }
+=======
+        // 4. Retornamos el siguiente número
+        return $fila['total'] + 1;
+    }
+>>>>>>> Stashed changes
 }
