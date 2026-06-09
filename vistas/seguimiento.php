@@ -64,8 +64,14 @@ $cod_web = $_POST['cod_web'] ?? '';
                         </div>
 
                         <div class="mt-4">
+<<<<<<< Updated upstream
                             <div id="contenedorDetallesTramite" class="p-3 border rounded-3">
                                 <p class="small mb-0 text-center">Seleccione un movimiento para ver detalles adicionales.</p>
+=======
+
+                            <div id="contenedorDetallesTramite" class="p-3 border rounded-3 bg-light-subtle">
+                                <p class="text-muted small mb-0 text-center">Seleccione un movimiento para ver detalles adicionales.</p>
+>>>>>>> Stashed changes
                             </div>
                         </div>
                     </div>
@@ -75,6 +81,7 @@ $cod_web = $_POST['cod_web'] ?? '';
     </div>
 </div>
 
+<<<<<<< Updated upstream
 <div class="modal fade" id="modalPDF" tabindex="-1">
   <div class="modal-dialog modal-xl modal-dialog-centered">
     <div class="modal-content">
@@ -147,6 +154,43 @@ $cod_web = $_POST['cod_web'] ?? '';
   </div>
 </div>
 
+=======
+<div class="modal fade" id="modalSubsanar" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-3 shadow">
+
+            <div class="modal-header">
+                <h5 class="modal-title">Subsanar Documento</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+
+                <input type="hidden" id="cod_web_subsanar">
+
+                <div class="mb-3">
+                    <label class="form-label">Adjuntar archivo</label>
+                    <input type="file" id="archivoSubsanar" class="form-control">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Comentario</label>
+                    <textarea id="comentarioSubsanar" class="form-control" rows="3"></textarea>
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button class="btn btn-primary" onclick="guardarSubsanacion()">
+                    Guardar
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+>>>>>>> Stashed changes
 <!-- [ Main Content ] end -->
 <?php
 include('footer.php')

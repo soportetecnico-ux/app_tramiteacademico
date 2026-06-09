@@ -581,6 +581,15 @@ function tablaSeguimiento(codWeb) {
                             texto = 'Observado';
                             clase = 'text-bg-danger';
 
+<<<<<<< Updated upstream
+=======
+                            boton = `
+                    <button class="btn btn-sm btn btn-outline-dark ms-2"
+                        onclick="subsanarDocumento('${row.cod_web}')">
+                        Subsanar
+                    </button>
+                `;
+>>>>>>> Stashed changes
                             break;
 
                         default:
@@ -593,13 +602,21 @@ function tablaSeguimiento(codWeb) {
                 <span class="badge ${clase} shadow-sm" style="font-size: 12px; padding: 5px 12px;">
                     ${texto}
                 </span>
+<<<<<<< Updated upstream
+=======
+                ${boton}
+>>>>>>> Stashed changes
             </div>
         `;
                 }
             }
         ],
         initComplete: function (settings, json) {
+<<<<<<< Updated upstream
 
+=======
+            
+>>>>>>> Stashed changes
             if (codWeb) {
                 obtenerDetalleCompleto(codWeb);
             }
@@ -644,6 +661,7 @@ function generarVistaDetalle(dataArray) {
         $('#contenedorDetallesTramite').html('<p class="text-muted">No hay información disponible.</p>');
         return;
     }
+<<<<<<< Updated upstream
 
     const safe = (val) => val ? val : '---';
 
@@ -755,9 +773,143 @@ function generarVistaDetalle(dataArray) {
                 <span class="text-muted d-block" style="font-size: 13px;">Estado:</span>
                 <div class="border-bottom pb-2 mt-1">
                     <strong class="text-dark">${safe(principal.estado)}</strong>
+=======
+
+    const safe = (val) => val ? val : '---';
+
+    const grupos = {};
+
+    dataArray.forEach(item => {
+        let key = item.cod_documento || 'SIN_COD';
+
+        if (!grupos[key]) {
+            grupos[key] = [];
+        }
+        grupos[key].push(item);
+    });
+
+    let html = '';
+
+    //Recorrer cada expediente
+    Object.values(grupos).forEach((grupo) => {
+
+        const principal = grupo[0];
+
+       // Procesar donde se usó como referencia
+        let htmlReferencias = '';
+        if (principal.usado_en_referencia) {
+            const lista = principal.usado_en_referencia.split('|');
+            htmlReferencias = `
+                <div class="mt-3" style='font-size:13px;'>
+                    <p class="mb-1 fw-bold text-dark">Usado como referencia en:</p>
+                    <ul class="list-unstyled mb-0 ms-3">
+                        ${lista.map(ref => `<li class="text-muted">• ${ref}</li>`).join('')}
+                    </ul>
+                </div>`;
+        }
+
+
+        html += `
+        <div class="card mb-4 border-0 shadow-sm rounded-3">
+
+            <div class="card-body">
+
+                <h6 class="fw-semibold mb-3 text-primary" style="font-size: 14px;">
+                    DATOS PRINCIPALES DEL TRÁMITE
+                </h6>
+
+                <div class="row g-2 mb-4" style='font-size:13px;'>
+                    <div class="col-md-6">
+                        <span class="text-muted">Expediente:</span><br>
+                        <strong>${safe(principal.cod_documento)}</strong>
+                    </div>
+
+                    <div class="col-md-6">
+                        <span class="text-muted">Asunto:</span><br>
+                        <strong class="text-uppercase">${safe(principal.asunto)}</strong>
+                    </div>
+
+                    <div class="col-md-6">
+                        <span class="text-muted">N° Documento:</span><br>
+                        <strong>${principal.num_doc ? String(principal.num_doc).padStart(3, '0') : '---'}</strong>
+                    </div>
+
+                    <div class="col-md-6">
+                        <span class="text-muted">Estado:</span><br>
+                        <strong>${safe(principal.estado)}</strong>
+                    </div>
                 </div>
+
+                ${htmlReferencias}
+
+                <div class="table-responsive">
+                    <table class="table align-middle" style="font-size: 13px; border-collapse: separate; border-spacing: 0 8px;">
+                        <thead>
+                            <tr class="text-muted small">
+                                <th>#</th>
+                                <th>N° Proveído</th>
+                                <th>Oficina Origen</th>
+                                <th>Fecha Envío</th>
+                                <th>Oficina Destino</th>
+                                <th>Fecha Recepción</th>
+                                <th>Estado</th>
+                                <th>Comentario</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+        `;
+
+        // 🔹 Invertir orden dentro del grupo
+        grupo = [...grupo].reverse();
+
+        grupo.forEach((data, index) => {
+
+            html += `
+                <tr class="bg-white shadow-sm">
+                    <td class="fw-semibold text-center">${index + 1}</td>
+
+                    <td class="text-center fw-semibold">
+                        ${safe(data.n_proveido)}
+                    </td>
+
+                    <td>
+                        <div class="text-muted">${safe(data.nombre_oficina_origen)}</div>
+                    </td>
+
+                    <td>
+                        <div class="text-muted">${safe(data.fecha)}</div>
+                    </td>
+
+                    <td>
+                        <div class="text-muted">${safe(data.nombre_oficina)}</div>
+                    </td>
+
+                    <td>
+                        <div class="text-muted">${safe(data.fecha_recepcion)}</div>
+                    </td>
+
+                    <td class="text-center">
+                        <span class="badge bg-success-subtle text-success rounded-pill" style="font-size:11px">
+                            ${safe(data.estado2)}
+                        </span>
+                    </td>
+
+                    <td class="text-muted">
+                        ${safe(data.comentario)}
+                    </td>
+                </tr>
+            `;
+        });
+
+        html += `
+                        </tbody>
+                    </table>
+>>>>>>> Stashed changes
+                </div>
+
             </div>
         </div>
+<<<<<<< Updated upstream
 
         ${htmlReferencias}
 
@@ -826,12 +978,15 @@ function generarVistaDetalle(dataArray) {
 
             </div>
         </div>
+=======
+>>>>>>> Stashed changes
         `;
     });
 
     $('#contenedorDetallesTramite').html(html);
 }
 
+<<<<<<< Updated upstream
 
 function generarFUT(cod_web) {
     // Agregamos "includes/" a la ruta
@@ -1077,3 +1232,18 @@ function listarActividadReciente() {
     form.method = "POST";
     form.action = "seguimiento.php";*/
 
+=======
+function subsanarDocumento(cod_web) {
+
+    $('#cod_web_subsanar').val(cod_web);
+
+    $('#archivoSubsanar').val('');
+    $('#comentarioSubsanar').val('');
+
+    const modal = new bootstrap.Modal(document.getElementById('modalSubsanar'));
+    modal.show();
+}
+
+
+
+>>>>>>> Stashed changes
