@@ -582,13 +582,19 @@ function tablaSeguimiento(codWeb) {
                             clase = 'text-bg-danger';
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 =======
+=======
+>>>>>>> Stashed changes
                             boton = `
                     <button class="btn btn-sm btn btn-outline-dark ms-2"
                         onclick="subsanarDocumento('${row.cod_web}')">
                         Subsanar
                     </button>
                 `;
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
                             break;
 
@@ -603,6 +609,10 @@ function tablaSeguimiento(codWeb) {
                     ${texto}
                 </span>
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+=======
+                ${boton}
+>>>>>>> Stashed changes
 =======
                 ${boton}
 >>>>>>> Stashed changes
@@ -613,7 +623,11 @@ function tablaSeguimiento(codWeb) {
         ],
         initComplete: function (settings, json) {
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 
+=======
+            
+>>>>>>> Stashed changes
 =======
             
 >>>>>>> Stashed changes
@@ -661,6 +675,7 @@ function generarVistaDetalle(dataArray) {
         $('#contenedorDetallesTramite').html('<p class="text-muted">No hay información disponible.</p>');
         return;
     }
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
 
     const safe = (val) => val ? val : '---';
@@ -775,6 +790,9 @@ function generarVistaDetalle(dataArray) {
                     <strong class="text-dark">${safe(principal.estado)}</strong>
 =======
 
+=======
+
+>>>>>>> Stashed changes
     const safe = (val) => val ? val : '---';
 
     const grupos = {};
@@ -904,11 +922,15 @@ function generarVistaDetalle(dataArray) {
         html += `
                         </tbody>
                     </table>
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
                 </div>
 
             </div>
         </div>
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
 
         ${htmlReferencias}
@@ -980,12 +1002,15 @@ function generarVistaDetalle(dataArray) {
         </div>
 =======
 >>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
         `;
     });
 
     $('#contenedorDetallesTramite').html(html);
 }
 
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
 
 function generarFUT(cod_web) {
@@ -1240,10 +1265,22 @@ function subsanarDocumento(cod_web) {
     $('#archivoSubsanar').val('');
     $('#comentarioSubsanar').val('');
 
+=======
+function subsanarDocumento(cod_web) {
+
+    $('#cod_web_subsanar').val(cod_web);
+
+    $('#archivoSubsanar').val('');
+    $('#comentarioSubsanar').val('');
+
+>>>>>>> Stashed changes
     const modal = new bootstrap.Modal(document.getElementById('modalSubsanar'));
     modal.show();
 }
 
 
 
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes

@@ -197,8 +197,11 @@ class Documento
                     d.asunto,
                     d.numero as num_doc,
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
                     d.atendido as observado,
                     d.obs_atendido as comentario_observacion,
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
                     d.cod_estado_documento2 as estado,
@@ -210,7 +213,11 @@ class Documento
                     hd.estado2 AS estado2,
                     hd.proveido as comentario,
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
                  
+=======
+                  -- LÓGICA: ¿En qué otros expedientes se usó este como referencia?
+>>>>>>> Stashed changes
 =======
                   -- LÓGICA: ¿En qué otros expedientes se usó este como referencia?
 >>>>>>> Stashed changes
@@ -317,18 +324,25 @@ class Documento
         $stmt = mysqli_prepare($conexion, $sql);
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
         mysqli_stmt_bind_param($stmt, "ii", $id_estu, $eliminado);
 
 =======
+=======
+>>>>>>> Stashed changes
 
         mysqli_stmt_bind_param($stmt, "ii", $id_estu, $eliminado);
 
         // 3. Ejecutamos y obtenemos el resultado
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
         mysqli_stmt_execute($stmt);
         $resultado = mysqli_stmt_get_result($stmt);
         $fila = mysqli_fetch_assoc($resultado);
 
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
         return $fila['total'] + 1;
     }
@@ -356,6 +370,11 @@ class Documento
         
         return ejecutarConsulta($sql);
     }
+=======
+        // 4. Retornamos el siguiente número
+        return $fila['total'] + 1;
+    }
+>>>>>>> Stashed changes
 =======
         // 4. Retornamos el siguiente número
         return $fila['total'] + 1;
