@@ -32,7 +32,7 @@ switch ($_GET["op"]) {
                     $res['mensaje'] = "Cumples con los requisitos minimos. Apto para solicitar el Certificado de Estudios.";
                 } else {
                     $res['status'] = false;
-                    $res['bloqueo'] = true; // Bloqueo duro
+                    $res['bloqueo'] = true; // Bloqueo duro porque se verifica si tiene al menos 1 asignatura aprobada, que es un requisito mínimo para este trámite
                     $res['mensaje'] = "No cumples con los requisitos minimos. Necesitas al menos 1 asignatura aprobada para solicitar el Certificado de Estudios.";
                 }
             break;
@@ -51,7 +51,7 @@ switch ($_GET["op"]) {
             break;
             case '3': //  Ampliación de Créditos
                 $actual = $sivireno->semestreDatos($id_estu); 
-                
+
                 if ($actual && !empty($actual['id_semestre'])) {
                     $id_semestre = $actual['id_semestre'];
                     $id_plan = $actual['id_plan'];
@@ -62,30 +62,45 @@ switch ($_GET["op"]) {
                         $id_sem_anterior = $reg_ant->id_semestre;
                         $res_promedio = $sivireno->calcularPromedio($id_estu, $id_sem_anterior);
                         
-                        $promedio = (isset($res_promedio['promedio'])) ? $res_promedio['promedio'] : 0;
+                        // Validamos si el promedio realmente existe y no es nulo
+                        if (isset($res_promedio['promedio']) && $res_promedio['promedio'] !== null) {
+                            $promedio = $res_promedio['promedio'];
 
-                        if ($promedio >= 14) {
+                            if ($promedio >= 14) {
+                                $res_creditos = $sivireno->obtenerCreditosPermitidos($id_estu, $id_semestre, $id_plan);
+                                $max_creditos = (isset($res_creditos['credito'])) ? $res_creditos['credito'] : "No definido";
+                                
+                                $creditos = ($actual['ciclo_ficham'] === 'X') ? 30 : 27;
+                                
+                                $res['status'] = true;
+                                $res['mensaje'] = "Tu Promedio es: " . number_format($promedio, 2) . ". Tienes $max_creditos créditos en el ciclo actual. Apto para llevar hasta $creditos créditos por adelanto.";
+                            } else {
+                                $res['status'] = false;
+                                $res['bloqueo'] = false;
+                                $res['mensaje'] = "Tu promedio es " . number_format($promedio, 2) . ". No cumples con el mínimo de 14 para adelantar cursos.";
+                            }
+                        } else {
+                            // CASO A: Tiene un semestre anterior registrado pero no tiene notas (Posible ingresante registrado antes de tiempo)
                             $res_creditos = $sivireno->obtenerCreditosPermitidos($id_estu, $id_semestre, $id_plan);
                             $max_creditos = (isset($res_creditos['credito'])) ? $res_creditos['credito'] : "No definido";
-                            if ($actual['ciclo_ficham'] === 'X') {
-                                $creditos = 30;
-                            }else {
-                                $creditos = 27;
-                            }
                             
-                            $res['status'] = true;
-                            $res['mensaje'] = "TU Promedio es: " . number_format($promedio, 2) . ". Tienes $max_creditos créditos en el ciclo actual. Apto para llevar hasta $creditos créditos.";
-                        } else {
-                            $res['status'] = false;
-                            $res['bloqueo'] = false;
-                            $res['mensaje'] = "Tu promedio es " . number_format($promedio, 2) . ". No cumples con el mínimo de 14.";
+                            $res['status'] = false; // NO apto para adelantar
+                            $res['bloqueo'] = false; // NO bloqueado para su matrícula normal
+                            $res['mensaje'] = "No cuentas con un promedio histórico. Los alumnos de primer ciclo no pueden adelantar cursos. Puedes llevar tus $max_creditos créditos regulares.";
                         }
+
                     } else {
-                        $res['mensaje'] = "No se encontró historial académico previo para validar.";
+                        // CASO B: ¡Aquí cae tu alumno de 2026-2! No tiene ningún semestre anterior en el sistema.
+                        $res_creditos = $sivireno->obtenerCreditosPermitidos($id_estu, $id_semestre, $id_plan);
+                        $max_creditos = (isset($res_creditos['credito'])) ? $res_creditos['credito'] : "No definido";
+                        
+                        $res['status'] = false; // NO apto para adelantar
+                        $res['bloqueo'] = false; // NO se bloquea, puede hacer su matrícula normal
+                        $res['mensaje'] = "Alumnos de primer ciclo (Ingresantes) no están autorizados a adelantar cursos. Puedes matricularte hasta un máximo de $max_creditos créditos regulares.";
                     }
                 } else {
                     $res['status'] = false;
-                    $res['bloqueo'] = true;
+                    $res['bloqueo'] = true; // Bloqueo total porque ni siquiera está configurado en el semestre actual
                     $res['mensaje'] = "El estudiante no se encuentra matriculado en el semestre actual.";
                 }
                 break;
@@ -94,9 +109,9 @@ switch ($_GET["op"]) {
                 $total_aprobadas = (isset($asignaturas_aprobadas['total_aprobados'])) ? $asignaturas_aprobadas['total_aprobados'] : 0;
                  if ($total_aprobadas >= 1) {
                     $res['status'] = true;
-                    $res['mensaje'] = "Cumples con los requisitos minimos. Apto para solicitar el Constancia de Estudios.";
+                    $res['mensaje'] = "Cumples con los requisitos minimos. Apto para solicitar la Constancia de Estudios.";
                 } else {
-                    $res['mensaje'] = "No cumples con los requisitos minimos. Necesitas al menos 1 asignatura aprobada para solicitar el Constancia de Estudios.";
+                    $res['mensaje'] = "No cumples con los requisitos minimos. Necesitas al menos 1 asignatura aprobada para solicitar la Constancia de Estudios.";
                 }
             break;
              case '5': 
@@ -422,6 +437,7 @@ switch ($_GET["op"]) {
                     $res['bloqueo'] = true;  
                 }
                 break;
+
             case '32': //CAMBIO DE TURNO
                 $datos_actuales = $sivireno->semestreDatos($id_estu);
                 if ($datos_actuales) {
@@ -433,13 +449,13 @@ switch ($_GET["op"]) {
                     $res['bloqueo'] = true;  
                 }
                 break;
+
             case '34': //ANULACIÓN DE INGRESO A LA UNDC - MESA DE PARTES GENERAL
-                
                 break;
+
             case '35': //TRASLADO INTERNO
                 $res['status'] = true;
                 $res['mensaje'] = "Puede proceder con su solicitud de Traslado Interno.";
-           
                 break;
             case '36': //DUPLICADO DE BOLETA DE PAGO - MESA DE PARTES GENERAL
                 
@@ -455,12 +471,16 @@ switch ($_GET["op"]) {
                 
                 break;
             case '40': //CERTIFICADO DE PROYECCIÓN SOCIAL
-                
+                $res['status'] = true;
+                $res['mensaje'] = "Puede proceder con su solicitud de Certificado de Proyección Social.";
                 break;
             case '41': //CONSTANCIA DE NO ADEUDO DE BIENES A LA ESCUELA PROFESIONAL
-                
+                $res['status'] = true;
+                $res['mensaje'] = "Puede proceder con su solicitud de Constancia de No Adeudo de Bienes a la Escuela Profesional.";
                 break;
             case '42': //CURSOS DIRIGIDOS
+                $res['status'] = true;
+                $res['mensaje'] = "Puede proceder con su solicitud de Cursos Dirigidos.";
                 
                 break;
             case '43': //CERTIFICADO DE ASISTENCIA A CURSOS- MESA DE PARTES GENERAL

@@ -19,7 +19,7 @@ class Sivireno
                     AND f.anulado = 0
                     AND f.borrado = 0
                     LIMIT 1";
-            return ejecutarConsultaSimpleFila2($sql); // Esto quita el error de Intelephense
+            return ejecutarConsultaSimpleFila2($sql); 
         }
 
         public function oldSemestre()
@@ -97,7 +97,6 @@ class Sivireno
             return ejecutarConsultaSimpleFila2($sql);
         }
         public function verificarPracticasAprobadas($id_estu) {
-            //IMPORTANTE: Reemplaza 'promedio_final' por el nombre real de tu columna de nota
             $sql = "SELECT COUNT(*) AS practicas_aprobadas 
                     FROM asignacion_estudiante ae
                     INNER JOIN ficha_matricula fm ON ae.id_ficham = fm.id_ficham
