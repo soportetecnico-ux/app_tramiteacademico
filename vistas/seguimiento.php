@@ -64,14 +64,11 @@ $cod_web = $_POST['cod_web'] ?? '';
                         </div>
 
                         <div class="mt-4">
-<<<<<<< Updated upstream
+
                             <div id="contenedorDetallesTramite" class="p-3 border rounded-3">
                                 <p class="small mb-0 text-center">Seleccione un movimiento para ver detalles adicionales.</p>
-=======
-
                             <div id="contenedorDetallesTramite" class="p-3 border rounded-3 bg-light-subtle">
                                 <p class="text-muted small mb-0 text-center">Seleccione un movimiento para ver detalles adicionales.</p>
->>>>>>> Stashed changes
                             </div>
                         </div>
                     </div>
@@ -81,7 +78,7 @@ $cod_web = $_POST['cod_web'] ?? '';
     </div>
 </div>
 
-<<<<<<< Updated upstream
+
 <div class="modal fade" id="modalPDF" tabindex="-1">
   <div class="modal-dialog modal-xl modal-dialog-centered">
     <div class="modal-content">
@@ -154,7 +151,6 @@ $cod_web = $_POST['cod_web'] ?? '';
   </div>
 </div>
 
-=======
 <div class="modal fade" id="modalSubsanar" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content rounded-3 shadow">
@@ -190,7 +186,7 @@ $cod_web = $_POST['cod_web'] ?? '';
         </div>
     </div>
 </div>
->>>>>>> Stashed changes
+
 <!-- [ Main Content ] end -->
 <?php
 include('footer.php')

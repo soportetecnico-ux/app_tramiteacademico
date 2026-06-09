@@ -36,7 +36,8 @@ $(document).ready(function () {
 
         choicesTupa = new Choices(elemento, {
             searchEnabled: true,       // Activa la búsqueda
-            searchChoices: true,       // Filtra los elementos
+            searchChoices: true,  // Filtra los elementos
+            searchResultLimit: 9999,
             removeItemButton: true,
             itemSelectText: '',
             placeholder: true,
@@ -516,54 +517,7 @@ function listarTramites() {
                         </button>`;
                 }
             },
-            {
-                data: "nombre_archivo",
-                className: "align-middle",
-                render: function (data) {
-                    if (!data) return '<span class="small">Sin archivo</span>';
-
-                    const extension = data.split('.').pop().toLowerCase();
-
-                    // Extrae solo "nombre.pdf" ignorando "academicos/2026/"
-                    const nombreReal = data.split('/').pop();
-
-                    // Cortamos el nombre si es muy largo para que el botón no se deforme
-                    const nombreCorto = nombreReal.length > 10
-                        ? nombreReal.substring(0, 7) + "..."
-                        : nombreReal;
-
-                    let icono = "fas fa-file-alt";
-                    let color = "text-secondary";
-
-                    if (extension === 'pdf') {
-                        icono = "fas fa-file-pdf";
-                        color = "text-danger";
-                    } else if (extension === 'zip' || extension === 'rar') {
-                        icono = "fas fa-file-archive";
-                        color = "text-warning";
-                    }
-
-                    // OJO AQUÍ: Si data ya trae "academicos/2026/...", 
-                    // solo retrocedemos hasta la carpeta 'archivos' o donde inicie la ruta.
-                    const rutaArchivo = `./../vistas/includes/descargar.php?file=${encodeURIComponent(data)}`;
-
-                    return `
-            <div class="d-inline-block">
-                <a href="${rutaArchivo}" download 
-                   class="d-flex align-items-center text-decoration-none p-1 px-2 text-dark" 
-                   style="background-color: #f1f3f5; border-radius: 6px; border: 1px solid #e9ecef; transition: all 0.2s;"
-                   title="${nombreReal}"> 
-                    
-                    <i class="${icono} ${color} me-2" style="font-size: 1.1rem;"></i>
-                    
-                    <div class="d-flex flex-column" style="line-height: 1.1;">
-                        <span class="fw-bold" style="font-size: 0.6rem; white-space: nowrap;">${nombreCorto}</span>
-                        <span style="font-size: 0.5rem;">${extension.toUpperCase()}</span>
-                    </div>
-                </a>
-            </div>`;
-                }
-            },
+            
             {
                 data: "estado",
                 className: "align-middle",
@@ -686,15 +640,14 @@ function tablaSeguimiento(codWeb) {
                             texto = 'Observado';
                             clase = 'text-bg-danger';
 
-<<<<<<< Updated upstream
-=======
+
                             boton = `
                     <button class="btn btn-sm btn btn-outline-dark ms-2"
                         onclick="subsanarDocumento('${row.cod_web}')">
                         Subsanar
                     </button>
                 `;
->>>>>>> Stashed changes
+
                             break;
 
                         default:
@@ -707,21 +660,16 @@ function tablaSeguimiento(codWeb) {
                 <span class="badge ${clase} shadow-sm" style="font-size: 12px; padding: 5px 12px;">
                     ${texto}
                 </span>
-<<<<<<< Updated upstream
-=======
+
                 ${boton}
->>>>>>> Stashed changes
+
             </div>
         `;
                 }
             }
         ],
         initComplete: function (settings, json) {
-<<<<<<< Updated upstream
 
-=======
-            
->>>>>>> Stashed changes
             if (codWeb) {
                 obtenerDetalleCompleto(codWeb);
             }
@@ -793,25 +741,6 @@ function generarVistaDetalle(dataArray) {
 
         const principal = grupo[0];
 
-<<<<<<< Updated upstream
-=======
-       // Procesar donde se usó como referencia
-        let htmlReferencias = '';
-        if (principal.usado_en_referencia) {
-            const lista = principal.usado_en_referencia.split('|');
-            htmlReferencias = `
-                <div class="mt-3" style='font-size:13px;'>
-                    <p class="mb-1 text-dark" style='font-size:13px;'>Usado como referencia en:</p>
-                    <ul class="list-unstyled mb-0 ms-3">
-                        ${lista.map(ref => `<li class="text-muted">• ${ref}</li>`).join('')}
-                    </ul>
-                </div>`;
-        }
-
-
-        html += `
-        <div class="card mb-4 border-0 shadow-sm rounded-3">
->>>>>>> Stashed changes
 
         // Procesar donde se usó como referencia
         let htmlReferencias = '';
@@ -827,7 +756,6 @@ function generarVistaDetalle(dataArray) {
         }
 
 
-<<<<<<< Updated upstream
         // 1. Detección a prueba de fallos (ignora si viene null, en mayúsculas o como número 2)
         const estaObservado = principal.observado == 2;
 
@@ -862,58 +790,15 @@ function generarVistaDetalle(dataArray) {
                                 </form>
                             </div>
                         </div>
-=======
-                <div class="row g-2 mb-4" style='font-size:13px;'>
-                    <div class="col-md-6">
-                        <span class="text-muted">Expediente:</span><br>
-                        <strong>${safe(principal.cod_documento)}</strong>
-                    </div>
-
-                    <div class="col-md-6">
-                        <span class="text-muted">N° Documento:</span><br>
-                        <strong>${principal.num_doc ? String(principal.num_doc).padStart(3, '0') : '---'}</strong>
-                    </div>
-
-                    <div class="col-md-6">
-                        <span class="text-muted">Asunto:</span><br>
-                        <strong class="text-uppercase">${safe(principal.asunto)}</strong>
-                    </div>
-
-
-                    <div class="col-md-6">
-                        <span class="text-muted">Estado:</span><br>
-                        <strong>${safe(principal.estado)}</strong>
->>>>>>> Stashed changes
                     </div>
                 </div>
             `;
         }
 
-<<<<<<< Updated upstream
         html += `
 <div class="card mb-4 border-2 shadow-sm rounded-3">
     <div class="card-body p-4">
         <h6 class="fw-bold mb-4" style="color:#085ec5; font-size: 14px;">DATOS PRINCIPALES DEL TRÁMITE</h6>
-=======
-                ${htmlReferencias}
-
-                <div class="table-responsive mt-2">
-                    <table class="table align-middle" style="font-size: 13px; border-collapse: separate; border-spacing: 0 8px;">
-                        <thead>
-                            <tr class="text-muted small">
-                                <th>#</th>
-                                <th>N° Proveído</th>
-                                <th>Oficina Origen</th>
-                                <th>Fecha Envío</th>
-                                <th>Oficina Destino</th>
-                                <th>Fecha Recepción</th>
-                                <th>Estado</th>
-                                <th>Comentario</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-        `;
->>>>>>> Stashed changes
 
         <div class="row mb-4">
             <div class="col-md-6 mb-4">
@@ -970,11 +855,7 @@ function generarVistaDetalle(dataArray) {
         grupo.forEach((data, index) => {
 
             html += `
-<<<<<<< Updated upstream
                 <tr>
-=======
-                <tr class="bg-white">
->>>>>>> Stashed changes
                     <td class="fw-semibold text-center">${index + 1}</td>
 
                     <td class="text-center">
@@ -1146,7 +1027,7 @@ function generarVistaDetalle(dataArray) {
     $('#contenedorDetallesTramite').html(html);
 }
 
-<<<<<<< Updated upstream
+
 function abrirModalArchivo(url, fechaAtencion) {
 
     const iframe = document.getElementById("iframePDF");
@@ -1227,7 +1108,7 @@ function generarFUT(cod_web) {
     window.open(url, 'Vista FUT',
         `width=${width},height=${height},top=${top},left=${left},scrollbars=yes`);
 }
-=======
+
 function subsanarDocumento(cod_web) {
 
     $('#cod_web_subsanar').val(cod_web);
@@ -1238,8 +1119,6 @@ function subsanarDocumento(cod_web) {
     const modal = new bootstrap.Modal(document.getElementById('modalSubsanar'));
     modal.show();
 }
-
->>>>>>> Stashed changes
 
 
 
@@ -1506,7 +1385,7 @@ function verificarTramiteEstu(idTupa) {
                     btn.text("No disponible").prop("disabled", true).addClass("btn-danger");
                 } else {
                     // Excepción flexible (Puede intentar enviarlo)
-                    btn.prop("disabled", false).text("Enviar Solicitud").addClass("btn-warning");
+                    btn.prop("disabled", false).html('<i class="ti ti-send"></i> Enviar Solicitud').addClass("btn btn-success px-4").removeClass("btn-danger");
                 }
             }
         } catch (e) {
