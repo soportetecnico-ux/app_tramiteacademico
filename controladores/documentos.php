@@ -17,8 +17,8 @@ switch ($_GET["op"]) {
             session_start();
         }
         $id_car = $_SESSION['sistema_academico']['id_car'];
-
-        $rspta = $documentos->seleccionarTramite($id_car);
+        $nivel = $_SESSION['sistema_academico']['nivel'];
+        $rspta = $documentos->seleccionarTramite($id_car, $nivel);
 
         while ($reg = $rspta->fetch_object()) {
             $oficina = !empty($reg->nombre_oficina) ? $reg->nombre_oficina : "OFICINA POR ASIGNAR";

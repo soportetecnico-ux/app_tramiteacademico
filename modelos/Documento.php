@@ -6,7 +6,7 @@ class Documento
 {
     public function __construct() {}
 
-    public function seleccionarTramite($id_car_sesion)
+    /*public function seleccionarTramite($id_car_sesion)
     {
         $sql = "SELECT 
                 t.id_tupa, 
@@ -17,12 +17,36 @@ class Documento
                 o.nombre AS nombre_oficina
             FROM tb_tupa t
             LEFT JOIN tb_tupa_oficina v ON v.id_tupa = t.id_tupa 
-                AND (v.id_car = '$id_car_sesion' OR v.id_car = NULL)
+                AND (v.id_car = '$id_car_sesion' OR v.id_car is NULL)
             LEFT JOIN oficina o ON v.cod_oficina = o.cod_oficina
             WHERE t.estado = 1
             GROUP BY t.id_tupa
             ORDER BY v.id_car DESC";
 
+        return ejecutarConsulta($sql);
+    }*/
+
+    public function seleccionarTramite($id_car_sesion, $nivel)
+    {
+        // nivel: 1 = Pregrado, 2 = Posgrado
+        $grado_filtro = $nivel == 1 ? "PREGRADO" : "POSGRADO";
+        
+        $sql = "SELECT 
+                t.id_tupa, 
+                t.denominacion, 
+                t.requisitos, 
+                t.monto,
+                o.cod_oficina,
+                o.nombre AS nombre_oficina
+            FROM tb_tupa t
+            LEFT JOIN tb_tupa_oficina v ON v.id_tupa = t.id_tupa 
+                AND (v.id_car = '$id_car_sesion' OR v.id_car IS NULL)
+            LEFT JOIN oficina o ON v.cod_oficina = o.cod_oficina
+            WHERE t.estado = 1
+            AND (TRIM(t.grado) = '$grado_filtro' OR TRIM(t.grado) = 'AMBOS')
+            GROUP BY t.id_tupa
+            ORDER BY v.id_car DESC";
+        
         return ejecutarConsulta($sql);
     }
 
